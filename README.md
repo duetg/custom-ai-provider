@@ -1,13 +1,5 @@
 # Custom AI Provider
 
-**Contributors:** duetg
-**Tags:** ai, openai, connector, anthropic, google, llm, gpt, claude, gemini
-**Requires at least:** 7.0
-**Tested up to:** 7.0
-**Requires PHP:** 7.4
-**License:** MIT
-**License URI:** https://opensource.org/licenses/MIT
-
 Connect WordPress to any OpenAI-compatible AI API provider.
 
 ## Description
@@ -48,7 +40,7 @@ Custom AI Provider allows WordPress to connect to any AI service that provides a
 
 ### Do I need an API key?
 
-Some providers require an API key, while local installations (like Ollama) may not. Leave the API key field empty if your provider doesn't require one.
+Some providers require an API key. For local installations (like Ollama) that don't require authentication, you can enter any dummy string (e.g., "not-required") as the API key.
 
 ### How do I use this in my code?
 
