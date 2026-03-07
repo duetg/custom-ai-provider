@@ -39,8 +39,8 @@ Custom AI Provider allows WordPress to connect to any AI service that provides a
 
 * Ollama (local): `http://localhost:11434/v1`
 * LM Studio (local): `http://localhost:1234/v1`
-* MiniMax: `https://api.minimax.chat/v1`
-* Moonshot: `https://api.moonshot.cn/v1`
+* MiniMax: `https://api.minimax.io/v1`
+* Moonshot: `https://api.moonshot.ai/v1`
 * DeepSeek: `https://api.deepseek.com/v1`
 * Other providers: Check their documentation
 
