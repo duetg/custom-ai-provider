@@ -83,4 +83,4 @@ $files = $result->toImageFiles();
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+GNU General Public License v2.0 or later - see [LICENSE](LICENSE) file for details.
