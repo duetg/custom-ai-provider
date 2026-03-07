@@ -20,6 +20,11 @@ Custom AI Provider allows WordPress to connect to any AI service that provides a
 * Works with any OpenAI-compatible API
 * Simple configuration through WordPress admin
 
+## Requirements
+
+* WordPress 7.0 or higher
+* PHP 7.4 or higher
+
 ## Installation
 
 1. Upload the `custom-ai-provider` folder to the `/wp-content/plugins/` directory
