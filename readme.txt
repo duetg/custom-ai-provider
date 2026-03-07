@@ -20,11 +20,18 @@ Custom AI Provider allows WordPress to connect to any AI service that provides a
 * DeepSeek
 * And any other OpenAI-compatible API provider
 
+== Requirements ==
+
+* WordPress 7.0 or higher
+* PHP 7.4 or higher
+
 == Installation ==
 
 1. Upload the `custom-ai-provider` folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Go to Settings > Connectors to configure your AI provider
+3. Go to Settings > Custom AI to configure your Base URL and model
+4. Go to Settings > Connectors to configure your API key
+5. (Optional) Go to Settings > Test AI to verify your configuration
 
 == Frequently Asked Questions ==
 
@@ -32,12 +39,38 @@ Custom AI Provider allows WordPress to connect to any AI service that provides a
 
 * Ollama (local): `http://localhost:11434/v1`
 * LM Studio (local): `http://localhost:1234/v1`
+* MiniMax: `https://api.minimax.chat/v1`
+* Moonshot: `https://api.moonshot.cn/v1`
+* DeepSeek: `https://api.deepseek.com/v1`
 * Other providers: Check their documentation
 
 = Do I need an API key? =
 
-Some providers require an API key, while local installations (like Ollama) may not.
-Leave the API key field empty if your provider doesn't require one.
+Some providers require an API key. For local installations (like Ollama) that don't require authentication, you can enter any dummy string (e.g., "not-required") as the API key.
+
+= How do I use this in my code? =
+
+    use WordPress\AiClient\AiClient;
+
+    $registry = AiClient::defaultRegistry();
+
+    // Text Generation
+    $model = $registry->getProviderModel('custom_text', 'gpt-4');
+    $result = $model->generateTextResult([
+        new \WordPress\AiClient\Messages\DTO\UserMessage([
+            new \WordPress\AiClient\Messages\DTO\MessagePart('Your prompt here')
+        ])
+    ]);
+    echo $result->toText();
+
+    // Image Generation
+    $model = $registry->getProviderModel('custom_image', 'dall-e-3');
+    $result = $model->generateImageResult([
+        new \WordPress\AiClient\Messages\DTO\UserMessage([
+            new \WordPress\AiClient\Messages\DTO\MessagePart('Your prompt here')
+        ])
+    ]);
+    $files = $result->toImageFiles();
 
 == Changelog ==
 
