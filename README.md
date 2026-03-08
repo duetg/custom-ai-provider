@@ -30,8 +30,10 @@ Custom AI Provider allows WordPress AI Client to connect to any AI service that 
 
 1. Upload the `custom-ai-provider` folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Configure your API key via the `CUSTOM_AI_PROVIDER_TEXT_API_KEY` and `CUSTOM_AI_PROVIDER_IMAGE_API_KEY` environment variables or constants
-4. Go to **Settings > Custom AI** to configure your Base URL and model (WordPress 7.0+)
+3. Configure your API key:
+   * For WordPress 7.0+: Go to **Settings > Connectors**
+   * For WordPress 6.9: Set via `CUSTOM_AI_PROVIDER_TEXT_API_KEY` and `CUSTOM_AI_PROVIDER_IMAGE_API_KEY` constants or environment variables
+4. Go to **Settings > Custom AI** to configure your Base URL and model
 5. (Optional) Go to **Settings > Test AI** to verify your configuration
 
 ## Frequently Asked Questions
