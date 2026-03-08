@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Custom AI Provider
- * Description: Connect WordPress to any OpenAI-compatible AI API provider
+ * Description: Connect WordPress AI Client to any OpenAI-compatible AI API provider
  * Version: 0.1.0
  * Author: DuetG
  * Author URI: https://github.com/duetg/custom-ai-provider

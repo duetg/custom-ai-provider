@@ -1,10 +1,10 @@
 # Custom AI Provider
 
-Connect WordPress to any OpenAI-compatible AI API provider.
+Connect WordPress AI Client to any OpenAI-compatible AI API provider.
 
 ## Description
 
-Custom AI Provider allows WordPress to connect to any AI service that provides an OpenAI-compatible API, such as:
+Custom AI Provider allows WordPress AI Client to connect to any AI service that provides an OpenAI-compatible API, such as:
 
 * [Ollama](https://ollama.ai/) (local AI)
 * [LM Studio](https://lmstudio.ai/) (local AI)
