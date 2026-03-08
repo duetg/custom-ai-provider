@@ -18,6 +18,42 @@ use WordPress\CustomAiProvider\Settings\Settings;
 class TestPage
 {
     /**
+     * Check if API key is configured (constant > env var > database)
+     *
+     * @param string $type 'text' or 'image'
+     * @return bool
+     */
+    private static function get_api_key_status(string $type): bool
+    {
+        $option_name = $type === 'text'
+            ? Settings::TEXT_API_KEY_OPTION
+            : Settings::IMAGE_API_KEY_OPTION;
+        $constant_name = $type === 'text'
+            ? Settings::TEXT_API_KEY_CONSTANT
+            : Settings::IMAGE_API_KEY_CONSTANT;
+
+        // 1. Check constant
+        if (defined($constant_name)) {
+            return true;
+        }
+
+        // 2. Check environment variable
+        $env_key = strtolower($constant_name);
+        $env_value = getenv($env_key);
+        if ($env_value !== false && $env_value !== '') {
+            return true;
+        }
+
+        // 3. Check database
+        $db_value = get_option($option_name, '');
+        if (!empty($db_value)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Render the test page
      */
     public static function render(): void
@@ -43,7 +79,7 @@ class TestPage
                         if (!$registry->hasProvider('custom_text')) {
                             $error = 'Text provider not registered.';
                         } elseif (!$registry->isProviderConfigured('custom_text')) {
-                            $error = 'Text provider not configured. Please add API key in Settings > Connectors.';
+                            $error = 'Text provider not configured. Please add API key via constant, environment variable, or Settings > Connectors.';
                         } else {
                             $model = $registry->getProviderModel('custom_text', CustomTextProvider::getModelId());
                             $result = $model->generateTextResult([
@@ -56,7 +92,7 @@ class TestPage
                         if (!$registry->hasProvider('custom_image')) {
                             $error = 'Image provider not registered.';
                         } elseif (!$registry->isProviderConfigured('custom_image')) {
-                            $error = 'Image provider not configured. Please add API key in Settings > Connectors.';
+                            $error = 'Image provider not configured. Please add API key via constant, environment variable, or Settings > Connectors.';
                         } else {
                             $model = $registry->getProviderModel('custom_image', CustomImageProvider::getModelId());
                             $result = $model->generateImageResult([
@@ -111,9 +147,9 @@ class TestPage
                             <td><?php echo esc_html($text_model); ?></td>
                             <td>
                                 <?php
-                                $text_api_key = get_option(Settings::TEXT_API_KEY_OPTION, '');
+                                $text_api_key = self::get_api_key_status('text');
 
-                                if (!empty($text_api_key)) {
+                                if ($text_api_key) {
                                     echo '<span style="color: green;">&#10004; ' . __('Configured', 'custom-ai-provider') . '</span>';
                                 } else {
                                     echo '<span style="color: red;">&#10008; ' . __('Not Configured', 'custom-ai-provider') . '</span>';
@@ -127,9 +163,9 @@ class TestPage
                             <td><?php echo esc_html($image_model); ?></td>
                             <td>
                                 <?php
-                                $image_api_key = get_option(Settings::IMAGE_API_KEY_OPTION, '');
+                                $image_api_key = self::get_api_key_status('image');
 
-                                if (!empty($image_api_key)) {
+                                if ($image_api_key) {
                                     echo '<span style="color: green;">&#10004; ' . __('Configured', 'custom-ai-provider') . '</span>';
                                 } else {
                                     echo '<span style="color: red;">&#10008; ' . __('Not Configured', 'custom-ai-provider') . '</span>';

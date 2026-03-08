@@ -67,9 +67,22 @@ class Admin
         <div class="wrap">
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
+            <?php
+            // Check if WordPress AI Client is available (7.0+ or plugin)
+            $ai_client_available = class_exists('WordPress\AiClient\AiClient');
+            ?>
             <div class="notice notice-info">
                 <p><strong><?php _e('API Key Configuration', 'custom-ai-provider'); ?></strong></p>
-                <p><?php _e('Please configure your API Key in the Settings > Connectors page. The API Key is required for the provider to be activated.', 'custom-ai-provider'); ?></p>
+                <?php if ($ai_client_available): ?>
+                    <p><?php _e('Please configure your API Key in the Settings > Connectors page. The API Key is required for the provider to be activated.', 'custom-ai-provider'); ?></p>
+                <?php else: ?>
+                    <p><?php _e('In WordPress versions below 7.0, please configure your API Key using a constant or environment variable:', 'custom-ai-provider'); ?></p>
+                    <p><code>define('CUSTOM_AI_PROVIDER_TEXT_API_KEY', 'your-key');</code></p>
+                    <p><code>define('CUSTOM_AI_PROVIDER_IMAGE_API_KEY', 'your-key');</code></p>
+                    <p><?php _e('Or use environment variables:', 'custom-ai-provider'); ?></p>
+                    <p><code>custom_ai_provider_text_api_key=your-key</code></p>
+                    <p><code>custom_ai_provider_image_api_key=your-key</code></p>
+                <?php endif; ?>
             </div>
 
             <?php if ($using_default_text): ?>
