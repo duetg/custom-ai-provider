@@ -33,19 +33,10 @@ require_once __DIR__ . '/src/autoload.php';
  */
 function load_custom_ai_provider_textdomain(): void
 {
-    $plugin_dir = dirname(plugin_basename(__FILE__));
-    $lang_dir = WP_CONTENT_DIR . '/plugins/' . $plugin_dir . '/languages';
-
-    load_textdomain(
-        'custom-ai-provider',
-        $lang_dir . '/custom-ai-provider-zh_CN.mo'
-    );
-
-    // Also try loading default MO
     load_plugin_textdomain(
         'custom-ai-provider',
         false,
-        $plugin_dir . '/languages'
+        dirname(plugin_basename(__FILE__)) . '/languages'
     );
 }
 add_action('plugins_loaded', __NAMESPACE__ . '\\load_custom_ai_provider_textdomain');
