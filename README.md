@@ -22,18 +22,25 @@ Custom AI Provider allows WordPress AI Client to connect to any AI service that 
 
 ## Requirements
 
-* WordPress 7.0 or higher
 * PHP 7.4 or higher
+* For WordPress 6.9, the [wordpress/php-ai-client](https://github.com/WordPress/php-ai-client) package must be installed
+* For WordPress 7.0 and above, no additional changes are required
 
 ## Installation
 
 1. Upload the `custom-ai-provider` folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Go to **Settings > Custom AI** to configure your Base URL and model
-4. Go to **Settings > Connectors** to configure your API key
+3. Configure your API key via the `CUSTOM_AI_PROVIDER_TEXT_API_KEY` and `CUSTOM_AI_PROVIDER_IMAGE_API_KEY` environment variables or constants
+4. Go to **Settings > Custom AI** to configure your Base URL and model (WordPress 7.0+)
 5. (Optional) Go to **Settings > Test AI** to verify your configuration
 
 ## Frequently Asked Questions
+
+### Does this plugin work without the PHP AI Client?
+
+No, this plugin requires the PHP AI Client plugin to be installed and activated. It provides the custom OpenAI-compatible implementation that the PHP AI Client uses.
+
+For WordPress 7.0 and above, the PHP AI Client is built-in. For WordPress 6.9, you need to install the [wordpress/php-ai-client](https://github.com/WordPress/php-ai-client) Composer package.
 
 ### How do I find the Base URL for my AI provider?
 
