@@ -15,12 +15,8 @@
 
 namespace WordPress\CustomAiProvider;
 
-use WordPress\AiClient\AiClient;
-use WordPress\CustomAiProvider\Provider\CustomTextProvider;
-use WordPress\CustomAiProvider\Provider\CustomImageProvider;
 use WordPress\CustomAiProvider\Settings\Settings;
 use WordPress\CustomAiProvider\Admin\Admin;
-use WordPress\CustomAiProvider\Admin\TestPage;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -46,18 +42,21 @@ add_action('plugins_loaded', __NAMESPACE__ . '\\load_custom_ai_provider_textdoma
  */
 function register_connector(): void
 {
-    if (!class_exists(AiClient::class)) {
+    if (!class_exists('WordPress\AiClient\AiClient')) {
         return;
     }
 
-    $registry = AiClient::defaultRegistry();
+    require_once __DIR__ . '/src/Provider/CustomTextProvider.php';
+    require_once __DIR__ . '/src/Provider/CustomImageProvider.php';
+
+    $registry = \WordPress\AiClient\AiClient::defaultRegistry();
 
     if (!$registry->hasProvider('custom_text')) {
-        $registry->registerProvider(CustomTextProvider::class);
+        $registry->registerProvider(\WordPress\CustomAiProvider\Provider\CustomTextProvider::class);
     }
 
     if (!$registry->hasProvider('custom_image')) {
-        $registry->registerProvider(CustomImageProvider::class);
+        $registry->registerProvider(\WordPress\CustomAiProvider\Provider\CustomImageProvider::class);
     }
 
     Settings::pass_api_keys_to_ai_client();
@@ -109,7 +108,19 @@ function render_settings_page(): void
  */
 function render_test_page(): void
 {
-    TestPage::render();
+    // Check if WordPress AI Client is available
+    if (!class_exists('WordPress\AiClient\AiClient')) {
+        echo '<div class="wrap">';
+        echo '<h1>' . esc_html__('Test AI', 'custom-ai-provider') . '</h1>';
+        echo '<div class="notice notice-error"><p>';
+        echo esc_html__('Custom AI Provider requires WordPress AI Client (WordPress 6.9+) to be installed and active.', 'custom-ai-provider');
+        echo '</p></div>';
+        echo '</div>';
+        return;
+    }
+
+    require_once __DIR__ . '/src/Admin/TestPage.php';
+    \WordPress\CustomAiProvider\Admin\TestPage::render();
 }
 
 /**
