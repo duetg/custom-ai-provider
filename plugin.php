@@ -6,7 +6,7 @@
  * Author: DuetG
  * Author URI: https://github.com/duetg/custom-ai-provider
  * License: GPL-2.0-or-later
- * Requires at least: 7.0
+ * Requires at least: 6.9
  * Requires PHP: 7.4
  * Text Domain: custom-ai-provider
  *
