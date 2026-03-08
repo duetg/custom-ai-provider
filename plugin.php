@@ -4,7 +4,7 @@
  * Description: Connect WordPress to any OpenAI-compatible AI API provider
  * Version: 0.1.0
  * Author: DuetG
- * Author URI: https://duetg.com
+ * Author URI: https://github.com/duetg/custom-ai-provider
  * License: GPL-2.0-or-later
  * Requires at least: 7.0
  * Requires PHP: 7.4
