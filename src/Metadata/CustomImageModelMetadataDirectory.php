@@ -45,13 +45,10 @@ class CustomImageModelMetadataDirectory implements ModelMetadataDirectoryInterfa
 
     private function getConfiguredModelId(): string
     {
-        if (defined('CUSTOM_AI_IMAGE_MODEL') && !empty(CUSTOM_AI_IMAGE_MODEL)) {
-            return CUSTOM_AI_IMAGE_MODEL;
-        }
         $model = get_option(Settings::IMAGE_MODEL_OPTION, '');
         if (!empty($model)) {
             return $model;
         }
-        return 'stable-diffusion';
+        return Settings::DEFAULT_IMAGE_MODEL;
     }
 }

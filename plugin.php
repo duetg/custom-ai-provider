@@ -6,7 +6,7 @@
  * Author: DuetG
  * Author URI: https://github.com/duetg/custom-ai-provider
  * License: GPL-2.0-or-later
- * Requires at least: 6.9
+ * Requires at least: 7.0
  * Requires PHP: 7.4
  * Text Domain: custom-ai-provider
  *
@@ -100,7 +100,7 @@ function render_test_page(): void
         echo '<div class="wrap">';
         echo '<h1>' . esc_html__('Test AI', 'custom-ai-provider') . '</h1>';
         echo '<div class="notice notice-error"><p>';
-        echo esc_html__('Custom AI Provider requires WordPress AI Client (WordPress 6.9+) to be installed and active.', 'custom-ai-provider');
+        echo esc_html__('Custom AI Provider requires WordPress 7.0 or higher.', 'custom-ai-provider');
         echo '</p></div>';
         echo '</div>';
         return;

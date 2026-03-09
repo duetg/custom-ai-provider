@@ -23,7 +23,7 @@ use WordPress\CustomAiProvider\Settings\Settings;
 class TestPage
 {
     /**
-     * Check if API key is configured (constant > env var > database)
+     * Check if API key is configured in database
      *
      * @param string $type 'text' or 'image'
      * @return bool
@@ -33,29 +33,10 @@ class TestPage
         $option_name = $type === 'text'
             ? Settings::TEXT_API_KEY_OPTION
             : Settings::IMAGE_API_KEY_OPTION;
-        $constant_name = $type === 'text'
-            ? Settings::TEXT_API_KEY_CONSTANT
-            : Settings::IMAGE_API_KEY_CONSTANT;
 
-        // 1. Check constant
-        if (defined($constant_name)) {
-            return true;
-        }
-
-        // 2. Check environment variable
-        $env_key = strtolower($constant_name);
-        $env_value = getenv($env_key);
-        if ($env_value !== false && $env_value !== '') {
-            return true;
-        }
-
-        // 3. Check database
+        // Check database
         $db_value = get_option($option_name, '');
-        if (!empty($db_value)) {
-            return true;
-        }
-
-        return false;
+        return !empty($db_value);
     }
 
     /**
@@ -84,7 +65,7 @@ class TestPage
                         if (!$registry->hasProvider('custom_text')) {
                             $error = 'Text provider not registered.';
                         } elseif (!$registry->isProviderConfigured('custom_text')) {
-                            $error = 'Text provider not configured. Please add API key via constant, environment variable, or Settings > Connectors.';
+                            $error = 'Text provider not configured. Please add API key via Settings > Connectors.';
                         } else {
                             $model = $registry->getProviderModel('custom_text', CustomTextProvider::getModelId());
                             $result = $model->generateTextResult([
@@ -97,7 +78,7 @@ class TestPage
                         if (!$registry->hasProvider('custom_image')) {
                             $error = 'Image provider not registered.';
                         } elseif (!$registry->isProviderConfigured('custom_image')) {
-                            $error = 'Image provider not configured. Please add API key via constant, environment variable, or Settings > Connectors.';
+                            $error = 'Image provider not configured. Please add API key via Settings > Connectors.';
                         } else {
                             $model = $registry->getProviderModel('custom_image', CustomImageProvider::getModelId());
                             $result = $model->generateImageResult([

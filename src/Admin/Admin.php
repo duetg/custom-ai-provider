@@ -72,23 +72,9 @@ class Admin
         <div class="wrap">
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
-            <?php
-            // Check WordPress version - Connectors page exists from 7.0-beta3+
-            $wp_version = get_bloginfo('version');
-            $is_wp70_beta3_or_higher = version_compare($wp_version, '7.0-beta3', '>=');
-            ?>
             <div class="notice notice-info">
                 <p><strong><?php esc_html_e('API Key Configuration', 'custom-ai-provider'); ?></strong></p>
-                <?php if ($is_wp70_beta3_or_higher): ?>
-                    <p><?php esc_html_e('Please configure your API Key in the Settings > Connectors page. The API Key is required for the provider to be activated.', 'custom-ai-provider'); ?></p>
-                <?php else: ?>
-                    <p><?php esc_html_e('In WordPress versions below 7.0, please configure your API Key using a constant or environment variable:', 'custom-ai-provider'); ?></p>
-                    <p><code>define('CUSTOM_AI_PROVIDER_TEXT_API_KEY', 'your-key');</code></p>
-                    <p><code>define('CUSTOM_AI_PROVIDER_IMAGE_API_KEY', 'your-key');</code></p>
-                    <p><?php esc_html_e('Or use environment variables:', 'custom-ai-provider'); ?></p>
-                    <p><code>custom_ai_provider_text_api_key=your-key</code></p>
-                    <p><code>custom_ai_provider_image_api_key=your-key</code></p>
-                <?php endif; ?>
+                <p><?php esc_html_e('Please configure your API Key in the Settings > Connectors page. The API Key is required for the provider to be activated.', 'custom-ai-provider'); ?></p>
             </div>
 
             <?php if ($using_default_text): ?>

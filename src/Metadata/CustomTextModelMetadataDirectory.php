@@ -51,13 +51,10 @@ class CustomTextModelMetadataDirectory implements ModelMetadataDirectoryInterfac
 
     private function getConfiguredModelId(): string
     {
-        if (defined('CUSTOM_AI_TEXT_MODEL') && !empty(CUSTOM_AI_TEXT_MODEL)) {
-            return CUSTOM_AI_TEXT_MODEL;
-        }
         $model = get_option(Settings::TEXT_MODEL_OPTION, '');
         if (!empty($model)) {
             return $model;
         }
-        return 'llama3';
+        return Settings::DEFAULT_TEXT_MODEL;
     }
 }

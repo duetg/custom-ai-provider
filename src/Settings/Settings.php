@@ -26,14 +26,12 @@ class Settings
     public const TEXT_BASE_URL_OPTION = 'connectors_ai_custom_text_base_url';
     public const TEXT_MODEL_OPTION = 'connectors_ai_custom_text_model';
     public const TEXT_API_KEY_OPTION = 'connectors_ai_custom_text_api_key';
-    public const TEXT_API_KEY_CONSTANT = 'CUSTOM_AI_PROVIDER_TEXT_API_KEY';
 
     // Image Generation Settings
     public const IMAGE_ENABLED_OPTION = 'connectors_ai_custom_image_enabled';
     public const IMAGE_BASE_URL_OPTION = 'connectors_ai_custom_image_base_url';
     public const IMAGE_MODEL_OPTION = 'connectors_ai_custom_image_model';
     public const IMAGE_API_KEY_OPTION = 'connectors_ai_custom_image_api_key';
-    public const IMAGE_API_KEY_CONSTANT = 'CUSTOM_AI_PROVIDER_IMAGE_API_KEY';
 
     /**
      * Initialize settings
@@ -130,44 +128,18 @@ class Settings
     }
 
     /**
-     * Get text API key (constant > env var > database)
+     * Get text API key from database
      */
     public static function get_text_api_key(): string
     {
-        // 1. Check constant first
-        if (defined(self::TEXT_API_KEY_CONSTANT)) {
-            return constant(self::TEXT_API_KEY_CONSTANT);
-        }
-
-        // 2. Check environment variable
-        $env_key = strtolower(self::TEXT_API_KEY_CONSTANT);
-        $env_value = getenv($env_key);
-        if ($env_value !== false && $env_value !== '') {
-            return $env_value;
-        }
-
-        // 3. Fall back to database option
         return get_option(self::TEXT_API_KEY_OPTION, '');
     }
 
     /**
-     * Get image API key (constant > env var > database)
+     * Get image API key from database
      */
     public static function get_image_api_key(): string
     {
-        // 1. Check constant first
-        if (defined(self::IMAGE_API_KEY_CONSTANT)) {
-            return constant(self::IMAGE_API_KEY_CONSTANT);
-        }
-
-        // 2. Check environment variable
-        $env_key = strtolower(self::IMAGE_API_KEY_CONSTANT);
-        $env_value = getenv($env_key);
-        if ($env_value !== false && $env_value !== '') {
-            return $env_value;
-        }
-
-        // 3. Fall back to database option
         return get_option(self::IMAGE_API_KEY_OPTION, '');
     }
 }

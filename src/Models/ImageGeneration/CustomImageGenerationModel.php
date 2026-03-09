@@ -43,9 +43,6 @@ class CustomImageGenerationModel extends AbstractOpenAiCompatibleImageGeneration
      */
     private function getBaseUrl(): string
     {
-        if (defined('CUSTOM_AI_IMAGE_BASE_URL') && !empty(CUSTOM_AI_IMAGE_BASE_URL)) {
-            return rtrim(CUSTOM_AI_IMAGE_BASE_URL, '/');
-        }
         $base_url = get_option(Settings::IMAGE_BASE_URL_OPTION, '');
         if (!empty($base_url)) {
             return rtrim($base_url, '/');

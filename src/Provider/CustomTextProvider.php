@@ -41,48 +41,35 @@ class CustomTextProvider extends AbstractApiProvider
     /**
      * Get base URL for the API
      *
-     * Priority: 1. wp-config.php constant, 2. database option, 3. default
      *
      * @return string
      */
     protected static function baseUrl(): string
     {
-        // 1. Check wp-config.php constant first
-        if (defined('CUSTOM_AI_TEXT_BASE_URL') && !empty(CUSTOM_AI_TEXT_BASE_URL)) {
-            return rtrim(CUSTOM_AI_TEXT_BASE_URL, '/');
-        }
-
-        // 2. Then check database option
+        // Check database option
         $base_url = get_option(Settings::TEXT_BASE_URL_OPTION, '');
         if (!empty($base_url)) {
             return rtrim($base_url, '/');
         }
 
-        // 3. Default fallback
+        // Default fallback
         return 'http://localhost:11434/v1';
     }
 
     /**
      * Get the model ID
      *
-     * Priority: 1. wp-config.php constant, 2. database option, 3. default
-     *
      * @return string
      */
     public static function getModelId(): string
     {
-        // 1. Check wp-config.php constant first
-        if (defined('CUSTOM_AI_TEXT_MODEL') && !empty(CUSTOM_AI_TEXT_MODEL)) {
-            return CUSTOM_AI_TEXT_MODEL;
-        }
-
-        // 2. Then check database option
+        // Check database option
         $model = get_option(Settings::TEXT_MODEL_OPTION, '');
         if (!empty($model)) {
             return $model;
         }
 
-        // 3. Default fallback
+        // Default fallback
         return Settings::DEFAULT_TEXT_MODEL;
     }
 
@@ -110,10 +97,7 @@ class CustomTextProvider extends AbstractApiProvider
         return new class implements \WordPress\AiClient\Providers\Contracts\ProviderAvailabilityInterface {
             public function isConfigured(): bool
             {
-                // Check if base URL is configured (from constant or option)
-                if (defined('CUSTOM_AI_TEXT_BASE_URL') && !empty(CUSTOM_AI_TEXT_BASE_URL)) {
-                    return true;
-                }
+                // Check if base URL is configured in database
                 $base_url = get_option(Settings::TEXT_BASE_URL_OPTION, '');
                 return !empty($base_url);
             }
