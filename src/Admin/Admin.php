@@ -68,12 +68,13 @@ class Admin
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
             <?php
-            // Check if WordPress AI Client is available (7.0+ or plugin)
-            $ai_client_available = class_exists('WordPress\AiClient\AiClient');
+            // Check WordPress version - Connectors page only exists in 7.0+
+            $wp_version = get_bloginfo('version');
+            $is_wp70_or_higher = version_compare($wp_version, '7.0', '>=');
             ?>
             <div class="notice notice-info">
                 <p><strong><?php _e('API Key Configuration', 'custom-ai-provider'); ?></strong></p>
-                <?php if ($ai_client_available): ?>
+                <?php if ($is_wp70_or_higher): ?>
                     <p><?php _e('Please configure your API Key in the Settings > Connectors page. The API Key is required for the provider to be activated.', 'custom-ai-provider'); ?></p>
                 <?php else: ?>
                     <p><?php _e('In WordPress versions below 7.0, please configure your API Key using a constant or environment variable:', 'custom-ai-provider'); ?></p>
