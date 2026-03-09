@@ -25,19 +25,6 @@ if (!defined('ABSPATH')) {
 require_once __DIR__ . '/src/autoload.php';
 
 /**
- * Load plugin text domain for translations
- */
-function load_custom_ai_provider_textdomain(): void
-{
-    load_plugin_textdomain(
-        'custom-ai-provider',
-        false,
-        dirname(plugin_basename(__FILE__)) . '/languages'
-    );
-}
-add_action('plugins_loaded', __NAMESPACE__ . '\\load_custom_ai_provider_textdomain');
-
-/**
  * Register the connector to WordPress AI system
  */
 function register_connector(): void

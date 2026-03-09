@@ -7,6 +7,11 @@
 
 namespace WordPress\CustomAiProvider\Admin;
 
+// Exit if accessed directly.
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 use WordPress\AiClient\AiClient;
 use WordPress\CustomAiProvider\Provider\CustomTextProvider;
 use WordPress\CustomAiProvider\Provider\CustomImageProvider;
@@ -64,8 +69,8 @@ class TestPage
 
         $result = null;
         $error = null;
-        $provider_type = isset($_POST['provider_type']) ? $_POST['provider_type'] : 'text';
-        $prompt = isset($_POST['prompt']) ? $_POST['prompt'] : '';
+        $provider_type = isset($_POST['provider_type']) ? sanitize_text_field(wp_unslash($_POST['provider_type'])) : 'text';
+        $prompt = isset($_POST['prompt']) ? sanitize_text_field(wp_unslash($_POST['prompt'])) : '';
 
         // Handle form submission
         if (isset($_POST['test_submit']) && check_admin_referer('custom_ai_test_action')) {
@@ -130,19 +135,19 @@ class TestPage
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
             <div class="card" style="max-width: 100%; margin-top: 20px;">
-                <h2><?php _e('Provider Status', 'custom-ai-provider'); ?></h2>
+                <h2><?php esc_html_e('Provider Status', 'custom-ai-provider'); ?></h2>
                 <table class="widefat">
                     <thead>
                         <tr>
-                            <th><?php _e('Type', 'custom-ai-provider'); ?></th>
+                            <th><?php esc_html_e('Type', 'custom-ai-provider'); ?></th>
                             <th>Base URL</th>
-                            <th><?php _e('Model', 'custom-ai-provider'); ?></th>
-                            <th>API Key <?php _e('Status', 'custom-ai-provider'); ?></th>
+                            <th><?php esc_html_e('Model', 'custom-ai-provider'); ?></th>
+                            <th>API Key <?php esc_html_e('Status', 'custom-ai-provider'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><strong><?php _e('Text Generation', 'custom-ai-provider'); ?></strong></td>
+                            <td><strong><?php esc_html_e('Text Generation', 'custom-ai-provider'); ?></strong></td>
                             <td><?php echo esc_html($text_base_url); ?></td>
                             <td><?php echo esc_html($text_model); ?></td>
                             <td>
@@ -150,15 +155,15 @@ class TestPage
                                 $text_api_key = self::get_api_key_status('text');
 
                                 if ($text_api_key) {
-                                    echo '<span style="color: green;">&#10004; ' . __('Configured', 'custom-ai-provider') . '</span>';
+                                    echo '<span style="color: green;">&#10004; ' . esc_html__('Configured', 'custom-ai-provider') . '</span>';
                                 } else {
-                                    echo '<span style="color: red;">&#10008; ' . __('Not Configured', 'custom-ai-provider') . '</span>';
+                                    echo '<span style="color: red;">&#10008; ' . esc_html__('Not Configured', 'custom-ai-provider') . '</span>';
                                 }
                                 ?>
                             </td>
                         </tr>
                         <tr>
-                            <td><strong><?php _e('Image Generation', 'custom-ai-provider'); ?></strong></td>
+                            <td><strong><?php esc_html_e('Image Generation', 'custom-ai-provider'); ?></strong></td>
                             <td><?php echo esc_html($image_base_url); ?></td>
                             <td><?php echo esc_html($image_model); ?></td>
                             <td>
@@ -166,9 +171,9 @@ class TestPage
                                 $image_api_key = self::get_api_key_status('image');
 
                                 if ($image_api_key) {
-                                    echo '<span style="color: green;">&#10004; ' . __('Configured', 'custom-ai-provider') . '</span>';
+                                    echo '<span style="color: green;">&#10004; ' . esc_html__('Configured', 'custom-ai-provider') . '</span>';
                                 } else {
-                                    echo '<span style="color: red;">&#10008; ' . __('Not Configured', 'custom-ai-provider') . '</span>';
+                                    echo '<span style="color: red;">&#10008; ' . esc_html__('Not Configured', 'custom-ai-provider') . '</span>';
                                 }
                                 ?>
                             </td>
@@ -178,23 +183,23 @@ class TestPage
             </div>
 
             <div class="card" style="max-width: 100%; margin-top: 20px;">
-                <h2><?php _e('Test AI', 'custom-ai-provider'); ?></h2>
+                <h2><?php esc_html_e('Test AI', 'custom-ai-provider'); ?></h2>
                 <form method="post">
                     <?php wp_nonce_field('custom_ai_test_action'); ?>
 
                     <table class="form-table">
                         <tr>
-                            <th scope="row"><?php _e('Provider Type', 'custom-ai-provider'); ?></th>
+                            <th scope="row"><?php esc_html_e('Provider Type', 'custom-ai-provider'); ?></th>
                             <td>
                                 <select name="provider_type" id="provider_type" onchange="updatePromptPlaceholder()">
-                                    <option value="text" <?php selected($provider_type, 'text'); ?>><?php _e('Text Generation', 'custom-ai-provider'); ?></option>
-                                    <option value="image" <?php selected($provider_type, 'image'); ?>><?php _e('Image Generation', 'custom-ai-provider'); ?></option>
+                                    <option value="text" <?php selected($provider_type, 'text'); ?>><?php esc_html_e('Text Generation', 'custom-ai-provider'); ?></option>
+                                    <option value="image" <?php selected($provider_type, 'image'); ?>><?php esc_html_e('Image Generation', 'custom-ai-provider'); ?></option>
                                 </select>
                             </td>
                         </tr>
                         <tr>
                             <th scope="row">
-                                <label for="prompt"><?php _e('Prompt', 'custom-ai-provider'); ?></label>
+                                <label for="prompt"><?php esc_html_e('Prompt', 'custom-ai-provider'); ?></label>
                             </th>
                             <td>
                                 <textarea
@@ -202,24 +207,24 @@ class TestPage
                                     id="prompt"
                                     rows="4"
                                     class="large-text"
-                                    placeholder="<?php echo $provider_type === 'text' ? __('Enter your text prompt...', 'custom-ai-provider') : __('Describe the image you want to generate...', 'custom-ai-provider'); ?>"
+                                    placeholder="<?php echo $provider_type === 'text' ? esc_attr__('Enter your text prompt...', 'custom-ai-provider') : esc_attr__('Describe the image you want to generate...', 'custom-ai-provider'); ?>"
                                 ><?php echo esc_textarea($prompt); ?></textarea>
                             </td>
                         </tr>
                     </table>
 
-                    <?php submit_button(__('Generate', 'custom-ai-provider'), 'primary', 'test_submit', false); ?>
+                    <?php submit_button(esc_html__('Generate', 'custom-ai-provider'), 'primary', 'test_submit', false); ?>
                 </form>
 
                 <?php if ($error): ?>
                     <div class="notice notice-error" style="margin-top: 20px;">
-                        <p><strong><?php _e('Error', 'custom-ai-provider'); ?>:</strong> <?php echo esc_html($error); ?></p>
+                        <p><strong><?php esc_html_e('Error', 'custom-ai-provider'); ?>:</strong> <?php echo esc_html($error); ?></p>
                     </div>
                 <?php endif; ?>
 
                 <?php if ($result): ?>
                     <div class="notice notice-success" style="margin-top: 20px;">
-                        <p><strong><?php _e('Success!', 'custom-ai-provider'); ?></strong></p>
+                        <p><strong><?php esc_html_e('Success!', 'custom-ai-provider'); ?></strong></p>
                         <?php if ($provider_type === 'text'): ?>
                             <pre style="background: #f0f0f0; padding: 10px; overflow-x: auto; max-height: 300px;"><?php echo esc_html($result->toText()); ?></pre>
                         <?php else: ?>
@@ -238,8 +243,8 @@ class TestPage
             </div>
 
             <div class="card" style="max-width: 100%; margin-top: 20px;">
-                <h2><?php _e('How to Use', 'custom-ai-provider'); ?></h2>
-                <p><?php _e('To use this provider in your code:', 'custom-ai-provider'); ?></p>
+                <h2><?php esc_html_e('How to Use', 'custom-ai-provider'); ?></h2>
+                <p><?php esc_html_e('To use this provider in your code:', 'custom-ai-provider'); ?></p>
                 <pre style="background: #f0f0f0; padding: 10px; overflow-x: auto;">// Text Generation
 $registry = AiClient::defaultRegistry();
 $model = $registry->getProviderModel('custom_text', '<?php echo esc_html($text_model); ?>');

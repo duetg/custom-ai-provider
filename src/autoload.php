@@ -5,6 +5,11 @@
  * @package CustomAiProvider
  */
 
+// Exit if accessed directly.
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 spl_autoload_register(function ($class) {
     $prefix = 'WordPress\\CustomAiProvider\\';
     $base_dir = __DIR__ . '/';
