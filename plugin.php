@@ -72,7 +72,7 @@ function add_admin_menu(): void
         __NAMESPACE__ . '\\render_settings_page'
     );
 
-    add_options_page(
+    add_management_page(
         __('Test AI', 'custom-ai-provider'),
         __('Test AI', 'custom-ai-provider'),
         'manage_options',
