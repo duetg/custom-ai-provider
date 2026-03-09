@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Custom AI Provider 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-07 12:00+0000\n"
-"PO-Revision-Date: 2026-03-07 12:00+0000\n"
+"POT-Creation-Date: 2026-03-10 00:00+0000\n"
+"PO-Revision-Date: 2026-03-10 00:00+0000\n"
 "Last-Translator: DuetG <hello@duetg.com>\n"
 "Language-Team: DuetG <hello@duetg.com>\n"
 "Language: en_US\n"
@@ -28,6 +28,10 @@ msgstr ""
 
 #: plugin.php
 msgid "Test AI"
+msgstr ""
+
+#: plugin.php
+msgid "Custom AI Provider requires WordPress 7.0 or higher."
 msgstr ""
 
 #: src/Provider/CustomTextProvider.php
@@ -95,11 +99,55 @@ msgid "Save Changes"
 msgstr ""
 
 #: src/Admin/TestPage.php
+msgid "Enter your text prompt..."
+msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "Describe the image you want to generate..."
+msgstr ""
+
+#: src/Admin/TestPage.php
 msgid "Provider Status"
 msgstr ""
 
 #: src/Admin/TestPage.php
+msgid "Type"
+msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "Model"
+msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "Status"
+msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "Text Generation"
+msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "Image Generation"
+msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "Configured"
+msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "Not Configured"
+msgstr ""
+
+#: src/Admin/TestPage.php
 msgid "Test AI"
+msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "Provider Type"
+msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "Prompt"
 msgstr ""
 
 #: src/Admin/TestPage.php
@@ -112,4 +160,12 @@ msgstr ""
 
 #: src/Admin/TestPage.php
 msgid "Success!"
+msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "How to Use"
+msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "To use this provider in your code:"
 msgstr ""
