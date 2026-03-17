@@ -6,7 +6,7 @@ Tested up to: 7.0
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Stable tag: 0.1.0
+Stable tag: 0.2.0
 
 Connect WordPress AI Client to any OpenAI-compatible AI API provider.
 
@@ -19,12 +19,48 @@ Custom AI Provider allows WordPress AI Client to connect to any AI service that 
 * MiniMax
 * Moonshot
 * DeepSeek
+* SiliconFlow
 * And any other OpenAI-compatible API provider
+
+= WordPress AI Experiments Integration =
+
+This plugin is compatible with the official [WordPress AI Experiments plugin](https://wordpress.org/plugins/ai/) (version 0.5.0+). When installed together, you can use your custom API provider with WordPress's built-in AI features:
+
+* **Alt Text Generation** - Generates descriptive alt text for images using AI vision models (requires VLM model)
+* **Content Summarization** - Summarizes long-form content into digestible overviews
+* **Excerpt Generation** - Generates excerpt suggestions from content
+* **Image Generation** - Generate featured images and inline images using AI
+* **Image Prompt Generation** - Generates a prompt from post content that can be used to generate an image
+* **Review Notes** - Reviews post content block-by-block and adds Notes with suggestions for Accessibility, Readability, Grammar, and SEO
+* **Title Generation** - Generates title suggestions from content
+
+= Model Capabilities =
+
+**Text-Only Models**:
+* Content Summarization
+* Excerpt Generation
+* Image Prompt Generation (used with Image Generation to create featured images)
+* Review Notes
+* Title Generation
+
+**Vision-Language Models (VLM)**:
+* Content Summarization
+* Excerpt Generation
+* Image Prompt Generation
+* Review Notes
+* Title Generation
+* Alt Text Generation
+
+**Image Generation Models**:
+* Image Generation (generate featured images and inline images)
+
+Note: Only Alt Text Generation requires a VLM to analyze images. All other features work with text-only models.
 
 == Requirements ==
 
 * PHP 7.4 or higher
 * WordPress 7.0 or higher (uses built-in Connectors API)
+* (Optional) WordPress AI Experiments plugin 0.5.0+ for enhanced integration
 
 == Installation ==
 
@@ -47,6 +83,7 @@ No, this plugin requires WordPress 7.0 or higher because it uses the built-in Co
 * MiniMax: `https://api.minimax.io/v1`
 * Moonshot: `https://api.moonshot.ai/v1`
 * DeepSeek: `https://api.deepseek.com/v1`
+* SiliconFlow: `https://api.siliconflow.cn/v1`
 * Other providers: Check their documentation
 
 = Do I need an API key? =
@@ -78,6 +115,18 @@ Some providers require an API key. For local installations (like Ollama) that do
     $files = $result->toImageFiles();
 
 == Changelog ==
+
+= 0.2.0 =
+* Added compatibility with WordPress AI Experiments plugin (0.5.0+)
+* Added Alt Text Generation support (requires VLM model)
+* Added Image Prompt Generation support
+* Added Review Notes feature
+* Added Title Generation support
+* Added Content Summarization support
+* Added Excerpt Generation support
+* Added thinking/reasoning support for models like DeepSeek, Qwen, MiniMax, Kimi
+* Improved JSON response parsing for better compatibility
+* Added debug logging (controlled via WP_DEBUG)
 
 = 0.1.0 =
 * Initial release

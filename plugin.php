@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Custom AI Provider
  * Description: Connect WordPress AI Client to any OpenAI-compatible AI API provider
- * Version: 0.1.0
+ * Version: 0.2.0
  * Author: DuetG
  * Author URI: https://github.com/duetg/custom-ai-provider
  * License: GPL-2.0-or-later
@@ -24,26 +24,83 @@ if (!defined('ABSPATH')) {
 
 require_once __DIR__ . '/src/autoload.php';
 
+// Register custom image model in WordPress AI's preferred image models list
+// Must use very late priority to ensure WordPress AI plugin is fully loaded
+add_filter('ai_experiments_preferred_image_models', function ($models) {
+    // Always add custom_image provider, use default if not configured
+    $image_model = get_option(\WordPress\CustomAiProvider\Settings\Settings::IMAGE_MODEL_OPTION, \WordPress\CustomAiProvider\Settings\Settings::DEFAULT_IMAGE_MODEL);
+    if (!empty($image_model)) {
+        $models[] = ['custom_image', $image_model];
+    }
+    return $models;
+}, PHP_INT_MAX);
+
+// Register custom text model in WordPress AI's preferred vision models list for alt text generation
+// Must use very late priority to ensure WordPress AI plugin is fully loaded
+add_filter('ai_experiments_preferred_vision_models', function ($models) {
+    // Add custom_text provider for vision tasks (alt text generation)
+    // All models registered as supporting vision, actual support depends on API
+    $text_model = get_option(\WordPress\CustomAiProvider\Settings\Settings::TEXT_MODEL_OPTION, \WordPress\CustomAiProvider\Settings\Settings::DEFAULT_TEXT_MODEL);
+    if (!empty($text_model)) {
+        $models[] = ['custom_text', $text_model];
+    }
+    return $models;
+}, PHP_INT_MAX);
+
+// Increase timeout for AI requests
+add_filter('http_request_timeout', function ($timeout) {
+    return 300; // 5 minutes timeout for AI requests
+});
+
+// Also increase timeout via http_request_args for WordPress HTTP API
+add_filter('http_request_args', function ($args, $url) {
+    $args['timeout'] = 300;
+    return $args;
+}, 10, 2);
+
+// Register custom text model in WordPress AI's preferred text generation models list
+add_filter('ai_experiments_preferred_models_for_text_generation', function ($models) {
+    $text_model = get_option(\WordPress\CustomAiProvider\Settings\Settings::TEXT_MODEL_OPTION, \WordPress\CustomAiProvider\Settings\Settings::DEFAULT_TEXT_MODEL);
+    custom_ai_debug('ai_experiments_preferred_models_for_text_generation filter', ['text_model' => $text_model]);
+    if (!empty($text_model)) {
+        $models[] = ['custom_text', $text_model];
+    }
+    custom_ai_debug('Preferred models', $models);
+    return $models;
+}, PHP_INT_MAX);
+
 /**
  * Register the connector to WordPress AI system
  */
 function register_connector(): void
 {
+    custom_ai_debug('register_connector called');
+
     if (!class_exists('WordPress\AiClient\AiClient')) {
+        custom_ai_debug('AiClient class not found');
         return;
     }
 
+    // Initialize model handlers
+    require_once __DIR__ . '/src/Models/TextGeneration/ModelHandlers.php';
+    \WordPress\CustomAiProvider\Models\TextGeneration\ModelHandlerRegistry::init();
+
     require_once __DIR__ . '/src/Provider/CustomTextProvider.php';
     require_once __DIR__ . '/src/Provider/CustomImageProvider.php';
+
 
     $registry = \WordPress\AiClient\AiClient::defaultRegistry();
 
     if (!$registry->hasProvider('custom_text')) {
         $registry->registerProvider(\WordPress\CustomAiProvider\Provider\CustomTextProvider::class);
+        custom_ai_debug('Registered custom_text provider');
+    } else {
+        custom_ai_debug('custom_text provider already exists');
     }
 
     if (!$registry->hasProvider('custom_image')) {
         $registry->registerProvider(\WordPress\CustomAiProvider\Provider\CustomImageProvider::class);
+        custom_ai_debug('Registered custom_image provider');
     }
 
     Settings::pass_api_keys_to_ai_client();

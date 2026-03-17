@@ -97,7 +97,6 @@ class CustomImageProvider extends AbstractApiProvider
         return new class implements \WordPress\AiClient\Providers\Contracts\ProviderAvailabilityInterface {
             public function isConfigured(): bool
             {
-                // Check if base URL is configured in database
                 $base_url = get_option(Settings::IMAGE_BASE_URL_OPTION, '');
                 return !empty($base_url);
             }

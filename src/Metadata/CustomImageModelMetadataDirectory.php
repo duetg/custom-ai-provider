@@ -7,6 +7,8 @@
 
 namespace WordPress\CustomAiProvider\Metadata;
 
+use WordPress\AiClient\Files\Enums\MediaOrientationEnum;
+use WordPress\AiClient\Messages\Enums\ModalityEnum;
 use WordPress\AiClient\Providers\Contracts\ModelMetadataDirectoryInterface;
 use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
 use WordPress\AiClient\Providers\Models\DTO\SupportedOption;
@@ -21,7 +23,8 @@ class CustomImageModelMetadataDirectory implements ModelMetadataDirectoryInterfa
 {
     public function listModelMetadata(): array
     {
-        return [$this->getModelMetadata($this->getConfiguredModelId())];
+        $modelId = $this->getConfiguredModelId();
+        return [$this->getModelMetadata($modelId)];
     }
 
     public function hasModelMetadata(string $modelId): bool
@@ -31,16 +34,24 @@ class CustomImageModelMetadataDirectory implements ModelMetadataDirectoryInterfa
 
     public function getModelMetadata(string $modelId): ModelMetadata
     {
-        return new ModelMetadata(
+        $metadata = new ModelMetadata(
             $modelId,
             $modelId,
             [CapabilityEnum::imageGeneration()],
             [
-                new SupportedOption(OptionEnum::outputMediaOrientation()),
-                new SupportedOption(OptionEnum::outputMediaAspectRatio()),
+                new SupportedOption(OptionEnum::inputModalities(), [[ModalityEnum::text()]]),
+                new SupportedOption(OptionEnum::outputModalities(), [[ModalityEnum::image()]]),
+                new SupportedOption(OptionEnum::outputMediaOrientation(), [
+                    MediaOrientationEnum::square(),
+                    MediaOrientationEnum::landscape(),
+                    MediaOrientationEnum::portrait(),
+                ]),
+                new SupportedOption(OptionEnum::outputMediaAspectRatio(), ['1:1', '16:9', '9:16', '4:3', '3:4']),
                 new SupportedOption(OptionEnum::outputFileType()),
+                new SupportedOption(OptionEnum::candidateCount()),
             ]
         );
+        return $metadata;
     }
 
     private function getConfiguredModelId(): string

@@ -7,6 +7,7 @@
 
 namespace WordPress\CustomAiProvider\Metadata;
 
+use WordPress\AiClient\Messages\Enums\ModalityEnum;
 use WordPress\AiClient\Providers\Contracts\ModelMetadataDirectoryInterface;
 use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
 use WordPress\AiClient\Providers\Models\DTO\SupportedOption;
@@ -16,6 +17,10 @@ use WordPress\CustomAiProvider\Settings\Settings;
 
 /**
  * Custom Model Metadata Directory for Text Generation
+ *
+ * Note: All models are registered as supporting both text and image input modalities.
+ * This allows users to try vision capabilities with any model. If the model doesn't
+ * actually support vision, the API will return an error which will be handled gracefully.
  */
 class CustomTextModelMetadataDirectory implements ModelMetadataDirectoryInterface
 {
@@ -31,13 +36,21 @@ class CustomTextModelMetadataDirectory implements ModelMetadataDirectoryInterfac
 
     public function getModelMetadata(string $modelId): ModelMetadata
     {
+        // Register as supporting both text and image input modalities
+        // This allows vision capabilities to be attempted with any model
+        // If model doesn't support vision, API will return an error
+        $inputModalities = [
+            [ModalityEnum::text()],
+            [ModalityEnum::text(), ModalityEnum::image()],
+        ];
+
         return new ModelMetadata(
             $modelId,
             $modelId,
             [CapabilityEnum::textGeneration(), CapabilityEnum::chatHistory()],
             [
-                new SupportedOption(OptionEnum::inputModalities()),
-                new SupportedOption(OptionEnum::outputModalities()),
+                new SupportedOption(OptionEnum::inputModalities(), $inputModalities),
+                new SupportedOption(OptionEnum::outputModalities(), [[ModalityEnum::text()]]),
                 new SupportedOption(OptionEnum::maxTokens()),
                 new SupportedOption(OptionEnum::temperature()),
                 new SupportedOption(OptionEnum::topP()),
@@ -45,6 +58,7 @@ class CustomTextModelMetadataDirectory implements ModelMetadataDirectoryInterfac
                 new SupportedOption(OptionEnum::systemInstruction()),
                 new SupportedOption(OptionEnum::functionDeclarations()),
                 new SupportedOption(OptionEnum::webSearch()),
+                new SupportedOption(OptionEnum::candidateCount()),
             ]
         );
     }
