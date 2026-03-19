@@ -211,17 +211,17 @@ register_deactivation_hook(__FILE__, __NAMESPACE__ . '\\deactivate');
  * Add action links to plugin list
  */
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), function (array $links): array {
-    // Custom AI settings link
-    $custom_ai_link = '<a href="' . admin_url('options-general.php?page=custom-ai-provider') . '">'
-        . esc_html__('Custom AI', 'custom-ai-provider')
-        . '</a>';
-    array_unshift($links, $custom_ai_link);
-
     // Test AI link
     $test_ai_link = '<a href="' . admin_url('tools.php?page=custom-ai-provider-test') . '">'
         . esc_html__('Test AI', 'custom-ai-provider')
         . '</a>';
     array_unshift($links, $test_ai_link);
+
+    // Custom AI settings link
+    $custom_ai_link = '<a href="' . admin_url('options-general.php?page=custom-ai-provider') . '">'
+        . esc_html__('Custom AI', 'custom-ai-provider')
+        . '</a>';
+    array_unshift($links, $custom_ai_link);
 
     return $links;
 });
