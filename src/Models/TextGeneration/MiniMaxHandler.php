@@ -22,8 +22,6 @@ class MiniMaxHandler implements ModelHandlerInterface
      */
     private const MINIMAX_PREFIXES = [
         'MiniMax-',
-        'MiniMax-M2',
-        'MiniMax-MoE',
     ];
 
     /**
@@ -50,23 +48,32 @@ class MiniMaxHandler implements ModelHandlerInterface
      */
     public function transformRequest(array $params): array
     {
-        // Remove parameters that MiniMax doesn't support or handles differently
-        if (isset($params['response_format'])) {
-            unset($params['response_format']);
+        // Parameters that MiniMax ignores
+        $ignoredParams = ['presence_penalty', 'frequency_penalty', 'logit_bias'];
+
+        // Parameters that might cause issues
+        $problematicParams = ['tools', 'tool_choice', 'tool_calls'];
+
+        // Remove problematic and ignored parameters for MiniMax
+        foreach (array_merge($ignoredParams, $problematicParams) as $param) {
+            unset($params[$param]);
         }
 
-        // Set default values for MiniMax
-        if (!isset($params['temperature'])) {
-            $params['temperature'] = 0.7;
+        // Ensure temperature is in valid range (0.0, 1.0]
+        if (isset($params['temperature'])) {
+            $temp = floatval($params['temperature']);
+            if ($temp <= 0 || $temp > 1) {
+                $params['temperature'] = 1.0;
+            }
         }
 
-        if (!isset($params['max_tokens'])) {
-            $params['max_tokens'] = 2048;
+        // Disable thinking/reasoning by default to support multiple candidates (n > 1)
+        // This fixes "The n parameter must be 1 when enable_thinking is true" error
+        if (!isset($params['extra_body'])) {
+            $params['extra_body'] = [];
         }
-
-        // MiniMax uses 'role' instead of 'system' in messages
-        // But we need to be careful - only transform system role in a way MiniMax understands
-        // Actually, MiniMax API accepts standard OpenAI format, so no transformation needed here
+        $params['extra_body']['enable_thinking'] = false;
+        $params['extra_body']['reasoning_split'] = false;
 
         return $params;
     }
@@ -79,15 +86,67 @@ class MiniMaxHandler implements ModelHandlerInterface
      */
     public function transformResponse(array $response): array
     {
-        // MiniMax returns standard OpenAI-compatible response format
-        // No transformation needed unless specific edge cases are discovered
+        if (!isset($response['choices']) || !is_array($response['choices'])) {
+            return $response;
+        }
 
-        // However, if the response contains 'reasoning' field, we should extract it
-        // Some MiniMax models include reasoning in a separate field
-        if (isset($response['choices'][0]['reasoning'])) {
-            $response['choices'][0]['reasoning_content'] = $response['choices'][0]['reasoning'];
+        foreach ($response['choices'] as &$choice) {
+            if (isset($choice['message']) && is_array($choice['message'])) {
+                $choice['message'] = $this->transformMessage($choice['message']);
+            }
         }
 
         return $response;
+    }
+
+    /**
+     * Transform message data - handles reasoning_details and thinking tags
+     *
+     * @param array $message
+     * @return array
+     */
+    private function transformMessage(array $message): array
+    {
+        // Check for reasoning_details (when reasoning_split=true worked)
+        if (isset($message['reasoning_details']) && is_array($message['reasoning_details'])) {
+            $reasoningTexts = [];
+            foreach ($message['reasoning_details'] as $reasoning) {
+                if (isset($reasoning['text']) && is_string($reasoning['text'])) {
+                    $reasoningTexts[] = $reasoning['text'];
+                }
+            }
+            if (!empty($reasoningTexts)) {
+                // Map to reasoning_content for WordPress to recognize as thinking
+                $message['reasoning_content'] = implode("\n\n", $reasoningTexts);
+            }
+            // Remove reasoning_details so parent doesn't process it
+            unset($message['reasoning_details']);
+        }
+
+        // If reasoning_split didn't work (no reasoning_details), clean content using thinking tags
+        if (!isset($message['reasoning_content']) && isset($message['content'])) {
+            custom_ai_debug('MiniMaxHandler: Before cleaning', [
+                'content_preview' => substr($message['content'], 0, 500)
+            ]);
+
+            $result = ThinkingTagHelper::clean($message['content']);
+
+            custom_ai_debug('MiniMaxHandler: After cleaning', [
+                'content' => $result['content'],
+                'thinking_length' => strlen($result['thinking'])
+            ]);
+
+            $message['content'] = $result['content'];
+            if (!empty($result['thinking'])) {
+                $message['reasoning_content'] = $result['thinking'];
+            }
+        }
+
+        // Handle 'reasoning' field (some MiniMax models)
+        if (isset($message['reasoning']) && !isset($message['reasoning_content'])) {
+            $message['reasoning_content'] = $message['reasoning'];
+        }
+
+        return $message;
     }
 }

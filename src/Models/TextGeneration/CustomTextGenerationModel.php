@@ -11,6 +11,7 @@ use WordPress\AiClient\Providers\OpenAiCompatibleImplementation\AbstractOpenAiCo
 use WordPress\AiClient\Providers\Http\DTO\Request;
 use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
 use WordPress\CustomAiProvider\Settings\Settings;
+use WordPress\CustomAiProvider\Models\TextGeneration\ThinkingTagHelper;
 
 /**
  * Custom Text Generation Model for OpenAI-compatible APIs
@@ -141,7 +142,7 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
                 // Always check for thinking tags in content (regardless of reasoning_content value)
                 // and extract them to reasoning_content
                 if (!empty($content)) {
-                    $result = $this->cleanContentByThinkingTags($content);
+                    $result = ThinkingTagHelper::clean($content);
                     if (!empty($result['thinking'])) {
                         // Extract thinking content to reasoning_content
                         $choiceData['message']['reasoning_content'] = $result['thinking'];
@@ -276,7 +277,7 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
 
         // Clean up the text first - remove thinking tags if present
         // Using # as delimiter to avoid issues with forward slashes in the pattern
-        $text = preg_replace('#<think>[\s\S]*?</think>#', '', $text);
+        $text = ThinkingTagHelper::strip($text);
         $text = trim($text);
 
         // Skip if text is empty after cleanup
@@ -672,56 +673,5 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
         }
 
         return ['text' => $text, 'priority' => $priority];
-    }
-
-    /**
-     * Clean content by extracting thinking tags
-     * Supports both Chinese and English thinking tags:
-     * - Chinese: <think> </think>
-     * - English: <thinking> </thinking>
-     *
-     * @param string $content
-     * @return array ['content' => string, 'thinking' => string]
-     */
-    private function cleanContentByThinkingTags(string $content): array
-    {
-        // Support Chinese and English closing tags
-        // Chinese: </think> (may appear as <\/think> in JSON)
-        // English: </thinking> (may appear as <\/thinking> in JSON)
-        $closeTags = ['</think>', '</thinking>', '<\\/think>', '<\\/thinking>'];
-
-        // Find the first closing tag
-        $closePos = false;
-        $foundCloseTag = '';
-        foreach ($closeTags as $closeTag) {
-            $pos = strpos($content, $closeTag);
-            if ($pos !== false && ($closePos === false || $pos < $closePos)) {
-                $closePos = $pos;
-                $foundCloseTag = $closeTag;
-            }
-        }
-
-        // If no closing tag found, return original content
-        if ($closePos === false) {
-            return [
-                'content' => $content,
-                'thinking' => ''
-            ];
-        }
-
-        // Everything before the closing tag is thinking content
-        // (could be after opening tag, or could be raw thinking if API removed opening tag)
-        $thinking = substr($content, 0, $closePos);
-        $thinking = trim($thinking);
-
-        // Everything after the closing tag is the actual content
-        $cleanContent = substr($content, $closePos + strlen($foundCloseTag));
-        $cleanContent = ltrim($cleanContent); // Remove leading whitespace/newlines
-        $cleanContent = trim($cleanContent);
-
-        return [
-            'content' => $cleanContent,
-            'thinking' => $thinking
-        ];
     }
 }
