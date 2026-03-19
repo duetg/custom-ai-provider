@@ -50,6 +50,8 @@ class TestPage
 
         $result = null;
         $error = null;
+        $provider_type = 'text';
+        $prompt = '';
 
         // Handle form submission
         if (isset($_POST['test_submit']) && check_admin_referer('custom_ai_test_action')) {
