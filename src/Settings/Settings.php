@@ -64,14 +64,14 @@ class Settings
         register_setting('connectors', self::TEXT_BASE_URL_OPTION, [
             'type' => 'string',
             'sanitize_callback' => 'esc_url_raw',
-            'default' => Settings::DEFAULT_TEXT_BASE_URL,
+            'default' => self::DEFAULT_TEXT_BASE_URL,
             'show_in_rest' => true,
         ]);
 
         register_setting('connectors', self::TEXT_MODEL_OPTION, [
             'type' => 'string',
             'sanitize_callback' => 'sanitize_text_field',
-            'default' => Settings::DEFAULT_TEXT_MODEL,
+            'default' => self::DEFAULT_TEXT_MODEL,
             'show_in_rest' => true,
         ]);
 
@@ -86,14 +86,14 @@ class Settings
         register_setting('connectors', self::IMAGE_BASE_URL_OPTION, [
             'type' => 'string',
             'sanitize_callback' => 'esc_url_raw',
-            'default' => Settings::DEFAULT_IMAGE_BASE_URL,
+            'default' => self::DEFAULT_IMAGE_BASE_URL,
             'show_in_rest' => true,
         ]);
 
         register_setting('connectors', self::IMAGE_MODEL_OPTION, [
             'type' => 'string',
             'sanitize_callback' => 'sanitize_text_field',
-            'default' => Settings::DEFAULT_IMAGE_MODEL,
+            'default' => self::DEFAULT_IMAGE_MODEL,
             'show_in_rest' => true,
         ]);
     }
