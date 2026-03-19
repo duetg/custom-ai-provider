@@ -24,6 +24,13 @@ class ModelHandlerRegistry
     private static array $handlers = [];
 
     /**
+     * Whether handlers have been initialized
+     *
+     * @var bool
+     */
+    private static bool $initialized = false;
+
+    /**
      * Register a model handler
      *
      * @param ModelHandlerInterface $handler
@@ -51,12 +58,17 @@ class ModelHandlerRegistry
     }
 
     /**
-     * Initialize default handlers
+     * Initialize default handlers (only runs once)
      *
      * @return void
      */
     public static function init(): void
     {
+        if (self::$initialized) {
+            return;
+        }
+        self::$initialized = true;
+
         // Register default handlers
         // Add new handlers here as needed
         self::register(new MiniMaxHandler());
