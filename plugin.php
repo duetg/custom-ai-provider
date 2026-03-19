@@ -47,14 +47,21 @@ add_filter('ai_experiments_preferred_vision_models', function ($models) {
     return $models;
 }, PHP_INT_MAX);
 
-// Increase timeout for AI requests
-add_filter('http_request_timeout', function ($timeout) {
-    return 300; // 5 minutes timeout for AI requests
-});
-
-// Also increase timeout via http_request_args for WordPress HTTP API
+// Increase timeout for AI requests only (not all WordPress HTTP requests)
 add_filter('http_request_args', function ($args, $url) {
-    $args['timeout'] = 300;
+    // Only set long timeout for our configured AI API URLs
+    $ai_base_urls = [
+        get_option(\WordPress\CustomAiProvider\Settings\Settings::TEXT_BASE_URL_OPTION, ''),
+        get_option(\WordPress\CustomAiProvider\Settings\Settings::IMAGE_BASE_URL_OPTION, ''),
+    ];
+
+    foreach ($ai_base_urls as $base) {
+        if (!empty($base) && strpos($url, rtrim($base, '/')) === 0) {
+            $args['timeout'] = 300; // 5 minutes timeout for AI requests
+            break;
+        }
+    }
+
     return $args;
 }, 10, 2);
 
