@@ -11,19 +11,35 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Debug logging helper - only logs when WP_DEBUG is enabled
+ * Debug logging helper - only logs when CUSTOM_AI_DEBUG is enabled
+ * Can also log if WP_DEBUG is enabled (for backwards compatibility)
  *
  * @param string $message The message to log
- * @param mixed $data Optional data to include (will be JSON encoded)
+ * @param mixed $data Optional data to include (lazy JSON encoding, only when debug is enabled)
+ * @param int $maxDataLength Maximum length for data serialization (0 = no limit)
  */
-function custom_ai_debug($message, $data = null) {
-    if (defined('WP_DEBUG') && WP_DEBUG) {
-        $log_message = 'Custom AI: ' . $message;
-        if ($data !== null) {
-            $log_message .= ' - ' . json_encode($data);
-        }
-        error_log($log_message);
+function custom_ai_debug($message, $data = null, $maxDataLength = 0) {
+    // Check CUSTOM_AI_DEBUG first (explicit control)
+    $isDebug = defined('CUSTOM_AI_DEBUG') && CUSTOM_AI_DEBUG;
+    // Fallback to WP_DEBUG for backwards compatibility
+    if (!$isDebug) {
+        $isDebug = defined('WP_DEBUG') && WP_DEBUG;
     }
+
+    if (!$isDebug) {
+        return;
+    }
+
+    $log_message = 'Custom AI: ' . $message;
+    if ($data !== null) {
+        // Lazy serialization - only encode when debug is enabled
+        $encoded = json_encode($data);
+        if ($maxDataLength > 0 && strlen($encoded) > $maxDataLength) {
+            $encoded = substr($encoded, 0, $maxDataLength) . '...[truncated]';
+        }
+        $log_message .= ' - ' . $encoded;
+    }
+    error_log($log_message);
 }
 
 spl_autoload_register(function ($class) {
