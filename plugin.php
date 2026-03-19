@@ -88,13 +88,8 @@ function register_connector(): void
         return;
     }
 
-    // Initialize model handlers
-    require_once __DIR__ . '/src/Models/TextGeneration/ModelHandlers.php';
+    // Initialize model handlers (autoloaded via PSR-4)
     \WordPress\CustomAiProvider\Models\TextGeneration\ModelHandlerRegistry::init();
-
-    require_once __DIR__ . '/src/Provider/CustomTextProvider.php';
-    require_once __DIR__ . '/src/Provider/CustomImageProvider.php';
-
 
     $registry = \WordPress\AiClient\AiClient::defaultRegistry();
 
@@ -170,7 +165,6 @@ function render_test_page(): void
         return;
     }
 
-    require_once __DIR__ . '/src/Admin/TestPage.php';
     \WordPress\CustomAiProvider\Admin\TestPage::render();
 }
 
