@@ -100,7 +100,7 @@ class Settings
 
     /**
      * Pass API keys to AI Client registry
-     * Priority: Constant > Environment Variable > Database Option
+     * API keys are stored via WordPress Connectors and retrieved from database
      */
     public static function pass_api_keys_to_ai_client(): void
     {
