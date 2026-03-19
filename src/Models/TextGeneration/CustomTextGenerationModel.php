@@ -391,166 +391,287 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
     {
         custom_ai_debug('normalizeReviewNotesFormat input', $data);
 
-        // Handle single object case: {"issue": "...", "priority": 1} or {"content": "...", "priority": 1}
-        // Convert to array format
-        if (isset($data['issue']) || isset($data['content']) || isset($data['text']) || isset($data['suggestion'])) {
-            $text = $data['issue'] ?? $data['content'] ?? $data['text'] ?? $data['suggestion'] ?? '';
-            if (!empty($text)) {
-                $priority = $data['priority'] ?? 1;
-                $review_type = $data['review_type'] ?? $data['category'] ?? 'readability';
-                return [
-                    'suggestions' => [
-                        [
-                            'review_type' => $review_type,
-                            'text' => $text,
-                            'priority' => $priority
-                        ]
-                    ]
-                ];
-            }
+        // Case 1: Single object like {"content": "...", "priority": 1}
+        $singleObjectResult = $this->normalizeSingleObjectSuggestion($data);
+        if ($singleObjectResult !== null) {
+            return $singleObjectResult;
         }
 
-        // If already in correct format, return as-is
+        // Case 2: Already has "suggestions" key
         if (isset($data['suggestions']) && is_array($data['suggestions'])) {
-            // Check if suggestions is an array of strings (not objects) - need to convert
-            $hasStringItems = false;
-            $hasObjectItems = false;
-            foreach ($data['suggestions'] as $item) {
-                if (is_string($item)) {
-                    $hasStringItems = true;
-                } elseif (is_array($item)) {
-                    $hasObjectItems = true;
-                }
-            }
-
-            // If all items are strings, convert them to objects
-            if ($hasStringItems && !$hasObjectItems) {
-                custom_ai_debug('normalizeReviewNotesFormat - converting string array to object array');
-                $convertedSuggestions = [];
-                foreach ($data['suggestions'] as $text) {
-                    if (is_string($text) && !empty($text)) {
-                        $convertedSuggestions[] = [
-                            'review_type' => 'readability',
-                            'text' => $text,
-                            'priority' => 1
-                        ];
-                    }
-                }
-                return ['suggestions' => $convertedSuggestions];
-            }
-
-            // If already objects with proper format, check if priority is set
-            if ($hasObjectItems) {
-                foreach ($data['suggestions'] as &$item) {
-                    if (is_array($item) && !isset($item['priority'])) {
-                        $item['priority'] = 1;
-                    }
-                }
-            }
-
-            custom_ai_debug('normalizeReviewNotesFormat - already correct format');
-            return $data;
+            return $this->normalizeSuggestionsArray($data['suggestions']);
         }
 
-        // Handle empty array - return proper format with empty suggestions
+        // Case 3: Empty array
         if (empty($data)) {
-            custom_ai_debug('normalizeReviewNotesFormat - empty array, returning suggestions: []');
+            custom_ai_debug('normalizeReviewNotesFormat - empty array');
             return ['suggestions' => []];
         }
 
-        // If it's an array of suggestions, wrap it
+        // Case 4: Direct array of suggestions (no wrapper object)
         if (is_array($data) && !empty($data)) {
-            custom_ai_debug('normalizeReviewNotesFormat - processing array', ['count' => count($data)]);
-            $suggestions = [];
-            foreach ($data as $item) {
-                // Handle string items (not objects)
-                if (is_string($item)) {
-                    $text = trim($item);
-                    if (!empty($text)) {
-                        // Extract priority from string ONLY if it's explicitly labeled
-                        // Only match formats like "[Priority: 1]", "(priority: 1)", "Priority: 1"
-                        // Do NOT match "(1)" or "(2)" which are likely part of the content
-                        $priority = 1;
-                        if (preg_match('/\[Priority:\s*(\d+)\]/i', $text, $matches) ||
-                            preg_match('/^\(priority:\s*(\d+)\)$/i', $text, $matches) ||
-                            preg_match('/\bPriority:\s*(\d+)$/i', $text, $matches)) {
-                            $priority = intval($matches[1]);
-                            // Remove priority from text
-                            $text = preg_replace('/\[Priority:\s*\d+\]/i', '', $text);
-                            $text = preg_replace('/^\(priority:\s*\d+\)$/i', '', $text);
-                            $text = preg_replace('/\bPriority:\s*\d+$/i', '', $text);
-                        }
-                        $text = trim($text);
-                        if (!empty($text)) {
-                            $suggestions[] = [
-                                'review_type' => 'readability',
-                                'text' => $text,
-                                'priority' => $priority
-                            ];
-                        }
-                    }
-                    continue;
-                }
-
-                if (is_array($item)) {
-                    // Handle nested array format like ["text", priority]
-                    // Some models return ["suggestion text", priority] instead of {suggestion: "text", priority: 1}
-                    if (isset($item[0]) && is_string($item[0]) && isset($item[1]) && is_numeric($item[1])) {
-                        $text = trim($item[0]);
-                        $priority = intval($item[1]);
-                        if (!empty($text)) {
-                            $suggestions[] = [
-                                'review_type' => 'readability',
-                                'text' => $text,
-                                'priority' => $priority
-                            ];
-                        }
-                        continue;
-                    }
-
-                    // Some models return keys with leading/trailing spaces (e.g., " suggestion" instead of "suggestion")
-                    // Create a normalized version of the array with trimmed keys
-                    $normalizedItem = [];
-                    foreach ($item as $key => $value) {
-                        $normalizedItem[trim($key)] = $value;
-                    }
-
-                    // Convert "content" to "text", or use "text" as-is
-                    // Also handle "issue" and "suggestion" fields which some models return
-                    $text = $normalizedItem['content'] ?? $normalizedItem['text'] ?? $normalizedItem['issue'] ?? $normalizedItem['suggestion'] ?? '';
-                    // Default to priority 1 so it passes WordPress filter (priority > 2 gets filtered out)
-                    $priority = $normalizedItem['priority'] ?? 1;
-
-                    // Skip empty items
-                    if (empty($text)) {
-                        custom_ai_debug('normalizeReviewNotesFormat - skipping empty text item');
-                        continue;
-                    }
-
-                    custom_ai_debug('normalizeReviewNotesFormat - found text', $text);
-
-                    // Determine review_type - default to 'readability'
-                    // Handle both 'review_type' and 'category' (some models return 'category')
-                    $review_type = $normalizedItem['review_type'] ?? $normalizedItem['category'] ?? 'readability';
-
-                    $suggestions[] = [
-                        'review_type' => $review_type,
-                        'text' => $text,
-                        'priority' => $priority
-                    ];
-                }
-            }
-
-            custom_ai_debug('normalizeReviewNotesFormat - suggestions count', ['count' => count($suggestions)]);
-            if (!empty($suggestions)) {
-                $result = ['suggestions' => $suggestions];
-                custom_ai_debug('normalizeReviewNotesFormat - returning', $result);
-                return $result;
-            }
+            return $this->normalizeDirectArray($data);
         }
 
         custom_ai_debug('normalizeReviewNotesFormat - returning original data');
         return $data;
+    }
+
+    /**
+     * Check if data is a single suggestion object
+     *
+     * @param array $data
+     * @return bool
+     */
+    private function isSingleSuggestionObject(array $data): bool
+    {
+        return isset($data['issue']) || isset($data['content'])
+            || isset($data['text']) || isset($data['suggestion']);
+    }
+
+    /**
+     * Normalize single object suggestion like {"content": "...", "priority": 1}
+     *
+     * @param array $data
+     * @return array|null Normalized array or null if not a single object
+     */
+    private function normalizeSingleObjectSuggestion(array $data): ?array
+    {
+        if (!$this->isSingleSuggestionObject($data)) {
+            return null;
+        }
+
+        $text = $data['issue'] ?? $data['content'] ?? $data['text'] ?? $data['suggestion'] ?? '';
+        if (empty($text)) {
+            return null;
+        }
+
+        $priority = $data['priority'] ?? 1;
+        $review_type = $data['review_type'] ?? $data['category'] ?? 'readability';
+
+        return [
+            'suggestions' => [
+                [
+                    'review_type' => $review_type,
+                    'text' => $text,
+                    'priority' => $priority
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * Normalize suggestions array - handles both string arrays and object arrays
+     *
+     * @param array $suggestions
+     * @return array
+     */
+    private function normalizeSuggestionsArray(array $suggestions): array
+    {
+        $hasStringItems = false;
+        $hasObjectItems = false;
+
+        foreach ($suggestions as $item) {
+            if (is_string($item)) {
+                $hasStringItems = true;
+            } elseif (is_array($item)) {
+                $hasObjectItems = true;
+            }
+        }
+
+        // All items are strings - convert to objects
+        if ($hasStringItems && !$hasObjectItems) {
+            custom_ai_debug('normalizeReviewNotesFormat - converting string array');
+            return $this->normalizeStringArrayToObjects($suggestions);
+        }
+
+        // Mix or all objects - ensure priority is set
+        if ($hasObjectItems) {
+            foreach ($suggestions as &$item) {
+                if (is_array($item) && !isset($item['priority'])) {
+                    $item['priority'] = 1;
+                }
+            }
+        }
+
+        custom_ai_debug('normalizeReviewNotesFormat - already correct format');
+        return ['suggestions' => $suggestions];
+    }
+
+    /**
+     * Convert string array to suggestion objects
+     *
+     * @param array $suggestions
+     * @return array
+     */
+    private function normalizeStringArrayToObjects(array $suggestions): array
+    {
+        $converted = [];
+        foreach ($suggestions as $text) {
+            if (is_string($text) && !empty(trim($text))) {
+                $converted[] = [
+                    'review_type' => 'readability',
+                    'text' => trim($text),
+                    'priority' => 1
+                ];
+            }
+        }
+        return ['suggestions' => $converted];
+    }
+
+    /**
+     * Normalize direct array of suggestions (no wrapper object)
+     *
+     * @param array $items
+     * @return array
+     */
+    private function normalizeDirectArray(array $items): array
+    {
+        custom_ai_debug('normalizeReviewNotesFormat - processing array', ['count' => count($items)]);
+        $suggestions = [];
+
+        foreach ($items as $item) {
+            $normalized = $this->normalizeSuggestionItem($item);
+            if ($normalized !== null) {
+                $suggestions[] = $normalized;
+            }
+        }
+
+        if (!empty($suggestions)) {
+            custom_ai_debug('normalizeReviewNotesFormat - suggestions count', ['count' => count($suggestions)]);
+            return ['suggestions' => $suggestions];
+        }
+
+        return $items;
+    }
+
+    /**
+     * Normalize a single suggestion item (string or array)
+     *
+     * @param mixed $item
+     * @return array|null Normalized suggestion or null to skip
+     */
+    private function normalizeSuggestionItem($item): ?array
+    {
+        // Handle string item
+        if (is_string($item)) {
+            return $this->normalizeStringItem($item);
+        }
+
+        // Handle array item
+        if (is_array($item)) {
+            return $this->normalizeObjectItem($item);
+        }
+
+        return null;
+    }
+
+    /**
+     * Normalize a string suggestion item
+     *
+     * @param string $text
+     * @return array|null
+     */
+    private function normalizeStringItem(string $text): ?array
+    {
+        $text = trim($text);
+        if (empty($text)) {
+            return null;
+        }
+
+        $extracted = $this->extractPriorityFromText($text);
+        if (empty($extracted['text'])) {
+            return null;
+        }
+
+        return [
+            'review_type' => 'readability',
+            'text' => $extracted['text'],
+            'priority' => $extracted['priority']
+        ];
+    }
+
+    /**
+     * Normalize an object suggestion item
+     *
+     * @param array $item
+     * @return array|null
+     */
+    private function normalizeObjectItem(array $item): ?array
+    {
+        // Handle ["text", priority] format
+        if (isset($item[0]) && is_string($item[0]) && isset($item[1]) && is_numeric($item[1])) {
+            $text = trim($item[0]);
+            if (empty($text)) {
+                return null;
+            }
+            return [
+                'review_type' => 'readability',
+                'text' => $text,
+                'priority' => intval($item[1])
+            ];
+        }
+
+        // Normalize keys (trim whitespace)
+        $normalized = $this->normalizeItemKeys($item);
+
+        // Extract text from various possible fields
+        $text = $normalized['content'] ?? $normalized['text'] ?? $normalized['issue'] ?? $normalized['suggestion'] ?? '';
+        if (empty($text)) {
+            custom_ai_debug('normalizeReviewNotesFormat - skipping empty text item');
+            return null;
+        }
+
+        $priority = $normalized['priority'] ?? 1;
+        $review_type = $normalized['review_type'] ?? $normalized['category'] ?? 'readability';
+
+        custom_ai_debug('normalizeReviewNotesFormat - found text', $text);
+
+        return [
+            'review_type' => $review_type,
+            'text' => $text,
+            'priority' => $priority
+        ];
+    }
+
+    /**
+     * Normalize array keys by trimming whitespace
+     *
+     * @param array $item
+     * @return array
+     */
+    private function normalizeItemKeys(array $item): array
+    {
+        $normalized = [];
+        foreach ($item as $key => $value) {
+            $normalized[trim($key)] = $value;
+        }
+        return $normalized;
+    }
+
+    /**
+     * Extract priority from text if explicitly labeled
+     * Only matches: "[Priority: 1]", "(priority: 1)", "Priority: 1"
+     * Does NOT match "(1)" or "(2)" as those are likely part of content
+     *
+     * @param string $text
+     * @return array ['text' => string, 'priority' => int]
+     */
+    private function extractPriorityFromText(string $text): array
+    {
+        $priority = 1;
+
+        if (preg_match('/\[Priority:\s*(\d+)\]/i', $text, $matches) ||
+            preg_match('/^\(priority:\s*(\d+)\)$/i', $text, $matches) ||
+            preg_match('/\bPriority:\s*(\d+)$/i', $text, $matches)) {
+            $priority = intval($matches[1]);
+            $text = preg_replace('/\[Priority:\s*\d+\]/i', '', $text);
+            $text = preg_replace('/^\(priority:\s*\d+\)$/i', '', $text);
+            $text = preg_replace('/\bPriority:\s*\d+$/i', '', $text);
+            $text = trim($text);
+        }
+
+        return ['text' => $text, 'priority' => $priority];
     }
 
     /**
