@@ -50,11 +50,12 @@ class TestPage
 
         $result = null;
         $error = null;
-        $provider_type = isset($_POST['provider_type']) ? sanitize_text_field(wp_unslash($_POST['provider_type'])) : 'text';
-        $prompt = isset($_POST['prompt']) ? sanitize_text_field(wp_unslash($_POST['prompt'])) : '';
 
         // Handle form submission
         if (isset($_POST['test_submit']) && check_admin_referer('custom_ai_test_action')) {
+            $provider_type = isset($_POST['provider_type']) ? sanitize_text_field(wp_unslash($_POST['provider_type'])) : 'text';
+            $prompt = isset($_POST['prompt']) ? sanitize_text_field(wp_unslash($_POST['prompt'])) : '';
+
             if (empty($prompt)) {
                 $error = 'Please enter a prompt.';
             } else {
