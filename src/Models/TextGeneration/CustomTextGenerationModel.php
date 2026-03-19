@@ -98,7 +98,6 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
         // Fix response_format for APIs that don't support JSON output properly
         // Many OpenAI-compatible APIs don't properly support response_format
         if (is_array($data) && isset($data['response_format'])) {
-            $model_id = $this->getModelId();
             // Remove response_format for models that don't support it properly
             // This includes Kimi, Qwen, and others that don't properly handle JSON schema
             // These models will output plain text which the caller can parse
