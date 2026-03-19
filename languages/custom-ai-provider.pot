@@ -51,6 +51,10 @@ msgid "Image generation with custom OpenAI-compatible API provider"
 msgstr ""
 
 #: src/Admin/Admin.php
+msgid "Settings saved."
+msgstr ""
+
+#: src/Admin/Admin.php
 msgid "API Key Configuration"
 msgstr ""
 
