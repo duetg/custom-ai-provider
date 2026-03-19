@@ -50,6 +50,8 @@ class Admin
             if (isset($_POST[Settings::IMAGE_MODEL_OPTION])) {
                 update_option(Settings::IMAGE_MODEL_OPTION, sanitize_text_field(wp_unslash($_POST[Settings::IMAGE_MODEL_OPTION])));
             }
+            // Reset cached values so next read gets fresh data
+            Settings::resetCache();
             echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Settings saved.', 'custom-ai-provider') . '</p></div>';
         }
 
