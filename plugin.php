@@ -24,35 +24,50 @@ if (!defined('ABSPATH')) {
 
 require_once __DIR__ . '/src/autoload.php';
 
-// Register custom image model in WordPress AI's preferred image models list
-// Must use very late priority to ensure WordPress AI plugin is fully loaded
-add_filter('ai_experiments_preferred_image_models', function ($models) {
-    // Always add custom_image provider, use default if not configured
-    $image_model = get_option(\WordPress\CustomAiProvider\Settings\Settings::IMAGE_MODEL_OPTION, \WordPress\CustomAiProvider\Settings\Settings::DEFAULT_IMAGE_MODEL);
+/**
+ * Add custom image model to preferred models list
+ *
+ * @param array $models
+ * @return array
+ */
+function custom_ai_preferred_image_models_filter(array $models): array
+{
+    $image_model = Settings::getImageModel();
     if (!empty($image_model)) {
         $models[] = ['custom_image', $image_model];
     }
     return $models;
-}, PHP_INT_MAX);
+}
+add_filter('ai_experiments_preferred_image_models', __NAMESPACE__ . '\\custom_ai_preferred_image_models_filter', PHP_INT_MAX);
 
-// Register custom text model in WordPress AI's preferred vision models list for alt text generation
-// Must use very late priority to ensure WordPress AI plugin is fully loaded
-add_filter('ai_experiments_preferred_vision_models', function ($models) {
-    // Add custom_text provider for vision tasks (alt text generation)
-    // All models registered as supporting vision, actual support depends on API
-    $text_model = get_option(\WordPress\CustomAiProvider\Settings\Settings::TEXT_MODEL_OPTION, \WordPress\CustomAiProvider\Settings\Settings::DEFAULT_TEXT_MODEL);
+/**
+ * Add custom text model to preferred vision models list
+ *
+ * @param array $models
+ * @return array
+ */
+function custom_ai_preferred_vision_models_filter(array $models): array
+{
+    $text_model = Settings::getTextModel();
     if (!empty($text_model)) {
         $models[] = ['custom_text', $text_model];
     }
     return $models;
-}, PHP_INT_MAX);
+}
+add_filter('ai_experiments_preferred_vision_models', __NAMESPACE__ . '\\custom_ai_preferred_vision_models_filter', PHP_INT_MAX);
 
-// Increase timeout for AI requests only (not all WordPress HTTP requests)
-add_filter('http_request_args', function ($args, $url) {
-    // Only set long timeout for our configured AI API URLs
+/**
+ * Increase timeout for AI API requests only
+ *
+ * @param array $args
+ * @param string $url
+ * @return array
+ */
+function custom_ai_http_request_args_filter(array $args, string $url): array
+{
     $ai_base_urls = [
-        get_option(\WordPress\CustomAiProvider\Settings\Settings::TEXT_BASE_URL_OPTION, ''),
-        get_option(\WordPress\CustomAiProvider\Settings\Settings::IMAGE_BASE_URL_OPTION, ''),
+        Settings::getTextBaseUrl(),
+        Settings::getImageBaseUrl(),
     ];
 
     foreach ($ai_base_urls as $base) {
@@ -63,18 +78,26 @@ add_filter('http_request_args', function ($args, $url) {
     }
 
     return $args;
-}, 10, 2);
+}
+add_filter('http_request_args', __NAMESPACE__ . '\\custom_ai_http_request_args_filter', 10, 2);
 
-// Register custom text model in WordPress AI's preferred text generation models list
-add_filter('ai_experiments_preferred_models_for_text_generation', function ($models) {
-    $text_model = get_option(\WordPress\CustomAiProvider\Settings\Settings::TEXT_MODEL_OPTION, \WordPress\CustomAiProvider\Settings\Settings::DEFAULT_TEXT_MODEL);
+/**
+ * Add custom text model to preferred text generation models list
+ *
+ * @param array $models
+ * @return array
+ */
+function custom_ai_preferred_text_models_filter(array $models): array
+{
+    $text_model = Settings::getTextModel();
     custom_ai_debug('ai_experiments_preferred_models_for_text_generation filter', ['text_model' => $text_model]);
     if (!empty($text_model)) {
         $models[] = ['custom_text', $text_model];
     }
     custom_ai_debug('Preferred models', $models);
     return $models;
-}, PHP_INT_MAX);
+}
+add_filter('ai_experiments_preferred_models_for_text_generation', __NAMESPACE__ . '\\custom_ai_preferred_text_models_filter', PHP_INT_MAX);
 
 /**
  * Register the connector to WordPress AI system
