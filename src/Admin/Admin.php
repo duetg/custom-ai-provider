@@ -53,21 +53,21 @@ class Admin
             echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Settings saved.', 'custom-ai-provider') . '</p></div>';
         }
 
-        // Get current values or defaults
-        $text_base_url = get_option(Settings::TEXT_BASE_URL_OPTION, '');
-        $text_model = get_option(Settings::TEXT_MODEL_OPTION, '');
-        $image_base_url = get_option(Settings::IMAGE_BASE_URL_OPTION, '');
-        $image_model = get_option(Settings::IMAGE_MODEL_OPTION, '');
+        // Get current values or defaults using centralized methods
+        $text_base_url = Settings::getTextBaseUrl();
+        $text_model = Settings::getTextModel();
+        $image_base_url = Settings::getImageBaseUrl();
+        $image_model = Settings::getImageModel();
 
-        // Use display defaults if empty
-        $text_base_url_display = $text_base_url ?: Settings::DEFAULT_TEXT_BASE_URL;
-        $text_model_display = $text_model ?: Settings::DEFAULT_TEXT_MODEL;
-        $image_base_url_display = $image_base_url ?: Settings::DEFAULT_IMAGE_BASE_URL;
-        $image_model_display = $image_model ?: Settings::DEFAULT_IMAGE_MODEL;
+        // For display in form fields (same as actual values now)
+        $text_base_url_display = $text_base_url;
+        $text_model_display = $text_model;
+        $image_base_url_display = $image_base_url;
+        $image_model_display = $image_model;
 
-        // Check if using defaults (for notice display)
-        $using_default_text = empty($text_base_url) && empty($text_model);
-        $using_default_image = empty($image_base_url) && empty($image_model);
+        // Check if using defaults by comparing to DEFAULT values
+        $using_default_text = ($text_base_url === Settings::DEFAULT_TEXT_BASE_URL) && ($text_model === Settings::DEFAULT_TEXT_MODEL);
+        $using_default_image = ($image_base_url === Settings::DEFAULT_IMAGE_BASE_URL) && ($image_model === Settings::DEFAULT_IMAGE_MODEL);
         ?>
         <div class="wrap">
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>

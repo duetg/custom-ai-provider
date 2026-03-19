@@ -95,10 +95,10 @@ class TestPage
             }
         }
 
-        // Get current settings
-        $text_base_url = get_option(Settings::TEXT_BASE_URL_OPTION, '') ?: Settings::DEFAULT_TEXT_BASE_URL;
+        // Get current settings using centralized methods
+        $text_base_url = Settings::getTextBaseUrl();
         $text_model = CustomTextProvider::getModelId();
-        $image_base_url = get_option(Settings::IMAGE_BASE_URL_OPTION, '') ?: Settings::DEFAULT_IMAGE_BASE_URL;
+        $image_base_url = Settings::getImageBaseUrl();
         $image_model = CustomImageProvider::getModelId();
 
         ?>

@@ -33,7 +33,7 @@ class CustomImageGenerationModel extends AbstractOpenAiCompatibleImageGeneration
      */
     protected function getModelId(): string
     {
-        $model = get_option(Settings::IMAGE_MODEL_OPTION, '');
+        $model = Settings::getImageModel();
         if (!empty($model)) {
             return $model;
         }
@@ -49,11 +49,7 @@ class CustomImageGenerationModel extends AbstractOpenAiCompatibleImageGeneration
      */
     private function getBaseUrl(): string
     {
-        $base_url = get_option(Settings::IMAGE_BASE_URL_OPTION, '');
-        if (!empty($base_url)) {
-            return rtrim($base_url, '/');
-        }
-        return 'http://localhost:11434';
+        return rtrim(Settings::getImageBaseUrl(), '/');
     }
 
     /**

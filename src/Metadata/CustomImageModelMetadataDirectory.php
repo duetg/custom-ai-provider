@@ -56,10 +56,6 @@ class CustomImageModelMetadataDirectory implements ModelMetadataDirectoryInterfa
 
     private function getConfiguredModelId(): string
     {
-        $model = get_option(Settings::IMAGE_MODEL_OPTION, '');
-        if (!empty($model)) {
-            return $model;
-        }
-        return Settings::DEFAULT_IMAGE_MODEL;
+        return Settings::getImageModel();
     }
 }

@@ -142,4 +142,36 @@ class Settings
     {
         return get_option(self::IMAGE_API_KEY_OPTION, '');
     }
+
+    /**
+     * Get text model - returns configured model or default
+     */
+    public static function getTextModel(): string
+    {
+        return get_option(self::TEXT_MODEL_OPTION, self::DEFAULT_TEXT_MODEL);
+    }
+
+    /**
+     * Get text base URL - returns configured URL or default
+     */
+    public static function getTextBaseUrl(): string
+    {
+        return get_option(self::TEXT_BASE_URL_OPTION, self::DEFAULT_TEXT_BASE_URL);
+    }
+
+    /**
+     * Get image model - returns configured model or default
+     */
+    public static function getImageModel(): string
+    {
+        return get_option(self::IMAGE_MODEL_OPTION, self::DEFAULT_IMAGE_MODEL);
+    }
+
+    /**
+     * Get image base URL - returns configured URL or default
+     */
+    public static function getImageBaseUrl(): string
+    {
+        return get_option(self::IMAGE_BASE_URL_OPTION, self::DEFAULT_IMAGE_BASE_URL);
+    }
 }

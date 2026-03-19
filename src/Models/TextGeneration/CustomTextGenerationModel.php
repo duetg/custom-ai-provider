@@ -27,7 +27,7 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
      */
     protected function getModelId(): string
     {
-        $model = get_option(Settings::TEXT_MODEL_OPTION, '');
+        $model = Settings::getTextModel();
         if (!empty($model)) {
             return $model;
         }
@@ -43,11 +43,7 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
      */
     private function getBaseUrl(): string
     {
-        $base_url = get_option(Settings::TEXT_BASE_URL_OPTION, '');
-        if (!empty($base_url)) {
-            return rtrim($base_url, '/');
-        }
-        return 'http://localhost:11434/v1';
+        return rtrim(Settings::getTextBaseUrl(), '/');
     }
 
     /**

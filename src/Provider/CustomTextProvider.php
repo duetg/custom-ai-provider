@@ -41,19 +41,11 @@ class CustomTextProvider extends AbstractApiProvider
     /**
      * Get base URL for the API
      *
-     *
      * @return string
      */
     protected static function baseUrl(): string
     {
-        // Check database option
-        $base_url = get_option(Settings::TEXT_BASE_URL_OPTION, '');
-        if (!empty($base_url)) {
-            return rtrim($base_url, '/');
-        }
-
-        // Default fallback
-        return 'http://localhost:11434/v1';
+        return rtrim(Settings::getTextBaseUrl(), '/');
     }
 
     /**
@@ -63,14 +55,7 @@ class CustomTextProvider extends AbstractApiProvider
      */
     public static function getModelId(): string
     {
-        // Check database option
-        $model = get_option(Settings::TEXT_MODEL_OPTION, '');
-        if (!empty($model)) {
-            return $model;
-        }
-
-        // Default fallback
-        return Settings::DEFAULT_TEXT_MODEL;
+        return Settings::getTextModel();
     }
 
     /**
@@ -97,9 +82,9 @@ class CustomTextProvider extends AbstractApiProvider
         return new class implements \WordPress\AiClient\Providers\Contracts\ProviderAvailabilityInterface {
             public function isConfigured(): bool
             {
-                // Check if base URL is configured in database
-                $base_url = get_option(Settings::TEXT_BASE_URL_OPTION, '');
-                return !empty($base_url);
+                // Check if base URL option is explicitly set (not using default)
+                $base_url = get_option(Settings::TEXT_BASE_URL_OPTION, null);
+                return $base_url !== null && $base_url !== '';
             }
         };
     }

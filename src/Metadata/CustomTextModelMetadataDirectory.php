@@ -65,10 +65,6 @@ class CustomTextModelMetadataDirectory implements ModelMetadataDirectoryInterfac
 
     private function getConfiguredModelId(): string
     {
-        $model = get_option(Settings::TEXT_MODEL_OPTION, '');
-        if (!empty($model)) {
-            return $model;
-        }
-        return Settings::DEFAULT_TEXT_MODEL;
+        return Settings::getTextModel();
     }
 }
