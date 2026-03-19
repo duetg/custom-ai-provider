@@ -82,9 +82,8 @@ class CustomTextProvider extends AbstractApiProvider
         return new class implements \WordPress\AiClient\Providers\Contracts\ProviderAvailabilityInterface {
             public function isConfigured(): bool
             {
-                // Check if base URL option is explicitly set (not using default)
-                $base_url = get_option(Settings::TEXT_BASE_URL_OPTION, null);
-                return $base_url !== null && $base_url !== '';
+                // Check if API key is configured - URL and model always have defaults
+                return !empty(Settings::get_text_api_key());
             }
         };
     }
