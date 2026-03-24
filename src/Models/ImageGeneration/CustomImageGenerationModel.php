@@ -126,7 +126,7 @@ class CustomImageGenerationModel extends AbstractOpenAiCompatibleImageGeneration
         } else {
             // No url or b64_json - throw error like parent
             throw new \WordPress\AiClient\Providers\Http\Exception\ResponseException(
-                sprintf('Invalid image data at index %d: must contain url or b64_json', $index)
+                sprintf('Invalid image data at index %d: must contain url or b64_json', (int) $index)
             );
         }
 
