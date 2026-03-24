@@ -134,18 +134,44 @@ class Settings
     }
 
     /**
-     * Get text API key from database
+     * Get text API key
+     * Priority: Constant > Environment Variable > Database Option
      */
     public static function get_text_api_key(): string
     {
+        // 1. Check constant
+        if (defined('CUSTOM_TEXT_API_KEY')) {
+            return constant('CUSTOM_TEXT_API_KEY');
+        }
+
+        // 2. Check environment variable
+        $env = getenv('CUSTOM_TEXT_API_KEY');
+        if ($env !== false && $env !== '') {
+            return $env;
+        }
+
+        // 3. Fallback to database
         return get_option(self::TEXT_API_KEY_OPTION, '');
     }
 
     /**
-     * Get image API key from database
+     * Get image API key
+     * Priority: Constant > Environment Variable > Database Option
      */
     public static function get_image_api_key(): string
     {
+        // 1. Check constant
+        if (defined('CUSTOM_IMAGE_API_KEY')) {
+            return constant('CUSTOM_IMAGE_API_KEY');
+        }
+
+        // 2. Check environment variable
+        $env = getenv('CUSTOM_IMAGE_API_KEY');
+        if ($env !== false && $env !== '') {
+            return $env;
+        }
+
+        // 3. Fallback to database
         return get_option(self::IMAGE_API_KEY_OPTION, '');
     }
 
