@@ -30,13 +30,11 @@ class TestPage
      */
     private static function get_api_key_status(string $type): bool
     {
-        $option_name = $type === 'text'
-            ? Settings::TEXT_API_KEY_OPTION
-            : Settings::IMAGE_API_KEY_OPTION;
+        $api_key = $type === 'text'
+            ? Settings::get_text_api_key()
+            : Settings::get_image_api_key();
 
-        // Check database
-        $db_value = get_option($option_name, '');
-        return !empty($db_value);
+        return !empty($api_key);
     }
 
     /**
@@ -59,16 +57,16 @@ class TestPage
             $prompt = isset($_POST['prompt']) ? sanitize_text_field(wp_unslash($_POST['prompt'])) : '';
 
             if (empty($prompt)) {
-                $error = 'Please enter a prompt.';
+                $error = __('Please enter a prompt.', 'custom-ai-provider');
             } else {
                 try {
                     $registry = AiClient::defaultRegistry();
 
                     if ($provider_type === 'text') {
                         if (!$registry->hasProvider('custom_text')) {
-                            $error = 'Text provider not registered.';
+                            $error = __('Text provider not registered.', 'custom-ai-provider');
                         } elseif (!$registry->isProviderConfigured('custom_text')) {
-                            $error = 'Text provider not configured. Please add API key via Settings > Connectors.';
+                            $error = __('Text provider not configured. Please add API key via Settings > Connectors.', 'custom-ai-provider');
                         } else {
                             $model = $registry->getProviderModel('custom_text', CustomTextProvider::getModelId());
                             $result = $model->generateTextResult([
@@ -79,9 +77,9 @@ class TestPage
                         }
                     } else {
                         if (!$registry->hasProvider('custom_image')) {
-                            $error = 'Image provider not registered.';
+                            $error = __('Image provider not registered.', 'custom-ai-provider');
                         } elseif (!$registry->isProviderConfigured('custom_image')) {
-                            $error = 'Image provider not configured. Please add API key via Settings > Connectors.';
+                            $error = __('Image provider not configured. Please add API key via Settings > Connectors.', 'custom-ai-provider');
                         } else {
                             $model = $registry->getProviderModel('custom_image', CustomImageProvider::getModelId());
                             $result = $model->generateImageResult([
@@ -217,17 +215,25 @@ class TestPage
                             $files = $result->toImageFiles();
                             if (!empty($files)):
                                 foreach ($files as $file):
-                                    // Use getDataUri() for inline files, getUrl() for remote files
-                                    // Note: esc_url() breaks data URI, so we output it directly
-                                    $url = $file->isInline() ? $file->getDataUri() : $file->getUrl();
+                                    // Validate Data URI format for inline images to prevent XSS
+                                    $url = '';
+                                    if ($file->isInline()) {
+                                        $dataUri = $file->getDataUri();
+                                        // Only allow safe image MIME types in data URIs
+                                        if (preg_match('#^data:(image/(?:png|jpeg|gif|webp));base64,[A-Za-z0-9+/=]+$#', $dataUri)) {
+                                            $url = $dataUri;
+                                        }
+                                    } else {
+                                        $url = esc_url($file->getUrl());
+                                    }
                                     if ($url): ?>
                                     <div style="margin-top: 10px;">
-                                        <img src="<?php echo $file->isInline() ? $url : esc_url($url); ?>" style="max-width: 500px; height: auto; border: 1px solid #ccc;" />
+                                        <img src="<?php echo $url; ?>" style="max-width: 500px; height: auto; border: 1px solid #ccc;" />
                                     </div>
                                     <?php endif;
                                 endforeach; ?>
                             <?php else: ?>
-                                <p>No image files returned. Result type: <?php echo esc_html(get_class($result)); ?></p>
+                                <p><?php echo esc_html__('No image files returned. Result type: ', 'custom-ai-provider') . esc_html(get_class($result)); ?></p>
                             <?php endif; ?>
                         <?php endif; ?>
                     </div>

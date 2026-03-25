@@ -12,6 +12,7 @@ use WordPress\AiClient\Providers\Http\DTO\Request;
 use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
 use WordPress\CustomAiProvider\Settings\Settings;
 use WordPress\CustomAiProvider\Models\TextGeneration\ThinkingTagHelper;
+use WordPress\CustomAiProvider\Models\TextGeneration\ReviewNotesNormalizer;
 
 /**
  * Custom Text Generation Model for OpenAI-compatible APIs
@@ -21,6 +22,13 @@ use WordPress\CustomAiProvider\Models\TextGeneration\ThinkingTagHelper;
  */
 class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationModel
 {
+    /**
+     * Review Notes normalizer instance
+     *
+     * @var ReviewNotesNormalizer
+     */
+    private $reviewNotesNormalizer;
+
     /**
      * Get the model ID to use for API requests
      *
@@ -55,6 +63,19 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
     private function getModelHandler(): ?ModelHandlerInterface
     {
         return ModelHandlerRegistry::getHandler($this->getModelId());
+    }
+
+    /**
+     * Get Review Notes normalizer instance
+     *
+     * @return ReviewNotesNormalizer
+     */
+    private function getReviewNotesNormalizer(): ReviewNotesNormalizer
+    {
+        if ($this->reviewNotesNormalizer === null) {
+            $this->reviewNotesNormalizer = new ReviewNotesNormalizer();
+        }
+        return $this->reviewNotesNormalizer;
     }
 
     /**
@@ -94,25 +115,24 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
 
         // Fix response_format for APIs that don't support JSON output properly
         // Many OpenAI-compatible APIs don't properly support response_format
-        $hadResponseFormat = is_array($data) && isset($data['response_format']);
+        // Get base URL from settings
+        $base_url = $this->getBaseUrl();
+
+        // Debug logging - log final request details (before removing response_format)
+        custom_ai_debug('Request', [
+            'path' => $path,
+            'model' => $model_id,
+            'url' => $base_url . '/' . ltrim($path, '/'),
+            'had_response_format' => is_array($data) && isset($data['response_format']),
+            'data_keys' => is_array($data) ? array_keys($data) : null,
+        ]);
+
         if (is_array($data) && isset($data['response_format'])) {
             // Remove response_format for models that don't support it properly
             // This includes Kimi, Qwen, and others that don't properly handle JSON schema
             // These models will output plain text which the caller can parse
             unset($data['response_format']);
         }
-
-        // Get base URL from settings
-        $base_url = $this->getBaseUrl();
-
-        // Debug logging - log final request details
-        custom_ai_debug('Request', [
-            'path' => $path,
-            'model' => $model_id,
-            'url' => $base_url . '/' . ltrim($path, '/'),
-            'had_response_format' => $hadResponseFormat,
-            'data_keys' => is_array($data) ? array_keys($data) : null,
-        ]);
 
         return new Request($method, $base_url . '/' . ltrim($path, '/'), $headers, $data);
     }
@@ -191,7 +211,7 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
             // Normal conversation responses are plain text and won't match this pattern
             if (preg_match('/^\s*[\[{]/', $content)) {
                 custom_ai_debug('Detected JSON-like response, trying to extract and normalize');
-                $json_extracted = $this->extractJsonFromText($content);
+                $json_extracted = $this->getReviewNotesNormalizer()->extractJsonFromText($content);
                 if ($json_extracted !== null) {
                     $json_content = json_encode($json_extracted);
                     // Update both top-level and message content
@@ -209,469 +229,4 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
         return parent::parseResponseChoiceToCandidate($choiceData, $index);
     }
 
-    /**
-     * Extract JSON from text response
-     * Many models don't properly support response_format, so they output plain text
-     * that contains JSON-like content. This tries to extract valid JSON.
-     *
-     * @param string $text
-     * @return array|null
-     */
-    private function extractJsonFromText(string $text): ?array
-    {
-        custom_ai_debug('extractJsonFromText input', $text);
-
-        // Try direct JSON decode first
-        $decoded = json_decode($text, true);
-        $jsonError = json_last_error();
-        custom_ai_debug('json_decode result', ['decoded' => $decoded, 'error' => $jsonError . ' (' . json_last_error_msg() . ')']);
-        if (is_array($decoded) && $jsonError === JSON_ERROR_NONE) {
-            return $this->normalizeReviewNotesFormat($decoded);
-        }
-
-        // Try to find JSON in the text using regex
-        // Look for {...} or [...] patterns
-        if (preg_match('/\{[\s\S]*\}/', $text, $matches)) {
-            custom_ai_debug('Found JSON object via regex', ['length' => strlen($matches[0])]);
-            $decoded = json_decode($matches[0], true);
-            if (is_array($decoded) && json_last_error() === JSON_ERROR_NONE) {
-                return $this->normalizeReviewNotesFormat($decoded);
-            }
-            custom_ai_debug('Regex JSON parse failed: ' . json_last_error_msg());
-        }
-
-        // Try to find JSON array [...]
-        if (preg_match('/\[[\s\S]*\]/', $text, $matches)) {
-            custom_ai_debug('Found JSON array via regex', ['length' => strlen($matches[0]), 'preview' => substr($matches[0], 0, 200)]);
-            $decoded = json_decode($matches[0], true);
-            if (is_array($decoded) && json_last_error() === JSON_ERROR_NONE) {
-                return $this->normalizeReviewNotesFormat(['suggestions' => $decoded]);
-            }
-            custom_ai_debug('Regex JSON array parse failed: ' . json_last_error_msg());
-        }
-
-        // Try to find JSON in markdown code blocks
-        if (preg_match('/```json\s*([\s\S]*?)```/', $text, $matches)) {
-            $decoded = json_decode($matches[1], true);
-            if (is_array($decoded) && json_last_error() === JSON_ERROR_NONE) {
-                return $this->normalizeReviewNotesFormat(['suggestions' => $decoded]);
-            }
-        }
-
-        // FALLBACK: If JSON parsing fails, try to extract suggestions from plain text
-        // This handles cases where models return raw text instead of JSON
-        $plainTextResult = $this->extractSuggestionsFromPlainText($text);
-        if ($plainTextResult !== null) {
-            custom_ai_debug('extractJsonFromText - extracted from plain text', $plainTextResult);
-            return $plainTextResult;
-        }
-
-        custom_ai_debug('extractJsonFromText - no valid JSON found, returning null');
-        return null;
-    }
-
-    /**
-     * Extract suggestions from plain text response
-     *
-     * This is a fallback when JSON parsing fails. It tries to parse:
-     * - Line-by-line suggestions
-     * - Numbered lists (1., 2., etc.)
-     * - Bullet points (-, *, •)
-     *
-     * @param string $text
-     * @return array|null
-     */
-    private function extractSuggestionsFromPlainText(string $text): ?array
-    {
-        if (empty(trim($text))) {
-            return null;
-        }
-
-        $suggestions = [];
-
-        // Clean up the text first - remove thinking tags if present
-        // Using # as delimiter to avoid issues with forward slashes in the pattern
-        $text = ThinkingTagHelper::strip($text);
-        $text = trim($text);
-
-        // Skip if text is empty after cleanup
-        if (empty($text)) {
-            return null;
-        }
-
-        // Skip if text looks like an error message or empty response
-        if (stripos($text, 'no suggestions') !== false ||
-            stripos($text, 'no issues') !== false ||
-            stripos($text, 'no problems') !== false ||
-            stripos($text, '[]') !== false ||
-            $text === '[]' ||
-            $text === '{}') {
-            return ['suggestions' => []];
-        }
-
-        // Split by newlines
-        $lines = preg_split('/\r\n|\r|\n/', $text);
-
-        foreach ($lines as $line) {
-            $line = trim($line);
-            if (empty($line)) {
-                continue;
-            }
-
-            // Remove common list prefixes: 1., 2., -, *, •, etc.
-            $cleanLine = preg_replace('/^[\d]+[\.\)]\s*/', '', $line);
-            $cleanLine = preg_replace('/^[-*•]\s*/', '', $cleanLine);
-            $cleanLine = trim($cleanLine);
-
-            // Skip if line is too short or looks like a header/label
-            if (strlen($cleanLine) < 10) {
-                continue;
-            }
-
-            // Skip common non-suggestion patterns
-            if (stripos($cleanLine, 'suggestions') !== false && stripos($cleanLine, ':') === false) {
-                continue;
-            }
-
-            // Skip lines that are purely priority indicators (e.g., "Priority: 2" or "priority: 2" on their own line)
-            // These often appear as separate lines when AI returns multi-line suggestions
-            if (preg_match('/^priority\s*:\s*\d+$/i', $cleanLine) ||
-                preg_match('/^priority\s+\d+$/i', $cleanLine) ||
-                preg_match('/^\[priority\s*:\s*\d+\]$/i', $cleanLine)) {
-                // This is a standalone priority line - merge with previous suggestion if exists
-                if (!empty($suggestions)) {
-                    // Try to extract priority and update previous suggestion
-                    if (preg_match('/(\d+)/', $cleanLine, $priorityMatches)) {
-                        $suggestions[count($suggestions) - 1]['priority'] = intval($priorityMatches[1]);
-                    }
-                }
-                continue;
-            }
-
-            // Extract priority if present in explicit formats only
-            // Only match: "[Priority: 1]", "(priority: 1)", "Priority: 1", "[1]"
-            // Do NOT match "(1)" which is likely part of the content
-            $priority = 1;
-            if (preg_match('/\[Priority:\s*(\d+)\]/i', $cleanLine, $matches) ||
-                preg_match('/^\(priority:\s*(\d+)\)$/i', $cleanLine, $matches) ||
-                preg_match('/\bPriority:\s*(\d+)$/i', $cleanLine, $matches) ||
-                preg_match('/^\[\d+\]$/', $cleanLine, $matches)) {
-                $priority = intval($matches[1]);
-                // Remove priority from text
-                $cleanLine = preg_replace('/\[Priority:\s*\d+\]/i', '', $cleanLine);
-                $cleanLine = preg_replace('/^\(priority:\s*\d+\)$/i', '', $cleanLine);
-                $cleanLine = preg_replace('/\bPriority:\s*\d+$/i', '', $cleanLine);
-                $cleanLine = preg_replace('/^\[\d+\]$/', '', $cleanLine);
-                $cleanLine = trim($cleanLine);
-            }
-
-            // Skip if line is empty after cleanup
-            if (empty($cleanLine)) {
-                continue;
-            }
-
-            $suggestions[] = [
-                'review_type' => 'readability',
-                'text' => $cleanLine,
-                'priority' => $priority
-            ];
-        }
-
-        if (empty($suggestions)) {
-            // If no lines extracted, treat the entire text as one suggestion
-            if (strlen($text) > 10) {
-                $suggestions[] = [
-                    'review_type' => 'readability',
-                    'text' => $text,
-                    'priority' => 1
-                ];
-            }
-        }
-
-        return empty($suggestions) ? null : ['suggestions' => $suggestions];
-    }
-
-    /**
-     * Normalize the response to Review Notes format
-     * Review Notes expects: {"suggestions": [{"review_type": "...", "text": "...", "priority": 1}]}
-     * But many models return: [{"content": "...", "priority": 1}] or [{"text": "...", "priority": 1}]
-     *
-     * @param array $data
-     * @return array
-     */
-    private function normalizeReviewNotesFormat(array $data): array
-    {
-        // Case 1: Single object like {"content": "...", "priority": 1}
-        $singleObjectResult = $this->normalizeSingleObjectSuggestion($data);
-        if ($singleObjectResult !== null) {
-            return $singleObjectResult;
-        }
-
-        // Case 2: Already has "suggestions" key
-        if (isset($data['suggestions']) && is_array($data['suggestions'])) {
-            return $this->normalizeSuggestionsArray($data['suggestions']);
-        }
-
-        // Case 3: Empty array
-        if (empty($data)) {
-            return ['suggestions' => []];
-        }
-
-        // Case 4: Direct array of suggestions (no wrapper object)
-        if (is_array($data) && !empty($data)) {
-            return $this->normalizeDirectArray($data);
-        }
-
-        return $data;
-    }
-
-    /**
-     * Check if data is a single suggestion object
-     *
-     * @param array $data
-     * @return bool
-     */
-    private function isSingleSuggestionObject(array $data): bool
-    {
-        return isset($data['issue']) || isset($data['content'])
-            || isset($data['text']) || isset($data['suggestion']);
-    }
-
-    /**
-     * Normalize single object suggestion like {"content": "...", "priority": 1}
-     *
-     * @param array $data
-     * @return array|null Normalized array or null if not a single object
-     */
-    private function normalizeSingleObjectSuggestion(array $data): ?array
-    {
-        if (!$this->isSingleSuggestionObject($data)) {
-            return null;
-        }
-
-        $text = $data['issue'] ?? $data['content'] ?? $data['text'] ?? $data['suggestion'] ?? '';
-        if (empty($text)) {
-            return null;
-        }
-
-        $priority = $data['priority'] ?? 1;
-        $review_type = $data['review_type'] ?? $data['category'] ?? 'readability';
-
-        return [
-            'suggestions' => [
-                [
-                    'review_type' => $review_type,
-                    'text' => $text,
-                    'priority' => $priority
-                ]
-            ]
-        ];
-    }
-
-    /**
-     * Normalize suggestions array - handles both string arrays and object arrays
-     *
-     * @param array $suggestions
-     * @return array
-     */
-    private function normalizeSuggestionsArray(array $suggestions): array
-    {
-        $hasStringItems = false;
-        $hasObjectItems = false;
-
-        foreach ($suggestions as $item) {
-            if (is_string($item)) {
-                $hasStringItems = true;
-            } elseif (is_array($item)) {
-                $hasObjectItems = true;
-            }
-        }
-
-        // All items are strings - convert to objects
-        if ($hasStringItems && !$hasObjectItems) {
-            return $this->normalizeStringArrayToObjects($suggestions);
-        }
-
-        // Mix or all objects - ensure priority is set
-        if ($hasObjectItems) {
-            foreach ($suggestions as &$item) {
-                if (is_array($item) && !isset($item['priority'])) {
-                    $item['priority'] = 1;
-                }
-            }
-        }
-
-        return ['suggestions' => $suggestions];
-    }
-
-    /**
-     * Convert string array to suggestion objects
-     *
-     * @param array $suggestions
-     * @return array
-     */
-    private function normalizeStringArrayToObjects(array $suggestions): array
-    {
-        $converted = [];
-        foreach ($suggestions as $text) {
-            if (is_string($text) && !empty(trim($text))) {
-                $converted[] = [
-                    'review_type' => 'readability',
-                    'text' => trim($text),
-                    'priority' => 1
-                ];
-            }
-        }
-        return ['suggestions' => $converted];
-    }
-
-    /**
-     * Normalize direct array of suggestions (no wrapper object)
-     *
-     * @param array $items
-     * @return array
-     */
-    private function normalizeDirectArray(array $items): array
-    {
-        $suggestions = [];
-
-        foreach ($items as $item) {
-            $normalized = $this->normalizeSuggestionItem($item);
-            if ($normalized !== null) {
-                $suggestions[] = $normalized;
-            }
-        }
-
-        if (!empty($suggestions)) {
-            return ['suggestions' => $suggestions];
-        }
-
-        return $items;
-    }
-
-    /**
-     * Normalize a single suggestion item (string or array)
-     *
-     * @param mixed $item
-     * @return array|null Normalized suggestion or null to skip
-     */
-    private function normalizeSuggestionItem($item): ?array
-    {
-        // Handle string item
-        if (is_string($item)) {
-            return $this->normalizeStringItem($item);
-        }
-
-        // Handle array item
-        if (is_array($item)) {
-            return $this->normalizeObjectItem($item);
-        }
-
-        return null;
-    }
-
-    /**
-     * Normalize a string suggestion item
-     *
-     * @param string $text
-     * @return array|null
-     */
-    private function normalizeStringItem(string $text): ?array
-    {
-        $text = trim($text);
-        if (empty($text)) {
-            return null;
-        }
-
-        $extracted = $this->extractPriorityFromText($text);
-        if (empty($extracted['text'])) {
-            return null;
-        }
-
-        return [
-            'review_type' => 'readability',
-            'text' => $extracted['text'],
-            'priority' => $extracted['priority']
-        ];
-    }
-
-    /**
-     * Normalize an object suggestion item
-     *
-     * @param array $item
-     * @return array|null
-     */
-    private function normalizeObjectItem(array $item): ?array
-    {
-        // Handle ["text", priority] format
-        if (isset($item[0]) && is_string($item[0]) && isset($item[1]) && is_numeric($item[1])) {
-            $text = trim($item[0]);
-            if (empty($text)) {
-                return null;
-            }
-            return [
-                'review_type' => 'readability',
-                'text' => $text,
-                'priority' => intval($item[1])
-            ];
-        }
-
-        // Normalize keys (trim whitespace)
-        $normalized = $this->normalizeItemKeys($item);
-
-        // Extract text from various possible fields
-        $text = $normalized['content'] ?? $normalized['text'] ?? $normalized['issue'] ?? $normalized['suggestion'] ?? '';
-        if (empty($text)) {
-            return null;
-        }
-
-        $priority = $normalized['priority'] ?? 1;
-        $review_type = $normalized['review_type'] ?? $normalized['category'] ?? 'readability';
-
-        return [
-            'review_type' => $review_type,
-            'text' => $text,
-            'priority' => $priority
-        ];
-    }
-
-    /**
-     * Normalize array keys by trimming whitespace
-     *
-     * @param array $item
-     * @return array
-     */
-    private function normalizeItemKeys(array $item): array
-    {
-        $normalized = [];
-        foreach ($item as $key => $value) {
-            $normalized[trim($key)] = $value;
-        }
-        return $normalized;
-    }
-
-    /**
-     * Extract priority from text if explicitly labeled
-     * Only matches: "[Priority: 1]", "(priority: 1)", "Priority: 1"
-     * Does NOT match "(1)" or "(2)" as those are likely part of content
-     *
-     * @param string $text
-     * @return array ['text' => string, 'priority' => int]
-     */
-    private function extractPriorityFromText(string $text): array
-    {
-        $priority = 1;
-
-        if (preg_match('/\[Priority:\s*(\d+)\]/i', $text, $matches) ||
-            preg_match('/^\(priority:\s*(\d+)\)$/i', $text, $matches) ||
-            preg_match('/\bPriority:\s*(\d+)$/i', $text, $matches)) {
-            $priority = intval($matches[1]);
-            $text = preg_replace('/\[Priority:\s*\d+\]/i', '', $text);
-            $text = preg_replace('/^\(priority:\s*\d+\)$/i', '', $text);
-            $text = preg_replace('/\bPriority:\s*\d+$/i', '', $text);
-            $text = trim($text);
-        }
-
-        return ['text' => $text, 'priority' => $priority];
-    }
 }

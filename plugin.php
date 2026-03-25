@@ -200,8 +200,11 @@ register_deactivation_hook(__FILE__, __NAMESPACE__ . '\\deactivate');
 
 /**
  * Add action links to plugin list
+ *
+ * @param array $links Existing plugin action links.
+ * @return array Modified links array.
  */
-add_filter('plugin_action_links_' . plugin_basename(__FILE__), function (array $links): array {
+function custom_ai_provider_action_links(array $links): array {
     // Test AI link
     $test_ai_link = '<a href="' . admin_url('tools.php?page=custom-ai-provider-test') . '">'
         . esc_html__('Test AI', 'custom-ai-provider')
@@ -215,4 +218,5 @@ add_filter('plugin_action_links_' . plugin_basename(__FILE__), function (array $
     array_unshift($links, $custom_ai_link);
 
     return $links;
-});
+}
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), __NAMESPACE__ . '\\custom_ai_provider_action_links');

@@ -12,21 +12,14 @@ if (!defined('ABSPATH')) {
 
 /**
  * Debug logging helper - only logs when CUSTOM_AI_DEBUG is enabled
- * Can also log if WP_DEBUG is enabled (for backwards compatibility)
  *
  * @param string $message The message to log
  * @param mixed $data Optional data to include (lazy JSON encoding, only when debug is enabled)
  * @param int $maxDataLength Maximum length for data serialization (0 = no limit)
  */
 function custom_ai_debug($message, $data = null, $maxDataLength = 0) {
-    // Check CUSTOM_AI_DEBUG first (explicit control)
-    $isDebug = defined('CUSTOM_AI_DEBUG') && CUSTOM_AI_DEBUG;
-    // Fallback to WP_DEBUG for backwards compatibility
-    if (!$isDebug) {
-        $isDebug = defined('WP_DEBUG') && WP_DEBUG;
-    }
-
-    if (!$isDebug) {
+    // Only log when CUSTOM_AI_DEBUG is explicitly enabled
+    if (!defined('CUSTOM_AI_DEBUG') || !CUSTOM_AI_DEBUG) {
         return;
     }
 

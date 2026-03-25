@@ -16,13 +16,6 @@ namespace WordPress\CustomAiProvider\Models\TextGeneration;
 class ThinkingTagHelper
 {
     /**
-     * Supported closing tags for thinking content
-     *
-     * @var array<string>
-     */
-    private const CLOSE_TAGS = ['</think>', '</thinking>', '<\\/think>', '<\\/thinking>'];
-
-    /**
      * Clean content by extracting thinking tags
      *
      * Extracts content within <think>/<thinking> tags and returns
@@ -32,50 +25,38 @@ class ThinkingTagHelper
      * - Chinese: <think> </think>
      * - English: <thinking> </thinking>
      *
+     * Uses preg_match_all to correctly handle multiple thinking blocks.
+     *
      * @param string $content The raw content potentially containing thinking tags
      * @return array{content: string, thinking: string}
      */
     public static function clean(string $content): array
     {
-        // Find the first closing tag
-        $closePos = false;
-        $foundCloseTag = '';
-        foreach (self::CLOSE_TAGS as $closeTag) {
-            $pos = strpos($content, $closeTag);
-            if ($pos !== false && ($closePos === false || $pos < $closePos)) {
-                $closePos = $pos;
-                $foundCloseTag = $closeTag;
-            }
-        }
-
-        // If no closing tag found, return trimmed original content
-        if ($closePos === false) {
+        // Use preg_match_all to extract all thinking blocks
+        // This handles multiple thinking paragraphs correctly
+        if (preg_match_all('#<think(?:ing)?>\s*([\s\S]*?)</think(?:ing)?>#', $content, $matches)) {
+            $allThinking = implode("\n\n", array_map('trim', $matches[1]));
+            $cleanContent = self::strip($content);
             return [
-                'content' => trim($content),
-                'thinking' => ''
+                'content' => $cleanContent,
+                'thinking' => $allThinking
             ];
         }
 
-        // Everything before the closing tag is thinking content
-        // (could be after opening tag, or could be raw thinking if API removed opening tag)
-        $thinking = trim(substr($content, 0, $closePos));
-
-        // Remove opening tags from thinking content if present
-        $thinking = preg_replace('#^<think(?:ing)?>\s*#', '', $thinking);
-
-        // Everything after the closing tag is the actual content
-        $cleanContent = trim(substr($content, $closePos + strlen($foundCloseTag)));
-
+        // No thinking tags found, return trimmed original content
         return [
-            'content' => $cleanContent,
-            'thinking' => $thinking
+            'content' => trim($content),
+            'thinking' => ''
         ];
     }
 
     /**
      * Remove thinking tags from text using regex (for inline cleanup)
      *
-     * Unlike clean(), this method removes all <think>...</think> blocks
+     * Unlike clean(), this method removes all <think>...
+</think>
+
+ blocks
      * entirely without extracting. Useful for cleaning plain text.
      *
      * @param string $text
