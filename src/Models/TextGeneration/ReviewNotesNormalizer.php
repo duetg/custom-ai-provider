@@ -241,6 +241,37 @@ class ReviewNotesNormalizer
                 $obj['text'] = $obj['content'];
                 unset($obj['content']);
             }
+            // Handle nested JSON in text field (model sometimes returns JSON inside JSON)
+            if (isset($obj['text']) && is_string($obj['text'])) {
+                $nestedJson = json_decode($obj['text'], true);
+                if (is_array($nestedJson) && json_last_error() === JSON_ERROR_NONE) {
+                    // Check if text contains a single suggestion object
+                    if (isset($nestedJson['suggestion']) || isset($nestedJson['issue']) || isset($nestedJson['content']) || isset($nestedJson['text'])) {
+                        $obj['text'] = $nestedJson['suggestion'] ?? $nestedJson['issue'] ?? $nestedJson['content'] ?? $nestedJson['text'] ?? '';
+                        if (isset($nestedJson['priority']) && is_numeric($nestedJson['priority'])) {
+                            $obj['priority'] = intval($nestedJson['priority']);
+                        }
+                        if (isset($nestedJson['review_type'])) {
+                            $obj['review_type'] = $nestedJson['review_type'];
+                        }
+                    } elseif (isset($nestedJson[0]) && is_array($nestedJson[0])) {
+                        // text contains an array of suggestions
+                        // Replace current object with first nested item, save rest for later
+                        $firstItem = $nestedJson[0];
+                        $obj['text'] = $firstItem['suggestion'] ?? $firstItem['issue'] ?? $firstItem['content'] ?? $firstItem['text'] ?? '';
+                        if (isset($firstItem['priority']) && is_numeric($firstItem['priority'])) {
+                            $obj['priority'] = intval($firstItem['priority']);
+                        }
+                        if (isset($firstItem['review_type'])) {
+                            $obj['review_type'] = $firstItem['review_type'];
+                        }
+                        // Queue remaining items to add after iteration
+                        for ($i = 1; $i < count($nestedJson); $i++) {
+                            $objects[] = $nestedJson[$i];
+                        }
+                    }
+                }
+            }
         }
 
         // If we have multiple objects, wrap in array with suggestions key
