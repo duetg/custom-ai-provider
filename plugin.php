@@ -38,7 +38,7 @@ function custom_ai_preferred_image_models_filter(array $models): array
     }
     return $models;
 }
-add_filter('ai_experiments_preferred_image_models', __NAMESPACE__ . '\\custom_ai_preferred_image_models_filter', PHP_INT_MAX);
+add_filter('wpai_preferred_image_models', __NAMESPACE__ . '\\custom_ai_preferred_image_models_filter', PHP_INT_MAX);
 
 /**
  * Add custom text model to preferred vision models list
@@ -54,7 +54,7 @@ function custom_ai_preferred_vision_models_filter(array $models): array
     }
     return $models;
 }
-add_filter('ai_experiments_preferred_vision_models', __NAMESPACE__ . '\\custom_ai_preferred_vision_models_filter', PHP_INT_MAX);
+add_filter('wpai_preferred_vision_models', __NAMESPACE__ . '\\custom_ai_preferred_vision_models_filter', PHP_INT_MAX);
 
 /**
  * Increase timeout for AI API requests only
@@ -90,24 +90,19 @@ add_filter('http_request_args', __NAMESPACE__ . '\\custom_ai_http_request_args_f
 function custom_ai_preferred_text_models_filter(array $models): array
 {
     $text_model = Settings::getTextModel();
-    custom_ai_debug('ai_experiments_preferred_models_for_text_generation filter', ['text_model' => $text_model]);
     if (!empty($text_model)) {
         $models[] = ['custom_text', $text_model];
     }
-    custom_ai_debug('Preferred models', $models);
     return $models;
 }
-add_filter('ai_experiments_preferred_models_for_text_generation', __NAMESPACE__ . '\\custom_ai_preferred_text_models_filter', PHP_INT_MAX);
+add_filter('wpai_preferred_text_models', __NAMESPACE__ . '\\custom_ai_preferred_text_models_filter', PHP_INT_MAX);
 
 /**
  * Register the connector to WordPress AI system
  */
 function register_connector(): void
 {
-    custom_ai_debug('register_connector called');
-
     if (!class_exists('WordPress\AiClient\AiClient')) {
-        custom_ai_debug('AiClient class not found');
         return;
     }
 
@@ -118,14 +113,10 @@ function register_connector(): void
 
     if (!$registry->hasProvider('custom_text')) {
         $registry->registerProvider(\WordPress\CustomAiProvider\Provider\CustomTextProvider::class);
-        custom_ai_debug('Registered custom_text provider');
-    } else {
-        custom_ai_debug('custom_text provider already exists');
     }
 
     if (!$registry->hasProvider('custom_image')) {
         $registry->registerProvider(\WordPress\CustomAiProvider\Provider\CustomImageProvider::class);
-        custom_ai_debug('Registered custom_image provider');
     }
 
     Settings::pass_api_keys_to_ai_client();
