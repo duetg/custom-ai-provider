@@ -223,8 +223,10 @@ class ReviewNotesNormalizer
             return null;
         }
 
-        // Set default priority if not set
-        foreach ($objects as &$obj) {
+        // Post-process objects: handle nested JSON and set defaults
+        $processedObjects = [];
+        foreach ($objects as $obj) {
+            // Set default priority if not set
             if (!isset($obj['priority'])) {
                 $obj['priority'] = 1;
             }
@@ -254,25 +256,28 @@ class ReviewNotesNormalizer
                         if (isset($nestedJson['review_type'])) {
                             $obj['review_type'] = $nestedJson['review_type'];
                         }
+                        $processedObjects[] = $obj;
                     } elseif (isset($nestedJson[0]) && is_array($nestedJson[0])) {
                         // text contains an array of suggestions
-                        // Replace current object with first nested item, save rest for later
-                        $firstItem = $nestedJson[0];
-                        $obj['text'] = $firstItem['suggestion'] ?? $firstItem['issue'] ?? $firstItem['content'] ?? $firstItem['text'] ?? '';
-                        if (isset($firstItem['priority']) && is_numeric($firstItem['priority'])) {
-                            $obj['priority'] = intval($firstItem['priority']);
+                        foreach ($nestedJson as $nestedItem) {
+                            $newObj = [
+                                'review_type' => $nestedItem['review_type'] ?? $obj['review_type'] ?? 'readability',
+                                'text' => $nestedItem['suggestion'] ?? $nestedItem['issue'] ?? $nestedItem['content'] ?? $nestedItem['text'] ?? '',
+                                'priority' => $nestedItem['priority'] ?? $obj['priority'] ?? 1
+                            ];
+                            $processedObjects[] = $newObj;
                         }
-                        if (isset($firstItem['review_type'])) {
-                            $obj['review_type'] = $firstItem['review_type'];
-                        }
-                        // Queue remaining items to add after iteration
-                        for ($i = 1; $i < count($nestedJson); $i++) {
-                            $objects[] = $nestedJson[$i];
-                        }
+                    } else {
+                        $processedObjects[] = $obj;
                     }
+                } else {
+                    $processedObjects[] = $obj;
                 }
+            } else {
+                $processedObjects[] = $obj;
             }
         }
+        $objects = $processedObjects;
 
         // If we have multiple objects, wrap in array with suggestions key
         if (count($objects) > 1) {
@@ -459,6 +464,31 @@ class ReviewNotesNormalizer
 
         $priority = $data['priority'] ?? 1;
         $review_type = $data['review_type'] ?? $data['category'] ?? 'readability';
+
+        // Check if text field contains nested JSON (model sometimes returns JSON inside JSON)
+        if (is_string($text)) {
+            $nestedJson = json_decode($text, true);
+            if (is_array($nestedJson) && json_last_error() === JSON_ERROR_NONE) {
+                // If it's an array of suggestions, normalize each item
+                if (isset($nestedJson[0]) && is_array($nestedJson[0])) {
+                    $normalizedItems = [];
+                    foreach ($nestedJson as $item) {
+                        $normalizedItems[] = [
+                            'review_type' => $item['review_type'] ?? $item['category'] ?? $review_type,
+                            'text' => $item['suggestion'] ?? $item['issue'] ?? $item['content'] ?? $item['text'] ?? '',
+                            'priority' => isset($item['priority']) ? intval($item['priority']) : $priority
+                        ];
+                    }
+                    return ['suggestions' => $normalizedItems];
+                }
+                // If it's a single suggestion object, use its values
+                if (isset($nestedJson['suggestion']) || isset($nestedJson['issue']) || isset($nestedJson['content']) || isset($nestedJson['text'])) {
+                    $text = $nestedJson['suggestion'] ?? $nestedJson['issue'] ?? $nestedJson['content'] ?? $nestedJson['text'] ?? '';
+                    $priority = $nestedJson['priority'] ?? $priority;
+                    $review_type = $nestedJson['review_type'] ?? $nestedJson['category'] ?? $review_type;
+                }
+            }
+        }
 
         return [
             'suggestions' => [
