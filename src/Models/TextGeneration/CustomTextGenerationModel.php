@@ -154,11 +154,12 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
         // Always copy message content fields to top level (for both handler and non-handler cases)
         if (isset($choiceData['message']) && is_array($choiceData['message'])) {
             // Copy content and reasoning_content to top level for easier access later
+            // Always trim content to remove leading/trailing whitespace
             if (isset($choiceData['message']['content'])) {
-                $choiceData['content'] = $choiceData['message']['content'];
+                $choiceData['content'] = trim($choiceData['message']['content']);
             }
             if (isset($choiceData['message']['reasoning_content'])) {
-                $choiceData['reasoning_content'] = $choiceData['message']['reasoning_content'];
+                $choiceData['reasoning_content'] = trim($choiceData['message']['reasoning_content']);
             }
         }
 
