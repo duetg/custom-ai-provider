@@ -36,25 +36,20 @@ This plugin is compatible with the official [WordPress AI Experiments plugin](ht
 
 ### Model Capabilities
 
-**Text-Only Models**:
-- Content Summarization
-- Excerpt Generation
-- Image Prompt Generation (used with Image Generation to create featured images)
-- Review Notes
-- Title Generation
-
-**Vision-Language Models (VLM)**:
+**All Models** (text generation endpoint):
 - Content Summarization
 - Excerpt Generation
 - Image Prompt Generation
 - Review Notes
 - Title Generation
-- Alt Text Generation
 
-**Image Generation Models**:
-- Image Generation (generate featured images and inline images)
+**Vision-Language Models (VLM)** additionally support:
+- Alt Text Generation (analyzes image content)
 
-> **Note:** Only Alt Text Generation requires a VLM to analyze images. All other features work with text-only models.
+**Image Generation Endpoint**:
+- Image Generation (featured images and inline images)
+
+> **Note:** Only Alt Text Generation requires a VLM. All other features work with a standard text-only model.
 
 ## Requirements
 
