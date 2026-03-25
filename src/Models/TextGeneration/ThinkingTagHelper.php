@@ -48,10 +48,10 @@ class ThinkingTagHelper
             }
         }
 
-        // If no closing tag found, return original content
+        // If no closing tag found, return trimmed original content
         if ($closePos === false) {
             return [
-                'content' => $content,
+                'content' => trim($content),
                 'thinking' => ''
             ];
         }
