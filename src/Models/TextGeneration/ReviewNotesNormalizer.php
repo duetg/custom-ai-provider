@@ -112,16 +112,19 @@ class ReviewNotesNormalizer
      * Reconstruct fragmented JSON where key-value pairs are split across lines
      *
      * Handles format like:
-     *   [READABILITY] "suggestion": "Replace the heading..."
-     *   [READABILITY] "priority": 2
+     *   [TAG] "suggestion": "Replace the heading..."
+     *   [TAG] "priority": 2
+     *
+     * Supports any tag like [READABILITY], [GRAMMAR], [ACCESSIBILITY, SEO], etc.
+     * Only the first tag is used as review_type.
      *
      * @param string $text
      * @return string|null Reconstructed JSON string or null if not recognized
      */
     private function reconstructFragmentedJson(string $text): ?string
     {
-        // Check if text has the fragmented pattern
-        if (!preg_match('/^\s*\[READABILITY\]\s*"[^"]+"\s*:/im', $text)) {
+        // Check if text has the fragmented pattern (any [TAG] "key": pattern)
+        if (!preg_match('/^\s*\[[^\]]+\]\s*"[^"]+"\s*:/im', $text)) {
             return null;
         }
 
@@ -145,11 +148,15 @@ class ReviewNotesNormalizer
                 continue;
             }
 
-            // Try to match [READABILITY] "key": "value" or "key": "value"
-            $pattern = '/^\[READABILITY\]\s*"([^"]+)"\s*:\s*(.+)/i';
+            // Try to match [TAG] "key": "value" or [TAG] "key": value
+            $pattern = '/^\[([^\]]+)\]\s*"([^"]+)"\s*:\s*(.+)/i';
             if (preg_match($pattern, $line, $matches)) {
-                $key = trim($matches[1]);
-                $value = trim($matches[2], '",');
+                $tag = trim($matches[1]);
+                $key = trim($matches[2]);
+                $value = trim($matches[3], '",');
+
+                // Extract first tag as review_type (e.g., "ACCESSIBILITY, SEO" -> "ACCESSIBILITY")
+                $reviewType = strtolower(explode(',', $tag)[0]);
 
                 // If we have accumulated text, add it as suggestion to current object
                 if (!empty($currentText) && $currentObject !== null) {
@@ -169,16 +176,19 @@ class ReviewNotesNormalizer
                 }
 
                 // Start new object
-                $currentObject = ['review_type' => 'readability'];
+                $currentObject = ['review_type' => $reviewType];
                 if (strtolower($key) === 'suggestion' || strtolower($key) === 'issue' || strtolower($key) === 'content') {
                     $currentText = $value;
                 } else {
                     $currentObject[$key] = $value;
                 }
-            } elseif (preg_match('/^\[READABILITY\]\s*"([^"]+)"\s*:\s*"([^"]*)/i', $line, $matches)) {
+            } elseif (preg_match('/^\[([^\]]+)\]\s*"([^"]+)"\s*:\s*"([^"]*)/i', $line, $matches)) {
                 // Handle "key": "value (possibly incomplete, value on next line)
-                $key = trim($matches[1]);
-                $value = trim($matches[2]);
+                $tag = trim($matches[1]);
+                $key = trim($matches[2]);
+                $value = trim($matches[3]);
+
+                $reviewType = strtolower(explode(',', $tag)[0]);
 
                 if (!empty($currentText) && $currentObject !== null) {
                     $currentObject['text'] = $currentText;
@@ -194,7 +204,7 @@ class ReviewNotesNormalizer
                     $objects[] = $currentObject;
                 }
 
-                $currentObject = ['review_type' => 'readability'];
+                $currentObject = ['review_type' => $reviewType];
                 $currentText = $value;
             }
         }
@@ -313,8 +323,8 @@ class ReviewNotesNormalizer
                 continue;
             }
 
-            // Detect priority-only lines (including [READABILITY] "priority": 2 pattern)
-            if (preg_match('/^\[READABILITY\]\s*"priority"\s*:\s*(\d+)$/i', $cleanLine, $priorityMatches) ||
+            // Detect priority-only lines (including [TAG] "priority": 2 pattern)
+            if (preg_match('/^\[[^\]]+\]\s*"priority"\s*:\s*(\d+)$/i', $cleanLine, $priorityMatches) ||
                 preg_match('/^priority\s*:\s*(\d+)$/i', $cleanLine, $priorityMatches) ||
                 preg_match('/^priority\s+(\d+)$/i', $cleanLine, $priorityMatches) ||
                 preg_match('/^\[priority\s*:\s*(\d+)\]$/i', $cleanLine, $priorityMatches)) {
@@ -344,14 +354,16 @@ class ReviewNotesNormalizer
             }
 
             // Check if this looks like it might have a priority on the next line
-            // (starts with [READABILITY] "suggestion": or similar pattern)
-            if (preg_match('/^\[READABILITY\]\s*"suggestion"\s*:/i', $cleanLine) ||
-                preg_match('/^\[READABILITY\]\s*"issue"\s*:/i', $cleanLine) ||
-                preg_match('/^\[READABILITY\]\s*"content"\s*:/i', $cleanLine)) {
+            // (starts with [TAG] "suggestion": or similar pattern)
+            if (preg_match('/^\[([^\]]+)\]\s*"suggestion"\s*:/i', $cleanLine, $tagMatches) ||
+                preg_match('/^\[([^\]]+)\]\s*"issue"\s*:/i', $cleanLine, $tagMatches) ||
+                preg_match('/^\[([^\]]+)\]\s*"content"\s*:/i', $cleanLine, $tagMatches)) {
+                // Extract the first tag as review_type
+                $reviewType = strtolower(explode(',', $tagMatches[1])[0]);
                 // Extract the actual text value
                 if (preg_match('/:\s*"(.+)"/', $cleanLine, $textMatches)) {
                     $pendingSuggestion = [
-                        'review_type' => 'readability',
+                        'review_type' => $reviewType,
                         'text' => $textMatches[1],
                         'priority' => 1 // default, will be updated if priority line follows
                     ];
