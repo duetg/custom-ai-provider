@@ -61,12 +61,6 @@ class Admin
         $image_base_url = Settings::getImageBaseUrl();
         $image_model = Settings::getImageModel();
 
-        // For display in form fields (same as actual values now)
-        $text_base_url_display = $text_base_url;
-        $text_model_display = $text_model;
-        $image_base_url_display = $image_base_url;
-        $image_model_display = $image_model;
-
         // Check if using defaults by comparing to DEFAULT values
         $using_default_text = ($text_base_url === Settings::DEFAULT_TEXT_BASE_URL) && ($text_model === Settings::DEFAULT_TEXT_MODEL);
         $using_default_image = ($image_base_url === Settings::DEFAULT_IMAGE_BASE_URL) && ($image_model === Settings::DEFAULT_IMAGE_MODEL);
@@ -105,7 +99,7 @@ class Admin
                             <input type="url"
                                 name="<?php echo esc_attr(Settings::TEXT_BASE_URL_OPTION); ?>"
                                 id="<?php echo esc_attr(Settings::TEXT_BASE_URL_OPTION); ?>"
-                                value="<?php echo esc_attr($text_base_url_display); ?>"
+                                value="<?php echo esc_attr($text_base_url); ?>"
                                 class="regular-text"
                                 placeholder="<?php echo esc_attr(Settings::DEFAULT_TEXT_BASE_URL); ?>">
                             <p class="description"><?php esc_html_e('The base URL for the text generation API. Default: https://api.openai.com/v1', 'custom-ai-provider'); ?></p>
@@ -119,7 +113,7 @@ class Admin
                             <input type="text"
                                 name="<?php echo esc_attr(Settings::TEXT_MODEL_OPTION); ?>"
                                 id="<?php echo esc_attr(Settings::TEXT_MODEL_OPTION); ?>"
-                                value="<?php echo esc_attr($text_model_display); ?>"
+                                value="<?php echo esc_attr($text_model); ?>"
                                 class="regular-text"
                                 placeholder="<?php echo esc_attr(Settings::DEFAULT_TEXT_MODEL); ?>">
                             <p class="description"><?php esc_html_e('The model identifier. Default: gpt-4', 'custom-ai-provider'); ?></p>
@@ -137,7 +131,7 @@ class Admin
                             <input type="url"
                                 name="<?php echo esc_attr(Settings::IMAGE_BASE_URL_OPTION); ?>"
                                 id="<?php echo esc_attr(Settings::IMAGE_BASE_URL_OPTION); ?>"
-                                value="<?php echo esc_attr($image_base_url_display); ?>"
+                                value="<?php echo esc_attr($image_base_url); ?>"
                                 class="regular-text"
                                 placeholder="<?php echo esc_attr(Settings::DEFAULT_IMAGE_BASE_URL); ?>">
                             <p class="description"><?php esc_html_e('The base URL for the image generation API. Default: https://api.openai.com/v1', 'custom-ai-provider'); ?></p>
@@ -151,7 +145,7 @@ class Admin
                             <input type="text"
                                 name="<?php echo esc_attr(Settings::IMAGE_MODEL_OPTION); ?>"
                                 id="<?php echo esc_attr(Settings::IMAGE_MODEL_OPTION); ?>"
-                                value="<?php echo esc_attr($image_model_display); ?>"
+                                value="<?php echo esc_attr($image_model); ?>"
                                 class="regular-text"
                                 placeholder="<?php echo esc_attr(Settings::DEFAULT_IMAGE_MODEL); ?>">
                             <p class="description"><?php esc_html_e('The model identifier. Default: dall-e-3', 'custom-ai-provider'); ?></p>

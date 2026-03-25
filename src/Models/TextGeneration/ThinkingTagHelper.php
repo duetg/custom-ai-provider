@@ -1,9 +1,6 @@
 <?php
 /**
- * Thinking Tag Helper
- *
- * Utility class for extracting and cleaning thinking/reasoning tags
- * from AI model responses. Supports both Chinese and English tags.
+ * Helper for handling thinking tags in AI responses
  *
  * @package CustomAiProvider\Models\TextGeneration
  */
@@ -11,16 +8,18 @@
 namespace WordPress\CustomAiProvider\Models\TextGeneration;
 
 /**
- * Helper class for cleaning thinking tags from AI response content
+ * Helper class for cleaning thinking tags from AI responses
+ *
+ * Supports both Chinese and English thinking tag formats:
+ * - Chinese: <think> </think>
+ * - English: <thinking> </thinking>
  */
 class ThinkingTagHelper
 {
     /**
-     * Clean content by extracting thinking tags
+     * Clean thinking tags from content and extract thinking text
      *
-     * Extracts content within <think>/<thinking> tags and returns
-     * both the clean content and the extracted thinking text.
-     *
+     * Uses preg_match_all to correctly handle multiple thinking blocks.
      * Supports both Chinese and English thinking tags:
      * - Chinese: <think> </think>
      * - English: <thinking> </thinking>
@@ -53,10 +52,7 @@ class ThinkingTagHelper
     /**
      * Remove thinking tags from text using regex (for inline cleanup)
      *
-     * Unlike clean(), this method removes all <think>...
-</think>
-
- blocks
+     * Unlike clean(), this method removes all thinking blocks
      * entirely without extracting. Useful for cleaning plain text.
      *
      * @param string $text

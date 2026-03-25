@@ -44,7 +44,8 @@ class ReviewNotesNormalizer
             return $this->normalizeDirectArray($data);
         }
 
-        return $data;
+        // Fallback: empty data
+        return ['suggestions' => []];
     }
 
     /**
