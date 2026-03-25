@@ -95,8 +95,151 @@ class ReviewNotesNormalizer
             }
         }
 
+        // Try to reconstruct fragmented JSON (e.g., split across lines with [READABILITY] prefix)
+        $reconstructed = $this->reconstructFragmentedJson($text);
+        if ($reconstructed !== null) {
+            $decoded = json_decode($reconstructed, true);
+            if (is_array($decoded) && json_last_error() === JSON_ERROR_NONE) {
+                return $this->normalize($decoded);
+            }
+        }
+
         // FALLBACK: If JSON parsing fails, try to extract suggestions from plain text
         return $this->extractSuggestionsFromPlainText($text);
+    }
+
+    /**
+     * Reconstruct fragmented JSON where key-value pairs are split across lines
+     *
+     * Handles format like:
+     *   [READABILITY] "suggestion": "Replace the heading..."
+     *   [READABILITY] "priority": 2
+     *
+     * @param string $text
+     * @return string|null Reconstructed JSON string or null if not recognized
+     */
+    private function reconstructFragmentedJson(string $text): ?string
+    {
+        // Check if text has the fragmented pattern
+        if (!preg_match('/^\s*\[READABILITY\]\s*"[^"]+"\s*:/im', $text)) {
+            return null;
+        }
+
+        $lines = preg_split('/\r\n|\r|\n/', $text);
+        $objects = [];
+        $currentObject = null;
+        $currentText = '';
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+
+            // Skip empty lines
+            if (empty($line)) {
+                continue;
+            }
+
+            // Skip lines that look like they end a previous value (contain trailing comma)
+            if (preg_match('/^[^"]*"[^"]*,\s*$/', $line)) {
+                // This line ends with a comma, it's a continuation - strip the comma and add to current text
+                $currentText .= ' ' . trim($line, ',');
+                continue;
+            }
+
+            // Try to match [READABILITY] "key": "value" or "key": "value"
+            $pattern = '/^\[READABILITY\]\s*"([^"]+)"\s*:\s*(.+)/i';
+            if (preg_match($pattern, $line, $matches)) {
+                $key = trim($matches[1]);
+                $value = trim($matches[2], '",');
+
+                // If we have accumulated text, add it as suggestion to current object
+                if (!empty($currentText) && $currentObject !== null) {
+                    $currentObject['text'] = $currentText;
+                    $currentText = '';
+                }
+
+                // If this is a priority field and we have a current object, set it
+                if (strtolower($key) === 'priority' && $currentObject !== null) {
+                    $currentObject['priority'] = intval($value);
+                    continue;
+                }
+
+                // Save previous object
+                if ($currentObject !== null) {
+                    $objects[] = $currentObject;
+                }
+
+                // Start new object
+                $currentObject = ['review_type' => 'readability'];
+                if (strtolower($key) === 'suggestion' || strtolower($key) === 'issue' || strtolower($key) === 'content') {
+                    $currentText = $value;
+                } else {
+                    $currentObject[$key] = $value;
+                }
+            } elseif (preg_match('/^\[READABILITY\]\s*"([^"]+)"\s*:\s*"([^"]*)/i', $line, $matches)) {
+                // Handle "key": "value (possibly incomplete, value on next line)
+                $key = trim($matches[1]);
+                $value = trim($matches[2]);
+
+                if (!empty($currentText) && $currentObject !== null) {
+                    $currentObject['text'] = $currentText;
+                    $currentText = '';
+                }
+
+                if (strtolower($key) === 'priority' && $currentObject !== null) {
+                    $currentObject['priority'] = intval($value);
+                    continue;
+                }
+
+                if ($currentObject !== null) {
+                    $objects[] = $currentObject;
+                }
+
+                $currentObject = ['review_type' => 'readability'];
+                $currentText = $value;
+            }
+        }
+
+        // Handle last accumulated text
+        if (!empty($currentText) && $currentObject !== null) {
+            $currentObject['text'] = $currentText;
+        }
+
+        // Don't forget the last object
+        if ($currentObject !== null) {
+            $objects[] = $currentObject;
+        }
+
+        if (empty($objects)) {
+            return null;
+        }
+
+        // Set default priority if not set
+        foreach ($objects as &$obj) {
+            if (!isset($obj['priority'])) {
+                $obj['priority'] = 1;
+            }
+            // Ensure text field exists
+            if (isset($obj['suggestion'])) {
+                $obj['text'] = $obj['suggestion'];
+                unset($obj['suggestion']);
+            }
+            if (isset($obj['issue'])) {
+                $obj['text'] = $obj['issue'];
+                unset($obj['issue']);
+            }
+            if (isset($obj['content'])) {
+                $obj['text'] = $obj['content'];
+                unset($obj['content']);
+            }
+        }
+
+        // If we have multiple objects, wrap in array with suggestions key
+        if (count($objects) > 1) {
+            return json_encode(['suggestions' => $objects]);
+        }
+
+        // Single object
+        return json_encode($objects[0]);
     }
 
     /**
@@ -135,9 +278,19 @@ class ReviewNotesNormalizer
             return ['suggestions' => []];
         }
 
+        // Try to handle fragmented JSON format before splitting by lines
+        $reconstructed = $this->reconstructFragmentedJson($text);
+        if ($reconstructed !== null) {
+            $decoded = json_decode($reconstructed, true);
+            if (is_array($decoded) && json_last_error() === JSON_ERROR_NONE) {
+                return $this->normalize($decoded);
+            }
+        }
+
         // Split by newlines
         $lines = preg_split('/\r\n|\r|\n/', $text);
         $suggestions = [];
+        $pendingSuggestion = null; // Track suggestion awaiting priority
 
         foreach ($lines as $line) {
             $line = trim($line);
@@ -160,14 +313,15 @@ class ReviewNotesNormalizer
                 continue;
             }
 
-            // Skip lines that are purely priority indicators
-            if (preg_match('/^priority\s*:\s*\d+$/i', $cleanLine) ||
-                preg_match('/^priority\s+\d+$/i', $cleanLine) ||
-                preg_match('/^\[priority\s*:\s*\d+\]$/i', $cleanLine)) {
-                if (!empty($suggestions)) {
-                    if (preg_match('/(\d+)/', $cleanLine, $priorityMatches)) {
-                        $suggestions[count($suggestions) - 1]['priority'] = intval($priorityMatches[1]);
-                    }
+            // Detect priority-only lines (including [READABILITY] "priority": 2 pattern)
+            if (preg_match('/^\[READABILITY\]\s*"priority"\s*:\s*(\d+)$/i', $cleanLine, $priorityMatches) ||
+                preg_match('/^priority\s*:\s*(\d+)$/i', $cleanLine, $priorityMatches) ||
+                preg_match('/^priority\s+(\d+)$/i', $cleanLine, $priorityMatches) ||
+                preg_match('/^\[priority\s*:\s*(\d+)\]$/i', $cleanLine, $priorityMatches)) {
+                if ($pendingSuggestion !== null) {
+                    $pendingSuggestion['priority'] = intval($priorityMatches[1]);
+                    $suggestions[] = $pendingSuggestion;
+                    $pendingSuggestion = null;
                 }
                 continue;
             }
@@ -182,11 +336,39 @@ class ReviewNotesNormalizer
                 continue;
             }
 
+            // If we have a pending suggestion with default priority, save it with extracted priority
+            if ($pendingSuggestion !== null) {
+                $pendingSuggestion['priority'] = $priority;
+                $suggestions[] = $pendingSuggestion;
+                $pendingSuggestion = null;
+            }
+
+            // Check if this looks like it might have a priority on the next line
+            // (starts with [READABILITY] "suggestion": or similar pattern)
+            if (preg_match('/^\[READABILITY\]\s*"suggestion"\s*:/i', $cleanLine) ||
+                preg_match('/^\[READABILITY\]\s*"issue"\s*:/i', $cleanLine) ||
+                preg_match('/^\[READABILITY\]\s*"content"\s*:/i', $cleanLine)) {
+                // Extract the actual text value
+                if (preg_match('/:\s*"(.+)"/', $cleanLine, $textMatches)) {
+                    $pendingSuggestion = [
+                        'review_type' => 'readability',
+                        'text' => $textMatches[1],
+                        'priority' => 1 // default, will be updated if priority line follows
+                    ];
+                    continue;
+                }
+            }
+
             $suggestions[] = [
                 'review_type' => 'readability',
                 'text' => $cleanLine,
                 'priority' => $priority
             ];
+        }
+
+        // Don't forget the pending suggestion if exists
+        if ($pendingSuggestion !== null) {
+            $suggestions[] = $pendingSuggestion;
         }
 
         if (empty($suggestions)) {
