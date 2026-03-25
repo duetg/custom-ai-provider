@@ -67,13 +67,17 @@ class MiniMaxHandler implements ModelHandlerInterface
             }
         }
 
-        // Disable thinking/reasoning by default to support multiple candidates (n > 1)
+        // Disable thinking/reasoning by default
         // This fixes "The n parameter must be 1 when enable_thinking is true" error
         if (!isset($params['extra_body'])) {
             $params['extra_body'] = [];
         }
         $params['extra_body']['enable_thinking'] = false;
         $params['extra_body']['reasoning_split'] = false;
+
+        // Force n=1 for MiniMax models that don't support multi-candidate generation
+        // even with thinking disabled (e.g., MiniMax-M2.7)
+        $params['n'] = 1;
 
         return $params;
     }

@@ -51,6 +51,8 @@ class CustomTextModelMetadataDirectory implements ModelMetadataDirectoryInterfac
             [
                 new SupportedOption(OptionEnum::inputModalities(), $inputModalities),
                 new SupportedOption(OptionEnum::outputModalities(), [[ModalityEnum::text()]]),
+                new SupportedOption(OptionEnum::outputMimeType(), ['application/json', 'text/plain']),
+                new SupportedOption(OptionEnum::outputSchema(), null),
                 new SupportedOption(OptionEnum::maxTokens()),
                 new SupportedOption(OptionEnum::temperature()),
                 new SupportedOption(OptionEnum::topP()),

@@ -24,7 +24,7 @@ Custom AI Provider allows WordPress AI Client to connect to any AI service that 
 
 ## WordPress AI Experiments Integration
 
-This plugin is compatible with the official [WordPress AI Experiments plugin](https://wordpress.org/plugins/ai/) (version 0.5.0+). When installed together, you can use your custom API provider with WordPress's built-in AI features:
+This plugin is compatible with the official [WordPress AI Experiments plugin](https://wordpress.org/plugins/ai/) (version 0.6.0+). When installed together, you can use your custom API provider with WordPress's built-in AI features:
 
 - **Alt Text Generation** - Generates descriptive alt text for images using AI vision models (requires VLM model)
 - **Content Summarization** - Summarizes long-form content into digestible overviews
@@ -60,7 +60,7 @@ This plugin is compatible with the official [WordPress AI Experiments plugin](ht
 
 * PHP 7.4 or higher
 * WordPress 7.0 or higher (uses built-in Connectors API)
-* (Optional) WordPress AI Experiments plugin 0.5.0+ for enhanced integration
+* (Optional) WordPress AI Experiments plugin 0.6.0+ for enhanced integration
 
 ## Installation
 
@@ -75,6 +75,18 @@ This plugin is compatible with the official [WordPress AI Experiments plugin](ht
 ### Does this plugin work without WordPress 7.0?
 
 No, this plugin requires WordPress 7.0 or higher because it uses the built-in Connectors API for API key management.
+
+### Why does Review Notes show all suggestions with the same prefix like [READABILITY]?
+
+When using Review Notes through the official WordPress AI Client plugin, you may notice that all suggestions appear with the same prefix (e.g., `[READABILITY]`), regardless of the actual review type (Accessibility, Grammar, SEO, etc.).
+
+**This is not a bug.** The root cause is:
+
+1. The WordPress AI Client's system prompt asks the AI model to return suggestions with a `review_type` field, but does not explicitly require the model to always populate this field with the correct type
+2. When the model does not return a `review_type` in its JSON response, this plugin defaults the field to `"readability"` to ensure compatibility (otherwise WordPress AI Client would receive malformed data)
+3. WordPress AI Client then displays this `review_type` value as the suggestion prefix
+
+In practice, this means the suggestion **text** itself is accurate (the AI still analyzes accessibility, grammar, SEO, etc.), but the **label** shown may not reflect the actual review type. This is a limitation of the system prompt used by WordPress AI Client, not this plugin. The plugin correctly forwards the model's response and fills in a required field when the model omits it.
 
 ### How do I find the Base URL for my AI provider?
 
@@ -119,7 +131,7 @@ $files = $result->toImageFiles();
 ## Changelog
 
 ### 0.2.0
-* Added compatibility with WordPress AI Experiments plugin (0.5.0+)
+* Added compatibility with WordPress AI Experiments plugin (0.6.0+)
 * Added Alt Text Generation support (requires VLM model)
 * Added Image Prompt Generation support
 * Added Review Notes feature

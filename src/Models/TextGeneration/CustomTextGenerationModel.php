@@ -72,9 +72,6 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
         array $headers = [],
         $data = null
     ): Request {
-        // Debug logging - log all requests
-        custom_ai_debug('Request', ['path' => $path, 'model' => $this->getModelId()]);
-
         // Get model ID from settings
         $model_id = $this->getModelId();
 
@@ -97,6 +94,7 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
 
         // Fix response_format for APIs that don't support JSON output properly
         // Many OpenAI-compatible APIs don't properly support response_format
+        $hadResponseFormat = is_array($data) && isset($data['response_format']);
         if (is_array($data) && isset($data['response_format'])) {
             // Remove response_format for models that don't support it properly
             // This includes Kimi, Qwen, and others that don't properly handle JSON schema
@@ -106,6 +104,15 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
 
         // Get base URL from settings
         $base_url = $this->getBaseUrl();
+
+        // Debug logging - log final request details
+        custom_ai_debug('Request', [
+            'path' => $path,
+            'model' => $model_id,
+            'url' => $base_url . '/' . ltrim($path, '/'),
+            'had_response_format' => $hadResponseFormat,
+            'data_keys' => is_array($data) ? array_keys($data) : null,
+        ]);
 
         return new Request($method, $base_url . '/' . ltrim($path, '/'), $headers, $data);
     }
@@ -121,6 +128,12 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
      */
     protected function parseResponseChoiceToCandidate(array $choiceData, int $index): \WordPress\AiClient\Results\DTO\Candidate
     {
+        // Debug: log raw response data
+        custom_ai_debug('Response choice[' . $index . ']', [
+            'content' => isset($choiceData['message']['content']) ? substr($choiceData['message']['content'], 0, 500) : null,
+            'finish_reason' => $choiceData['finish_reason'] ?? null,
+        ]);
+
         // Apply model-specific handler if available
         $handler = $this->getModelHandler();
         if ($handler !== null) {
@@ -168,6 +181,11 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
         if (isset($choiceData['content']) && is_string($choiceData['content'])) {
             $content = $choiceData['content'];
 
+            custom_ai_debug('Checking JSON extraction', [
+                'content_preview' => substr($content, 0, 200),
+                'matches_json_pattern' => (bool) preg_match('/^\s*[\[{]/', $content),
+            ]);
+
             // If the response looks like JSON (starts with [ or {), try to parse and normalize it
             // This handles Review Notes and other structured responses
             // Normal conversation responses are plain text and won't match this pattern
@@ -183,6 +201,8 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
                     }
                     custom_ai_debug('Extracted JSON from text', $json_content);
                 }
+            } else {
+                custom_ai_debug('Content does not look like JSON, skipping extraction');
             }
         }
 
