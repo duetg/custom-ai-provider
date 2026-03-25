@@ -217,10 +217,11 @@ class TestPage
                             if (!empty($files)):
                                 foreach ($files as $file):
                                     // Use getDataUri() for inline files, getUrl() for remote files
+                                    // Note: esc_url() breaks data URI, so we output it directly
                                     $url = $file->isInline() ? $file->getDataUri() : $file->getUrl();
                                     if ($url): ?>
                                     <div style="margin-top: 10px;">
-                                        <img src="<?php echo esc_url($url); ?>" style="max-width: 500px; height: auto; border: 1px solid #ccc;" />
+                                        <img src="<?php echo $file->isInline() ? $url : esc_url($url); ?>" style="max-width: 500px; height: auto; border: 1px solid #ccc;" />
                                     </div>
                                     <?php endif;
                                 endforeach; ?>
