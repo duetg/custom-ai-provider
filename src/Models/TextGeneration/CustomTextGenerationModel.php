@@ -121,9 +121,6 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
      */
     protected function parseResponseChoiceToCandidate(array $choiceData, int $index): \WordPress\AiClient\Results\DTO\Candidate
     {
-        // Debug logging - log response data
-        custom_ai_debug('Response choice data (before handler)', $choiceData);
-
         // Apply model-specific handler if available
         $handler = $this->getModelHandler();
         if ($handler !== null) {
@@ -135,17 +132,19 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
             // For models without a specific handler (e.g., DeepSeek on SiliconFlow),
             // clean thinking tags from content
             if (isset($choiceData['message']) && is_array($choiceData['message'])) {
-                $message = $choiceData['message'];
-                $content = $message['content'] ?? '';
+                $content = $choiceData['message']['content'] ?? '';
 
                 // Always check for thinking tags in content (regardless of reasoning_content value)
                 // and extract them to reasoning_content
                 if (!empty($content)) {
                     $result = ThinkingTagHelper::clean($content);
-                    if (!empty($result['thinking'])) {
-                        // Extract thinking content to reasoning_content
+
+                    // Always update content with cleaned version (regardless of whether thinking was found)
+                    // This ensures any leading/trailing whitespace or thinking tags are removed
+                    $choiceData['message']['content'] = $result['content'];
+                    // Only update reasoning_content if we found thinking AND it's not already set
+                    if (!empty($result['thinking']) && !isset($choiceData['message']['reasoning_content'])) {
                         $choiceData['message']['reasoning_content'] = $result['thinking'];
-                        $choiceData['message']['content'] = $result['content'];
                     }
                 }
             }
@@ -162,9 +161,6 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
                 $choiceData['reasoning_content'] = trim($choiceData['message']['reasoning_content']);
             }
         }
-
-        // Debug: log after handler
-        custom_ai_debug('Response choice data (after handler)', ['content' => $choiceData['content'] ?? 'N/A', 'reasoning_content' => $choiceData['reasoning_content'] ?? 'N/A']);
 
         // Check if content is not valid JSON but looks like it should be JSON
         // Try to extract JSON from the text response - but ONLY for Review Notes requests

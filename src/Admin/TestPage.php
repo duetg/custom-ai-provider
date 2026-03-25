@@ -210,7 +210,8 @@ class TestPage
                     <div class="notice notice-success" style="margin-top: 20px;">
                         <p><strong><?php esc_html_e('Success!', 'custom-ai-provider'); ?></strong></p>
                         <?php if ($provider_type === 'text'): ?>
-                            <pre style="background: #f0f0f0; padding: 10px; overflow-x: auto; max-height: 300px;"><?php echo esc_html($result->toText()); ?></pre>
+                            <?php $text = $result->toText(); ?>
+                            <pre style="background: #f0f0f0; padding: 10px; overflow-x: auto; max-height: 300px;"><?php echo esc_html($text); ?></pre>
                         <?php else: ?>
                             <?php
                             $files = $result->toImageFiles();
