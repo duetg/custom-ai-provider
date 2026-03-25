@@ -215,11 +215,17 @@ class TestPage
                             <?php
                             $files = $result->toImageFiles();
                             if (!empty($files)):
-                                foreach ($files as $file): ?>
+                                foreach ($files as $file):
+                                    // Use getDataUri() for inline files, getUrl() for remote files
+                                    $url = $file->isInline() ? $file->getDataUri() : $file->getUrl();
+                                    if ($url): ?>
                                     <div style="margin-top: 10px;">
-                                        <img src="<?php echo esc_url($file->getUrl()); ?>" style="max-width: 500px; height: auto;" />
+                                        <img src="<?php echo esc_url($url); ?>" style="max-width: 500px; height: auto; border: 1px solid #ccc;" />
                                     </div>
-                                <?php endforeach; ?>
+                                    <?php endif;
+                                endforeach; ?>
+                            <?php else: ?>
+                                <p>No image files returned. Result type: <?php echo esc_html(get_class($result)); ?></p>
                             <?php endif; ?>
                         <?php endif; ?>
                     </div>
