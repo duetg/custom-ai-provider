@@ -267,8 +267,6 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
             return null;
         }
 
-        custom_ai_debug('extractSuggestionsFromPlainText - input', $text);
-
         $suggestions = [];
 
         // Clean up the text first - remove thinking tags if present
@@ -288,7 +286,6 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
             stripos($text, '[]') !== false ||
             $text === '[]' ||
             $text === '{}') {
-            custom_ai_debug('extractSuggestionsFromPlainText - text indicates no suggestions');
             return ['suggestions' => []];
         }
 
@@ -371,8 +368,6 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
             }
         }
 
-        custom_ai_debug('extractSuggestionsFromPlainText - extracted ' . count($suggestions) . ' suggestions');
-
         return empty($suggestions) ? null : ['suggestions' => $suggestions];
     }
 
@@ -386,8 +381,6 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
      */
     private function normalizeReviewNotesFormat(array $data): array
     {
-        custom_ai_debug('normalizeReviewNotesFormat input', $data);
-
         // Case 1: Single object like {"content": "...", "priority": 1}
         $singleObjectResult = $this->normalizeSingleObjectSuggestion($data);
         if ($singleObjectResult !== null) {
@@ -401,7 +394,6 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
 
         // Case 3: Empty array
         if (empty($data)) {
-            custom_ai_debug('normalizeReviewNotesFormat - empty array');
             return ['suggestions' => []];
         }
 
@@ -410,7 +402,6 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
             return $this->normalizeDirectArray($data);
         }
 
-        custom_ai_debug('normalizeReviewNotesFormat - returning original data');
         return $data;
     }
 
@@ -478,7 +469,6 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
 
         // All items are strings - convert to objects
         if ($hasStringItems && !$hasObjectItems) {
-            custom_ai_debug('normalizeReviewNotesFormat - converting string array');
             return $this->normalizeStringArrayToObjects($suggestions);
         }
 
@@ -491,7 +481,6 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
             }
         }
 
-        custom_ai_debug('normalizeReviewNotesFormat - already correct format');
         return ['suggestions' => $suggestions];
     }
 
@@ -524,7 +513,6 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
      */
     private function normalizeDirectArray(array $items): array
     {
-        custom_ai_debug('normalizeReviewNotesFormat - processing array', ['count' => count($items)]);
         $suggestions = [];
 
         foreach ($items as $item) {
@@ -535,7 +523,6 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
         }
 
         if (!empty($suggestions)) {
-            custom_ai_debug('normalizeReviewNotesFormat - suggestions count', ['count' => count($suggestions)]);
             return ['suggestions' => $suggestions];
         }
 
@@ -615,14 +602,11 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
         // Extract text from various possible fields
         $text = $normalized['content'] ?? $normalized['text'] ?? $normalized['issue'] ?? $normalized['suggestion'] ?? '';
         if (empty($text)) {
-            custom_ai_debug('normalizeReviewNotesFormat - skipping empty text item');
             return null;
         }
 
         $priority = $normalized['priority'] ?? 1;
         $review_type = $normalized['review_type'] ?? $normalized['category'] ?? 'readability';
-
-        custom_ai_debug('normalizeReviewNotesFormat - found text', $text);
 
         return [
             'review_type' => $review_type,
