@@ -124,18 +124,8 @@ class MiniMaxHandler implements ModelHandlerInterface
         }
 
         // If reasoning_split didn't work (no reasoning_details), clean content using thinking tags
-        // Even if reasoning_content is already set (e.g., from Qwen API), we still need to trim content
         if (isset($message['content'])) {
-            custom_ai_debug('MiniMaxHandler: Before cleaning', [
-                'content_preview' => substr($message['content'], 0, 500)
-            ]);
-
             $result = ThinkingTagHelper::clean($message['content']);
-
-            custom_ai_debug('MiniMaxHandler: After cleaning', [
-                'content' => $result['content'],
-                'thinking_length' => strlen($result['thinking'])
-            ]);
 
             $message['content'] = $result['content'];
             // Only update reasoning_content if we actually found thinking content
