@@ -42,7 +42,7 @@ class TestPage
      */
     public static function enqueue_scripts(): void
     {
-        $plugin_url = plugin_dir_url(dirname(__DIR__, 2) . '/custom-ai-provider.php');
+        $plugin_url = plugin_dir_url(dirname(__DIR__, 2) . '/plugin.php');
         $js_url = $plugin_url . 'assets/js/test-page.js';
 
         wp_enqueue_script(
@@ -196,7 +196,7 @@ class TestPage
                         <tr>
                             <th scope="row"><?php esc_html_e('Provider Type', 'custom-ai-provider'); ?></th>
                             <td>
-                                <select name="provider_type" id="provider_type" onchange="updatePromptPlaceholder()">
+                                <select name="provider_type" id="provider_type">
                                     <option value="text" <?php selected($provider_type, 'text'); ?>><?php esc_html_e('Text Generation', 'custom-ai-provider'); ?></option>
                                     <option value="image" <?php selected($provider_type, 'image'); ?>><?php esc_html_e('Image Generation', 'custom-ai-provider'); ?></option>
                                 </select>

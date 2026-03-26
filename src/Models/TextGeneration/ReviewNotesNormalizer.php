@@ -88,19 +88,6 @@ class ReviewNotesNormalizer
     }
 
     /**
-     * Extract suggestions from plain text response
-     *
-     * This is a fallback when JSON parsing fails.
-     *
-     * @param string $text
-     * @return array|null
-     */
-    public function extractSuggestionsFromPlainText(string $text): ?array
-    {
-        return $this->extractor->extract($text, $this);
-    }
-
-    /**
      * Check if data is a single suggestion object
      *
      * @param array $data
