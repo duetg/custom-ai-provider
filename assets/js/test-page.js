@@ -3,8 +3,8 @@
  */
 (function() {
     var placeholders = window.customAiTestPage || {
-        textPlaceholder: 'Enter your text prompt...',
-        imagePlaceholder: 'Describe the image you want to generate...'
+        textPlaceholder: '',
+        imagePlaceholder: ''
     };
 
     function updatePromptPlaceholder() {
