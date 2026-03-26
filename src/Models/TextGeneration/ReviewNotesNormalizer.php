@@ -553,16 +553,23 @@ class ReviewNotesNormalizer
             return $this->normalizeStringArrayToObjects($suggestions);
         }
 
-        // Mix or all objects - ensure priority is set
+        // Mix or all objects - normalize each item
         if ($hasObjectItems) {
-            foreach ($suggestions as &$item) {
-                if (is_array($item) && !isset($item['priority'])) {
-                    $item['priority'] = 1;
+            $normalized = [];
+            foreach ($suggestions as $item) {
+                if (is_array($item)) {
+                    $normalizedItem = $this->normalizeObjectItem($item);
+                    if ($normalizedItem !== null) {
+                        $normalized[] = $normalizedItem;
+                    }
                 }
+            }
+            if (!empty($normalized)) {
+                return ['suggestions' => $normalized];
             }
         }
 
-        return ['suggestions' => $suggestions];
+        return ['suggestions' => []];
     }
 
     /**
@@ -649,9 +656,12 @@ class ReviewNotesNormalizer
             return null;
         }
 
+        // Clean up tag prefixes like [SEO], [ACCESSIBILITY], etc. from text
+        $text = $this->cleanTagPrefix($extracted['text']);
+
         return [
             'review_type' => 'readability',
-            'text' => $extracted['text'],
+            'text' => $text,
             'priority' => $extracted['priority']
         ];
     }
@@ -685,6 +695,9 @@ class ReviewNotesNormalizer
         if (empty($text)) {
             return null;
         }
+
+        // Clean up tag prefixes like [SEO], [ACCESSIBILITY], etc. from text
+        $text = $this->cleanTagPrefix($text);
 
         $priority = $normalized['priority'] ?? 1;
         $review_type = $normalized['review_type'] ?? $normalized['category'] ?? 'readability';
