@@ -256,7 +256,6 @@ class ReviewNotesNormalizer
                         if (isset($nestedJson['review_type'])) {
                             $obj['review_type'] = $nestedJson['review_type'];
                         }
-                        $processedObjects[] = $obj;
                     } elseif (isset($nestedJson[0]) && is_array($nestedJson[0])) {
                         // text contains an array of suggestions
                         foreach ($nestedJson as $nestedItem) {
@@ -267,15 +266,25 @@ class ReviewNotesNormalizer
                             ];
                             $processedObjects[] = $newObj;
                         }
-                    } else {
-                        $processedObjects[] = $obj;
+                        continue;
+                    } elseif (isset($nestedJson[0]) && is_string($nestedJson[0])) {
+                        // text contains an array of strings
+                        foreach ($nestedJson as $str) {
+                            if (is_string($str) && !empty(trim($str))) {
+                                $processedObjects[] = [
+                                    'review_type' => $obj['review_type'] ?? 'readability',
+                                    'text' => trim($str),
+                                    'priority' => $obj['priority'] ?? 1
+                                ];
+                            }
+                        }
+                        continue;
                     }
-                } else {
-                    $processedObjects[] = $obj;
                 }
-            } else {
-                $processedObjects[] = $obj;
+                // Clean up tag prefixes like [SEO], [ACCESSIBILITY], etc. from text
+                $obj['text'] = $this->cleanTagPrefix($obj['text']);
             }
+            $processedObjects[] = $obj;
         }
         $objects = $processedObjects;
 
@@ -494,7 +503,7 @@ class ReviewNotesNormalizer
                         if (is_string($str) && !empty(trim($str))) {
                             $normalizedItems[] = [
                                 'review_type' => $review_type,
-                                'text' => trim($str),
+                                'text' => $this->cleanTagPrefix(trim($str)),
                                 'priority' => $priority
                             ];
                         }
@@ -503,6 +512,9 @@ class ReviewNotesNormalizer
                         return ['suggestions' => $normalizedItems];
                     }
                 }
+            } else {
+                // Not nested JSON - clean tag prefix from plain text
+                $text = $this->cleanTagPrefix($text);
             }
         }
 
@@ -697,6 +709,23 @@ class ReviewNotesNormalizer
             $normalized[trim($key)] = $value;
         }
         return $normalized;
+    }
+
+    /**
+     * Clean tag prefixes from text (e.g., [SEO], [ACCESSIBILITY], [READABILITY])
+     *
+     * When model returns text with embedded tags like "[SEO] Some suggestion",
+     * this removes the tag prefix and returns clean text.
+     *
+     * @param string $text
+     * @return string
+     */
+    private function cleanTagPrefix(string $text): string
+    {
+        // Remove leading [TAG] pattern where TAG is uppercase letters, possibly with comma
+        // e.g., "[SEO]", "[ACCESSIBILITY, SEO]", "[READABILITY]"
+        $text = preg_replace('/^\[[A-Z][A-Z,\s]+\]\s*/i', '', $text);
+        return trim($text);
     }
 
     /**
