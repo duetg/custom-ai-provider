@@ -73,4 +73,15 @@ class ModelHandlerRegistry
         // Add new handlers here as needed
         self::register(new MiniMaxHandler());
     }
+
+    /**
+     * Reset registry state (for testing purposes)
+     *
+     * @return void
+     */
+    public static function reset(): void
+    {
+        self::$handlers = [];
+        self::$initialized = false;
+    }
 }
