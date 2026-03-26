@@ -487,6 +487,22 @@ class ReviewNotesNormalizer
                     $priority = $nestedJson['priority'] ?? $priority;
                     $review_type = $nestedJson['review_type'] ?? $nestedJson['category'] ?? $review_type;
                 }
+                // If it's an array of strings (not objects), create one suggestion per string
+                if (isset($nestedJson[0]) && is_string($nestedJson[0])) {
+                    $normalizedItems = [];
+                    foreach ($nestedJson as $str) {
+                        if (is_string($str) && !empty(trim($str))) {
+                            $normalizedItems[] = [
+                                'review_type' => $review_type,
+                                'text' => trim($str),
+                                'priority' => $priority
+                            ];
+                        }
+                    }
+                    if (!empty($normalizedItems)) {
+                        return ['suggestions' => $normalizedItems];
+                    }
+                }
             }
         }
 
