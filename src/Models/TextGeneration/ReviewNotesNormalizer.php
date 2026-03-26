@@ -757,7 +757,7 @@ class ReviewNotesNormalizer
         if (preg_match('/\[Priority:\s*(\d+)\]/i', $text, $matches) ||
             preg_match('/^\(priority:\s*(\d+)\)$/i', $text, $matches) ||
             preg_match('/\bPriority:\s*(\d+)$/i', $text, $matches) ||
-            preg_match('/^\[\d+\]$/', $text, $matches)) {
+            preg_match('/^\[(\d+)\]$/', $text, $matches)) {
             $priority = intval($matches[1]);
             $text = preg_replace('/\[Priority:\s*\d+\]/i', '', $text);
             $text = preg_replace('/^\(priority:\s*\d+\)$/i', '', $text);

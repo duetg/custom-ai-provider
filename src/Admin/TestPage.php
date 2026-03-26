@@ -38,6 +38,33 @@ class TestPage
     }
 
     /**
+     * Enqueue required scripts
+     */
+    public static function enqueue_scripts(): void
+    {
+        $plugin_url = plugin_dir_url(dirname(__DIR__, 2) . '/custom-ai-provider.php');
+        $js_url = $plugin_url . 'assets/js/test-page.js';
+
+        wp_enqueue_script(
+            'custom-ai-test-page',
+            $js_url,
+            [],
+            null,
+            true
+        );
+
+        // Pass localized data for placeholders
+        wp_add_inline_script(
+            'custom-ai-test-page',
+            'window.customAiTestPage = ' . json_encode([
+                'textPlaceholder' => __('Enter your text prompt...', 'custom-ai-provider'),
+                'imagePlaceholder' => __('Describe the image you want to generate...', 'custom-ai-provider'),
+            ]) . ';',
+            'before'
+        );
+    }
+
+    /**
      * Render the test page
      */
     public static function render(): void
@@ -45,6 +72,9 @@ class TestPage
         if (!current_user_can('manage_options')) {
             return;
         }
+
+        // Enqueue scripts
+        self::enqueue_scripts();
 
         $result = null;
         $error = null;
@@ -106,17 +136,6 @@ class TestPage
         $image_model = CustomImageProvider::getModelId();
 
         ?>
-        <script>
-        function updatePromptPlaceholder() {
-            var select = document.getElementById('provider_type');
-            var textarea = document.getElementById('prompt');
-            if (select.value === 'text') {
-                textarea.placeholder = '<?php echo esc_js(__('Enter your text prompt...', 'custom-ai-provider')); ?>';
-            } else {
-                textarea.placeholder = '<?php echo esc_js(__('Describe the image you want to generate...', 'custom-ai-provider')); ?>';
-            }
-        }
-        </script>
         <div class="wrap">
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
