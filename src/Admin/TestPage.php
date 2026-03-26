@@ -145,9 +145,9 @@ class TestPage
                     <thead>
                         <tr>
                             <th><?php esc_html_e('Type', 'custom-ai-provider'); ?></th>
-                            <th>Base URL</th>
+                            <th><?php esc_html_e('Base URL', 'custom-ai-provider'); ?></th>
                             <th><?php esc_html_e('Model', 'custom-ai-provider'); ?></th>
-                            <th>API Key <?php esc_html_e('Status', 'custom-ai-provider'); ?></th>
+                            <th><?php esc_html_e('API Key Status', 'custom-ai-provider'); ?></th>
                         </tr>
                     </thead>
                     <tbody>

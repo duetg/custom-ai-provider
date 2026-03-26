@@ -20,14 +20,6 @@ use WordPress\CustomAiProvider\Settings\Settings;
 class Admin
 {
     /**
-     * Initialize admin hooks
-     */
-    public static function init(): void
-    {
-        // Nothing to initialize - we use manual form handling
-    }
-
-    /**
      * Render the settings page
      */
     public static function render_settings_page(): void
@@ -93,7 +85,7 @@ class Admin
                 <table class="form-table">
                     <tr>
                         <th scope="row">
-                            <label for="<?php echo esc_attr(Settings::TEXT_BASE_URL_OPTION); ?>">Base URL</label>
+                            <label for="<?php echo esc_attr(Settings::TEXT_BASE_URL_OPTION); ?>"><?php esc_html_e('Base URL', 'custom-ai-provider'); ?></label>
                         </th>
                         <td>
                             <input type="url"
@@ -125,7 +117,7 @@ class Admin
                 <table class="form-table">
                     <tr>
                         <th scope="row">
-                            <label for="<?php echo esc_attr(Settings::IMAGE_BASE_URL_OPTION); ?>">Base URL</label>
+                            <label for="<?php echo esc_attr(Settings::IMAGE_BASE_URL_OPTION); ?>"><?php esc_html_e('Base URL', 'custom-ai-provider'); ?></label>
                         </th>
                         <td>
                             <input type="url"

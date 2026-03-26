@@ -187,6 +187,7 @@ function render_test_page(): void
  */
 function activate(): void
 {
+    // TODO: Add plugin activation tasks (e.g., flush rewrite rules, set default options)
 }
 register_activation_hook(__FILE__, __NAMESPACE__ . '\\activate');
 
@@ -195,6 +196,7 @@ register_activation_hook(__FILE__, __NAMESPACE__ . '\\activate');
  */
 function deactivate(): void
 {
+    // TODO: Add plugin deactivation tasks (e.g., clear caches, cleanup temporary data)
 }
 register_deactivation_hook(__FILE__, __NAMESPACE__ . '\\deactivate');
 

@@ -46,6 +46,17 @@ class Settings
     {
         // Register settings for REST API
         self::register_settings();
+
+        // Auto-clear cache when options are updated externally (REST API, WP-CLI, etc.)
+        $options = [
+            self::TEXT_MODEL_OPTION,
+            self::TEXT_BASE_URL_OPTION,
+            self::IMAGE_MODEL_OPTION,
+            self::IMAGE_BASE_URL_OPTION,
+        ];
+        foreach ($options as $opt) {
+            add_action("update_option_{$opt}", [self::class, 'resetCache']);
+        }
     }
 
     /**

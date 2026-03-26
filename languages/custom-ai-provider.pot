@@ -99,6 +99,10 @@ msgid "The model identifier. Default: dall-e-3"
 msgstr ""
 
 #: src/Admin/Admin.php
+msgid "Base URL"
+msgstr ""
+
+#: src/Admin/Admin.php
 msgid "Save Changes"
 msgstr ""
 
@@ -123,7 +127,7 @@ msgid "Model"
 msgstr ""
 
 #: src/Admin/TestPage.php
-msgid "Status"
+msgid "API Key Status"
 msgstr ""
 
 #: src/Admin/TestPage.php
