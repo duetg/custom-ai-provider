@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Custom AI Provider 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-10 00:00+0000\n"
-"PO-Revision-Date: 2026-03-10 00:00+0000\n"
+"POT-Creation-Date: 2026-03-26 00:00+0000\n"
+"PO-Revision-Date: 2026-03-26 00:00+0000\n"
 "Last-Translator: DuetG <hello@duetg.com>\n"
 "Language-Team: DuetG <hello@duetg.com>\n"
 "Language: en_US\n"
@@ -172,4 +172,28 @@ msgstr ""
 
 #: src/Admin/TestPage.php
 msgid "To use this provider in your code:"
+msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "Please enter a prompt."
+msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "Text provider not registered."
+msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "Text provider not configured. Please add API key via Settings > Connectors."
+msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "Image provider not registered."
+msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "Image provider not configured. Please add API key via Settings > Connectors."
+msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "No image files returned. Result type: "
 msgstr ""
