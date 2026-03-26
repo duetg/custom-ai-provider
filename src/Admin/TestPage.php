@@ -90,7 +90,11 @@ class TestPage
                         }
                     }
                 } catch (\Exception $e) {
-                    $error = $e->getMessage();
+                    custom_ai_debug('Test page error', ['message' => $e->getMessage()]);
+                    $error = __('An error occurred while processing the request. Check debug logs for details.', 'custom-ai-provider');
+                    if (defined('CUSTOM_AI_DEBUG') && CUSTOM_AI_DEBUG) {
+                        $error .= ' ' . $e->getMessage();
+                    }
                 }
             }
         }

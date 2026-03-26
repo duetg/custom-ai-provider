@@ -197,3 +197,7 @@ msgstr ""
 #: src/Admin/TestPage.php
 msgid "No image files returned. Result type: "
 msgstr ""
+
+#: src/Admin/TestPage.php
+msgid "An error occurred while processing the request. Check debug logs for details."
+msgstr ""

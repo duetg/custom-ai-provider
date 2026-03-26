@@ -144,11 +144,15 @@ class CustomImageGenerationModel extends AbstractOpenAiCompatibleImageGeneration
      * @param string $url The image URL
      * @param string $expectedMimeType Expected MIME type
      * @return File The file object
+     * @throws \WordPress\AiClient\Providers\Http\Exception\ResponseException
      */
     private function createFileFromUrl(string $url, string $expectedMimeType): File
     {
+        // Validate URL to prevent SSRF attacks
+        $this->validateImageUrl($url);
+
         // Try to fetch the image and convert to base64
-        $response = wp_remote_get($url);
+        $response = wp_remote_get($url, ['timeout' => 30]);
 
         if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
             $body = wp_remote_retrieve_body($response);
@@ -159,6 +163,82 @@ class CustomImageGenerationModel extends AbstractOpenAiCompatibleImageGeneration
         }
 
         // If we couldn't fetch, return as URL file (might work if URL is accessible)
+        // Log the failure for debugging
+        if (is_wp_error($response)) {
+            custom_ai_debug('Image download failed', [
+                'url' => substr($url, 0, 200),
+                'error' => $response->get_error_message()
+            ]);
+        } else {
+            custom_ai_debug('Image download failed', [
+                'url' => substr($url, 0, 200),
+                'error' => 'HTTP ' . wp_remote_retrieve_response_code($response)
+            ]);
+        }
+
         return new File($url, $expectedMimeType);
+    }
+
+    /**
+     * Validate image URL to prevent SSRF attacks
+     *
+     * By default, blocks private IP ranges, localhost, and non-HTTP protocols.
+     * Override by defining CUSTOM_AI_ALLOW_LOCAL_URLS in wp-config.php.
+     *
+     * @param string $url The URL to validate
+     * @throws \WordPress\AiClient\Providers\Http\Exception\ResponseException
+     */
+    private function validateImageUrl(string $url): void
+    {
+        // Allow override via constant (for local development/testing)
+        if (defined('CUSTOM_AI_ALLOW_LOCAL_URLS') && CUSTOM_AI_ALLOW_LOCAL_URLS) {
+            return;
+        }
+
+        // Validate protocol - only allow HTTP and HTTPS
+        if (!preg_match('#^https?://#i', $url)) {
+            throw new \WordPress\AiClient\Providers\Http\Exception\ResponseException(
+                'Image URL must use HTTP or HTTPS protocol'
+            );
+        }
+
+        $host = wp_parse_url($url, PHP_URL_HOST);
+        if (empty($host)) {
+            throw new \WordPress\AiClient\Providers\Http\Exception\ResponseException(
+                'Invalid image URL: could not parse host'
+            );
+        }
+
+        // Block localhost variations
+        $localhosts = ['localhost', '127.0.0.1', '::1', '0.0.0.0', '::'];
+        if (in_array(strtolower($host), $localhosts, true)) {
+            throw new \WordPress\AiClient\Providers\Http\Exception\ResponseException(
+                'Image URL must not point to localhost'
+            );
+        }
+
+        // Block private and reserved IP addresses
+        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false
+            && filter_var($host, FILTER_VALIDATE_IP) !== false) {
+            throw new \WordPress\AiClient\Providers\Http\Exception\ResponseException(
+                'Image URL must not point to a private or reserved IP address'
+            );
+        }
+
+        // Block hostnames that resolve to private IPs (basic check)
+        // This is a best-effort check since DNS resolution can be slow
+        if (defined('CUSTOM_AI_CHECK_DNS') && CUSTOM_AI_CHECK_DNS) {
+            $dns_result = gethostbynamel($host);
+            if ($dns_result !== false) {
+                foreach ($dns_result as $ip) {
+                    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false
+                        && filter_var($ip, FILTER_VALIDATE_IP) !== false) {
+                        throw new \WordPress\AiClient\Providers\Http\Exception\ResponseException(
+                            'Image URL resolves to a private or reserved IP address'
+                        );
+                    }
+                }
+            }
+        }
     }
 }
