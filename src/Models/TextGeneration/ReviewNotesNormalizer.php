@@ -725,7 +725,7 @@ class ReviewNotesNormalizer
     }
 
     /**
-     * Clean tag prefixes from text (e.g., [SEO], [ACCESSIBILITY], [READABILITY])
+     * Clean tag prefixes from text (e.g., [SEO], [ACCESSIBILITY], [READABILITY], ["SEO"])
      *
      * When model returns text with embedded tags like "[SEO] Some suggestion",
      * this removes the tag prefix and returns clean text.
@@ -736,8 +736,8 @@ class ReviewNotesNormalizer
     private function cleanTagPrefix(string $text): string
     {
         // Remove leading [TAG] pattern where TAG is uppercase letters, possibly with comma
-        // e.g., "[SEO]", "[ACCESSIBILITY, SEO]", "[READABILITY]"
-        $text = preg_replace('/^\[[A-Z][A-Z,\s]+\]\s*/i', '', $text);
+        // e.g., "[SEO]", "[ACCESSIBILITY, SEO]", "[READABILITY]", "["SEO"]"
+        $text = preg_replace('/^\[\"?[A-Z][A-Z,\s]*\"?\]\s*/i', '', $text);
         return trim($text);
     }
 
