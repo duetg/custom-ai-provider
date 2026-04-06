@@ -18,16 +18,6 @@ if (!defined('ABSPATH')) {
  * @param int $maxDataLength Maximum length for data serialization (0 = no limit)
  */
 if (!function_exists('custom_ai_debug')) {
-    /**
-     * Sanitize URL to remove sensitive parameters before logging
-     *
-     * @param string $url
-     * @return string
-     */
-    function custom_ai_sanitize_url_for_log($url) {
-        return preg_replace('/([?&])(api_key|key|token|secret|auth|password|passwd)=[^&]*/i', '$1$2=[REDACTED]', $url);
-    }
-
     function custom_ai_debug($message, $data = null, $maxDataLength = 0) {
         // Only log when CUSTOM_AI_DEBUG is explicitly enabled
         if (!defined('CUSTOM_AI_DEBUG') || !CUSTOM_AI_DEBUG) {
@@ -36,12 +26,15 @@ if (!function_exists('custom_ai_debug')) {
 
         // Sanitize URLs in data to prevent sensitive info leakage
         if (is_array($data)) {
-            $data = array_map(function ($value, $key) {
+            foreach ($data as $key => $value) {
                 if (is_string($value) && preg_match('/^https?:\/\//i', $value)) {
-                    return custom_ai_sanitize_url_for_log($value);
+                    $data[$key] = preg_replace(
+                        '/([?&])(api_key|key|token|secret|auth|password|passwd)=[^&]*/i',
+                        '$1$2=[REDACTED]',
+                        $value
+                    );
                 }
-                return $value;
-            }, $data, array_keys($data));
+            }
         }
 
         $log_message = 'Custom AI: ' . $message;
