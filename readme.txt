@@ -6,7 +6,7 @@ Tested up to: 7.0
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Stable tag: 0.2.2
+Stable tag: 0.2.3
 
 Connect WordPress AI Client to any OpenAI-compatible AI API provider.
 
@@ -135,6 +135,9 @@ By default, the plugin blocks requests to localhost and private IP addresses for
 
 == Changelog ==
 
+= 0.2.3 =
+* Fixed OutputNotEscaped error for image URL in TestPage.php
+
 = 0.2.2 =
 * Fixed namespace declaration order in Settings.php (moved before ABSPATH check)
 * Fixed JS file version to use JS file's own mtime instead of plugin.php
@@ -173,6 +176,9 @@ By default, the plugin blocks requests to localhost and private IP addresses for
 * Support for image generation
 
 == Upgrade Notice ==
+
+= 0.2.3 =
+This version fixes an OutputNotEscaped error in the Test AI page.
 
 = 0.2.2 =
 This version includes code quality improvements and bug fixes from a comprehensive code audit. No configuration changes required for existing users.

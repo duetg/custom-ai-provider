@@ -133,6 +133,9 @@ $files = $result->toImageFiles();
 
 ## Changelog
 
+### 0.2.3
+* Fixed OutputNotEscaped error for image URL in TestPage.php
+
 ### 0.2.2
 * Fixed namespace declaration order in Settings.php (moved before ABSPATH check)
 * Fixed JS file version to use JS file's own mtime instead of plugin.php
