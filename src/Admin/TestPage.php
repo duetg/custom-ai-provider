@@ -251,7 +251,7 @@ class TestPage
                                     }
                                     if ($url): ?>
                                     <div style="margin-top: 10px;">
-                                        <img src="<?php echo $url; ?>" style="max-width: 500px; height: auto; border: 1px solid #ccc;" />
+                                        <img src="<?php echo esc_url($url); ?>" style="max-width: 500px; height: auto; border: 1px solid #ccc;" />
                                     </div>
                                     <?php endif;
                                 endforeach; ?>
