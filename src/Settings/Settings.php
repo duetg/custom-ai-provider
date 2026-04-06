@@ -5,12 +5,12 @@
  * @package CustomAiProvider\Settings
  */
 
+namespace WordPress\CustomAiProvider\Settings;
+
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
     exit;
 }
-
-namespace WordPress\CustomAiProvider\Settings;
 
 use WordPress\AiClient\AiClient;
 use WordPress\AiClient\Providers\Http\DTO\ApiKeyRequestAuthentication;

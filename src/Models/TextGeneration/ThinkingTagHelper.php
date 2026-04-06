@@ -24,8 +24,6 @@ class ThinkingTagHelper
      * - Chinese: <think> </think>
      * - English: <thinking> </thinking>
      *
-     * Uses preg_match_all to correctly handle multiple thinking blocks.
-     *
      * @param string $content The raw content potentially containing thinking tags
      * @return array{content: string, thinking: string}
      */

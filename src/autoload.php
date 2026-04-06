@@ -17,7 +17,8 @@ if (!defined('ABSPATH')) {
  * @param mixed $data Optional data to include (lazy JSON encoding, only when debug is enabled)
  * @param int $maxDataLength Maximum length for data serialization (0 = no limit)
  */
-function custom_ai_debug($message, $data = null, $maxDataLength = 0) {
+if (!function_exists('custom_ai_debug')) {
+    function custom_ai_debug($message, $data = null, $maxDataLength = 0) {
     // Only log when CUSTOM_AI_DEBUG is explicitly enabled
     if (!defined('CUSTOM_AI_DEBUG') || !CUSTOM_AI_DEBUG) {
         return;
@@ -34,6 +35,7 @@ function custom_ai_debug($message, $data = null, $maxDataLength = 0) {
     }
     // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
     error_log($log_message);
+    }
 }
 
 spl_autoload_register(function ($class) {

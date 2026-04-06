@@ -49,7 +49,7 @@ class TestPage
             'custom-ai-test-page',
             $js_url,
             [],
-            filemtime(dirname(__DIR__, 2) . '/plugin.php'),
+            filemtime(dirname(__DIR__, 3) . '/assets/js/test-page.js'),
             true
         );
 

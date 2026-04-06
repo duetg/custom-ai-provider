@@ -38,7 +38,7 @@ class CustomImageGenerationModel extends AbstractOpenAiCompatibleImageGeneration
             return $model;
         }
 
-        // Fallback to metadata ID if not setting
+        // Fallback to metadata ID if not set
         return $this->metadata()->getId();
     }
 
