@@ -40,7 +40,7 @@ class JsonResponseExtractor
             return null;
         }
 
-        if (preg_match('/\{[\s\S]*\}/', $text, $matches)) {
+        if (preg_match('/\{[\s\S]*?\}/', $text, $matches)) {
             $decoded = json_decode($matches[0], true);
             if (is_array($decoded) && json_last_error() === JSON_ERROR_NONE) {
                 return $normalizer->normalize($decoded);
@@ -48,7 +48,7 @@ class JsonResponseExtractor
         }
 
         // Try to find JSON array [...]
-        if (preg_match('/\[[\s\S]*\]/', $text, $matches)) {
+        if (preg_match('/\[[\s\S]*?\]/', $text, $matches)) {
             $decoded = json_decode($matches[0], true);
             if (is_array($decoded) && json_last_error() === JSON_ERROR_NONE) {
                 return $normalizer->normalize(['suggestions' => $decoded]);
