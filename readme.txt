@@ -6,7 +6,7 @@ Tested up to: 7.0
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Stable tag: 0.2.1
+Stable tag: 0.2.2
 
 Connect WordPress AI Client to any OpenAI-compatible AI API provider.
 
@@ -135,6 +135,18 @@ By default, the plugin blocks requests to localhost and private IP addresses for
 
 == Changelog ==
 
+= 0.2.2 =
+* Fixed namespace declaration order in Settings.php (moved before ABSPATH check)
+* Fixed JS file version to use JS file's own mtime instead of plugin.php
+* Added function_exists() wrapper to custom_ai_debug() to prevent conflicts
+* Fixed duplicate docblock comment in ThinkingTagHelper
+* Fixed typo in CustomImageGenerationModel comment ("if not setting" → "if not set")
+* Added URL sanitization in debug logs to filter sensitive params
+* Changed JSON regex from greedy to non-greedy matching for better accuracy
+* Fixed dirname level bug in TestPage.php (dirname level 3 → 2)
+* Fixed array_map key preservation bug in debug logging
+* Inlined URL sanitization logic to avoid nested function definition
+
 = 0.2.1 =
 * Fixed missing resource version in wp_enqueue_script()
 * Fixed unsescaped output in test page
@@ -161,6 +173,9 @@ By default, the plugin blocks requests to localhost and private IP addresses for
 * Support for image generation
 
 == Upgrade Notice ==
+
+= 0.2.2 =
+This version includes code quality improvements and bug fixes from a comprehensive code audit. No configuration changes required for existing users.
 
 = 0.2.1 =
 This version adds SSRF protection for image URLs and fixes several code quality issues. If you use a local image generation model, you may need to add `define('CUSTOM_AI_ALLOW_LOCAL_URLS', true);` to wp-config.php.

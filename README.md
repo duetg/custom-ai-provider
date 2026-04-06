@@ -133,6 +133,18 @@ $files = $result->toImageFiles();
 
 ## Changelog
 
+### 0.2.2
+* Fixed namespace declaration order in Settings.php (moved before ABSPATH check)
+* Fixed JS file version to use JS file's own mtime instead of plugin.php
+* Added function_exists() wrapper to custom_ai_debug() to prevent conflicts
+* Fixed duplicate docblock comment in ThinkingTagHelper
+* Fixed typo in CustomImageGenerationModel comment ("if not setting" → "if not set")
+* Added URL sanitization in debug logs to filter sensitive params (api_key, token, etc.)
+* Changed JSON regex from greedy to non-greedy matching for better accuracy
+* Fixed dirname level bug in TestPage.php (dirname level 3 → 2)
+* Fixed array_map key preservation bug in debug logging
+* Inlined URL sanitization logic to avoid nested function definition
+
 ### 0.2.1
 * Fixed missing resource version in wp_enqueue_script()
 * Fixed unsescaped output in test page
