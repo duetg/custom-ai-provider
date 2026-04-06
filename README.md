@@ -20,11 +20,11 @@ Custom AI Provider allows WordPress AI Client to connect to any AI service that 
 * Image generation support
 * Works with any OpenAI-compatible API
 * Simple configuration through WordPress admin
-* Compatible with WordPress AI Experiments plugin
+* Compatible with WordPress AI plugin
 
-## WordPress AI Experiments Integration
+## WordPress AI Integration
 
-This plugin is compatible with the official [WordPress AI Experiments plugin](https://wordpress.org/plugins/ai/) (version 0.6.0+). When installed together, you can use your custom API provider with WordPress's built-in AI features:
+This plugin is compatible with the official [WordPress AI plugin](https://wordpress.org/plugins/ai/) (version 0.6.0+). When installed together, you can use your custom API provider with WordPress's built-in AI features:
 
 - **Alt Text Generation** - Generates descriptive alt text for images using AI vision models (requires VLM model)
 - **Content Summarization** - Summarizes long-form content into digestible overviews
@@ -55,7 +55,7 @@ This plugin is compatible with the official [WordPress AI Experiments plugin](ht
 
 * PHP 7.4 or higher
 * WordPress 7.0 or higher (uses built-in Connectors API)
-* (Optional) WordPress AI Experiments plugin 0.6.0+ for enhanced integration
+* (Optional) WordPress AI plugin 0.6.0+ for enhanced integration
 
 ## Installation
 
@@ -97,6 +97,14 @@ If you need more consistent results, consider using a model that reliably return
 
 Some providers require an API key. For local installations (like Ollama) that don't require authentication, you can enter any dummy string (e.g., "not-required") as the API key.
 
+### How do I use a local image model that returns localhost URLs?
+
+By default, the plugin blocks requests to localhost and private IP addresses for security (SSRF protection). If you're using a local image generation model that returns localhost URLs, you can enable local URL access by adding this to your `wp-config.php`:
+
+```php
+define('CUSTOM_AI_ALLOW_LOCAL_URLS', true);
+```
+
 ### How do I use this in my code?
 
 ```php
@@ -125,8 +133,16 @@ $files = $result->toImageFiles();
 
 ## Changelog
 
+### 0.2.1
+* Fixed missing resource version in wp_enqueue_script()
+* Fixed unsescaped output in test page
+* Added direct file access protection to Settings.php
+* Added SSRF protection for image URLs (blocks localhost/private IPs by default)
+* Added CUSTOM_AI_ALLOW_LOCAL_URLS constant to enable local image URLs when needed
+* Updated to WordPress AI plugin (removed "Experiments" branding)
+
 ### 0.2.0
-* Added compatibility with WordPress AI Experiments plugin (0.6.0+)
+* Added compatibility with WordPress AI plugin (0.6.0+)
 * Added Alt Text Generation support (requires VLM model)
 * Added Image Prompt Generation support
 * Added Review Notes feature

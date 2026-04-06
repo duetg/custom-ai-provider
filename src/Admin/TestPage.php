@@ -49,7 +49,7 @@ class TestPage
             'custom-ai-test-page',
             $js_url,
             [],
-            null,
+            filemtime(dirname(__DIR__, 2) . '/plugin.php'),
             true
         );
 
@@ -244,7 +244,7 @@ class TestPage
                                         $dataUri = $file->getDataUri();
                                         // Only allow safe image MIME types in data URIs
                                         if (preg_match('#^data:(image/(?:png|jpeg|gif|webp));base64,[A-Za-z0-9+/=]+$#', $dataUri)) {
-                                            $url = $dataUri;
+                                            $url = esc_url($dataUri);
                                         }
                                     } else {
                                         $url = esc_url($file->getUrl());

@@ -32,6 +32,7 @@ function custom_ai_debug($message, $data = null, $maxDataLength = 0) {
         }
         $log_message .= ' - ' . $encoded;
     }
+    // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
     error_log($log_message);
 }
 

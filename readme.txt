@@ -6,7 +6,7 @@ Tested up to: 7.0
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Stable tag: 0.2.0
+Stable tag: 0.2.1
 
 Connect WordPress AI Client to any OpenAI-compatible AI API provider.
 
@@ -22,9 +22,9 @@ Custom AI Provider allows WordPress AI Client to connect to any AI service that 
 * SiliconFlow
 * And any other OpenAI-compatible API provider
 
-= WordPress AI Experiments Integration =
+= WordPress AI Integration =
 
-This plugin is compatible with the official [WordPress AI Experiments plugin](https://wordpress.org/plugins/ai/) (version 0.6.0+). When installed together, you can use your custom API provider with WordPress's built-in AI features:
+This plugin is compatible with the official [WordPress AI plugin](https://wordpress.org/plugins/ai/) (version 0.6.0+). When installed together, you can use your custom API provider with WordPress's built-in AI features:
 
 * **Alt Text Generation** - Generates descriptive alt text for images using AI vision models (requires VLM model)
 * **Content Summarization** - Summarizes long-form content into digestible overviews
@@ -55,7 +55,7 @@ Note: Only Alt Text Generation requires a VLM. All other features work with a st
 
 * PHP 7.4 or higher
 * WordPress 7.0 or higher (uses built-in Connectors API)
-* (Optional) WordPress AI Experiments plugin 0.6.0+ for enhanced integration
+* (Optional) WordPress AI plugin 0.6.0+ for enhanced integration
 
 == Installation ==
 
@@ -97,6 +97,12 @@ If you need more consistent results, consider using a model that reliably return
 
 Some providers require an API key. For local installations (like Ollama) that don't require authentication, you can enter any dummy string (e.g., "not-required") as the API key.
 
+= How do I use a local image model that returns localhost URLs? =
+
+By default, the plugin blocks requests to localhost and private IP addresses for security (SSRF protection). If you're using a local image generation model that returns localhost URLs, you can enable local URL access by adding this to your `wp-config.php`:
+
+    define('CUSTOM_AI_ALLOW_LOCAL_URLS', true);
+
 = How do I use this in my code? =
 
     use WordPress\AiClient\AiClient;
@@ -129,8 +135,16 @@ Some providers require an API key. For local installations (like Ollama) that do
 
 == Changelog ==
 
+= 0.2.1 =
+* Fixed missing resource version in wp_enqueue_script()
+* Fixed unsescaped output in test page
+* Added direct file access protection to Settings.php
+* Added SSRF protection for image URLs (blocks localhost/private IPs by default)
+* Added CUSTOM_AI_ALLOW_LOCAL_URLS constant to enable local image URLs when needed
+* Updated to WordPress AI plugin (removed "Experiments" branding)
+
 = 0.2.0 =
-* Added compatibility with WordPress AI Experiments plugin (0.6.0+)
+* Added compatibility with WordPress AI plugin (0.6.0+)
 * Added Alt Text Generation support (requires VLM model)
 * Added Image Prompt Generation support
 * Added Review Notes feature
@@ -148,5 +162,8 @@ Some providers require an API key. For local installations (like Ollama) that do
 
 == Upgrade Notice ==
 
+= 0.2.1 =
+This version adds SSRF protection for image URLs and fixes several code quality issues. If you use a local image generation model, you may need to add `define('CUSTOM_AI_ALLOW_LOCAL_URLS', true);` to wp-config.php.
+
 = 0.2.0 =
-This version adds full compatibility with WordPress AI Experiments plugin (0.6.0+). Upgrade to use AI features like Alt Text Generation, Content Summarization, Review Notes, and more.
+This version adds full compatibility with WordPress AI plugin (0.6.0+). Upgrade to use AI features like Alt Text Generation, Content Summarization, Review Notes, and more.
