@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Custom AI Provider
+ * Plugin Name: DuetG AI Connector
  * Description: Connect WordPress AI Client to any OpenAI-compatible AI API provider
  * Version: 0.2.3
  * Author: DuetG
@@ -8,7 +8,7 @@
  * License: GPL-2.0-or-later
  * Requires at least: 7.0
  * Requires PHP: 7.4
- * Text Domain: custom-ai-provider
+ * Text Domain: duetg-ai-connector
  *
  * @package CustomAiProvider
  */
@@ -138,18 +138,18 @@ add_action('admin_init', __NAMESPACE__ . '\\init_settings');
 function add_admin_menu(): void
 {
     add_options_page(
-        __('Custom AI Provider', 'custom-ai-provider'),
-        __('Custom AI', 'custom-ai-provider'),
+        __('DuetG AI Connector', 'duetg-ai-connector'),
+        __('Custom AI', 'duetg-ai-connector'),
         'manage_options',
-        'custom-ai-provider',
+        'duetg-ai-connector',
         __NAMESPACE__ . '\\render_settings_page'
     );
 
     add_management_page(
-        __('Test AI', 'custom-ai-provider'),
-        __('Test AI', 'custom-ai-provider'),
+        __('Test AI', 'duetg-ai-connector'),
+        __('Test AI', 'duetg-ai-connector'),
         'manage_options',
-        'custom-ai-provider-test',
+        'duetg-ai-connector-test',
         __NAMESPACE__ . '\\render_test_page'
     );
 }
@@ -171,9 +171,9 @@ function render_test_page(): void
     // Check if WordPress AI Client is available
     if (!class_exists('WordPress\AiClient\AiClient')) {
         echo '<div class="wrap">';
-        echo '<h1>' . esc_html__('Test AI', 'custom-ai-provider') . '</h1>';
+        echo '<h1>' . esc_html__('Test AI', 'duetg-ai-connector') . '</h1>';
         echo '<div class="notice notice-error"><p>';
-        echo esc_html__('Custom AI Provider requires WordPress 7.0 or higher.', 'custom-ai-provider');
+        echo esc_html__('DuetG AI Connector requires WordPress 7.0 or higher.', 'duetg-ai-connector');
         echo '</p></div>';
         echo '</div>';
         return;
@@ -208,14 +208,14 @@ register_deactivation_hook(__FILE__, __NAMESPACE__ . '\\deactivate');
  */
 function custom_ai_provider_action_links(array $links): array {
     // Test AI link
-    $test_ai_link = '<a href="' . admin_url('tools.php?page=custom-ai-provider-test') . '">'
-        . esc_html__('Test AI', 'custom-ai-provider')
+    $test_ai_link = '<a href="' . admin_url('tools.php?page=duetg-ai-connector-test') . '">'
+        . esc_html__('Test AI', 'duetg-ai-connector')
         . '</a>';
     array_unshift($links, $test_ai_link);
 
     // Custom AI settings link
-    $custom_ai_link = '<a href="' . admin_url('options-general.php?page=custom-ai-provider') . '">'
-        . esc_html__('Custom AI', 'custom-ai-provider')
+    $custom_ai_link = '<a href="' . admin_url('options-general.php?page=duetg-ai-connector') . '">'
+        . esc_html__('Custom AI', 'duetg-ai-connector')
         . '</a>';
     array_unshift($links, $custom_ai_link);
 
