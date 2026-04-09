@@ -1,4 +1,4 @@
-=== Custom AI Provider ===
+=== DuetG AI Connector ===
 Contributors: duetg
 Tags: ai, openai, gpt, artificial-intelligence, connector
 Requires at least: 7.0
@@ -12,7 +12,7 @@ Connect WordPress AI Client to any OpenAI-compatible AI API provider.
 
 == Description ==
 
-Custom AI Provider allows WordPress AI Client to connect to any AI service that provides an OpenAI-compatible API, such as:
+DuetG AI Connector allows WordPress AI Client to connect to any AI service that provides an OpenAI-compatible API, such as:
 
 * Ollama (local AI)
 * LM Studio (local AI)
