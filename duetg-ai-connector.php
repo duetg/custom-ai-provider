@@ -30,7 +30,7 @@ require_once __DIR__ . '/src/autoload.php';
  * @param array $models
  * @return array
  */
-function custom_ai_preferred_image_models_filter(array $models): array
+function duetgaicon_preferred_image_models_filter(array $models): array
 {
     $image_model = Settings::getImageModel();
     if (!empty($image_model)) {
@@ -38,7 +38,7 @@ function custom_ai_preferred_image_models_filter(array $models): array
     }
     return $models;
 }
-add_filter('wpai_preferred_image_models', __NAMESPACE__ . '\\custom_ai_preferred_image_models_filter', PHP_INT_MAX);
+add_filter('wpai_preferred_image_models', __NAMESPACE__ . '\\duetgaicon_preferred_image_models_filter', PHP_INT_MAX);
 
 /**
  * Add custom text model to preferred vision models list
@@ -46,7 +46,7 @@ add_filter('wpai_preferred_image_models', __NAMESPACE__ . '\\custom_ai_preferred
  * @param array $models
  * @return array
  */
-function custom_ai_preferred_vision_models_filter(array $models): array
+function duetgaicon_preferred_vision_models_filter(array $models): array
 {
     $text_model = Settings::getTextModel();
     if (!empty($text_model)) {
@@ -54,7 +54,7 @@ function custom_ai_preferred_vision_models_filter(array $models): array
     }
     return $models;
 }
-add_filter('wpai_preferred_vision_models', __NAMESPACE__ . '\\custom_ai_preferred_vision_models_filter', PHP_INT_MAX);
+add_filter('wpai_preferred_vision_models', __NAMESPACE__ . '\\duetgaicon_preferred_vision_models_filter', PHP_INT_MAX);
 
 /**
  * Increase timeout for AI API requests only
@@ -63,7 +63,7 @@ add_filter('wpai_preferred_vision_models', __NAMESPACE__ . '\\custom_ai_preferre
  * @param string $url
  * @return array
  */
-function custom_ai_http_request_args_filter(array $args, string $url): array
+function duetgaicon_http_request_args_filter(array $args, string $url): array
 {
     $ai_base_urls = [
         Settings::getTextBaseUrl(),
@@ -79,7 +79,7 @@ function custom_ai_http_request_args_filter(array $args, string $url): array
 
     return $args;
 }
-add_filter('http_request_args', __NAMESPACE__ . '\\custom_ai_http_request_args_filter', 10, 2);
+add_filter('http_request_args', __NAMESPACE__ . '\\duetgaicon_http_request_args_filter', 10, 2);
 
 /**
  * Add custom text model to preferred text generation models list
@@ -87,7 +87,7 @@ add_filter('http_request_args', __NAMESPACE__ . '\\custom_ai_http_request_args_f
  * @param array $models
  * @return array
  */
-function custom_ai_preferred_text_models_filter(array $models): array
+function duetgaicon_preferred_text_models_filter(array $models): array
 {
     $text_model = Settings::getTextModel();
     if (!empty($text_model)) {
@@ -95,7 +95,7 @@ function custom_ai_preferred_text_models_filter(array $models): array
     }
     return $models;
 }
-add_filter('wpai_preferred_text_models', __NAMESPACE__ . '\\custom_ai_preferred_text_models_filter', PHP_INT_MAX);
+add_filter('wpai_preferred_text_models', __NAMESPACE__ . '\\duetgaicon_preferred_text_models_filter', PHP_INT_MAX);
 
 /**
  * Register the connector to WordPress AI system
@@ -206,7 +206,7 @@ register_deactivation_hook(__FILE__, __NAMESPACE__ . '\\deactivate');
  * @param array $links Existing plugin action links.
  * @return array Modified links array.
  */
-function custom_ai_provider_action_links(array $links): array {
+function duetgaicon_provider_action_links(array $links): array {
     // Test AI link
     $test_ai_link = '<a href="' . admin_url('tools.php?page=duetg-ai-connector-test') . '">'
         . esc_html__('Test AI', 'duetg-ai-connector')
@@ -221,4 +221,4 @@ function custom_ai_provider_action_links(array $links): array {
 
     return $links;
 }
-add_filter('plugin_action_links_' . plugin_basename(__FILE__), __NAMESPACE__ . '\\custom_ai_provider_action_links');
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), __NAMESPACE__ . '\\duetgaicon_provider_action_links');

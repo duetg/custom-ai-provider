@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin test page for Custom AI Provider
+ * Admin test page for DuetG AI Connector
  *
  * @package CustomAiProvider\Admin
  */
@@ -42,7 +42,7 @@ class TestPage
      */
     public static function enqueue_scripts(): void
     {
-        $plugin_url = plugin_dir_url(dirname(__DIR__, 2) . '/plugin.php');
+        $plugin_url = plugin_dir_url(dirname(__DIR__, 2) . '/duetg-ai-connector.php');
         $js_url = $plugin_url . 'assets/js/test-page.js';
 
         wp_enqueue_script(
@@ -82,7 +82,7 @@ class TestPage
         $prompt = '';
 
         // Handle form submission
-        if (isset($_POST['test_submit']) && check_admin_referer('custom_ai_test_action')) {
+        if (isset($_POST['test_submit']) && check_admin_referer('duetgaicon_test_action')) {
             $provider_type = isset($_POST['provider_type']) ? sanitize_text_field(wp_unslash($_POST['provider_type'])) : 'text';
             $prompt = isset($_POST['prompt']) ? sanitize_text_field(wp_unslash($_POST['prompt'])) : '';
 
@@ -122,7 +122,7 @@ class TestPage
                 } catch (\Exception $e) {
                     duetgaicon_debug('Test page error', ['message' => $e->getMessage()]);
                     $error = __('An error occurred while processing the request. Check debug logs for details.', 'duetg-ai-connector');
-                    if (defined('CUSTOM_AI_DEBUG') && CUSTOM_AI_DEBUG) {
+                    if (defined('DUETGAICON_DEBUG') && DUETGAICON_DEBUG) {
                         $error .= ' ' . $e->getMessage();
                     }
                 }
@@ -190,7 +190,7 @@ class TestPage
             <div class="card" style="max-width: 100%; margin-top: 20px;">
                 <h2><?php esc_html_e('Test AI', 'duetg-ai-connector'); ?></h2>
                 <form method="post">
-                    <?php wp_nonce_field('custom_ai_test_action'); ?>
+                    <?php wp_nonce_field('duetgaicon_test_action'); ?>
 
                     <table class="form-table">
                         <tr>

@@ -102,7 +102,7 @@ Some providers require an API key. For local installations (like Ollama) that do
 By default, the plugin blocks requests to localhost and private IP addresses for security (SSRF protection). If you're using a local image generation model that returns localhost URLs, you can enable local URL access by adding this to your `wp-config.php`:
 
 ```php
-define('CUSTOM_AI_ALLOW_LOCAL_URLS', true);
+define('DUETGAICON_ALLOW_LOCAL_URLS', true);
 ```
 
 ### How do I use this in my code?

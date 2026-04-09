@@ -101,7 +101,7 @@ Some providers require an API key. For local installations (like Ollama) that do
 
 By default, the plugin blocks requests to localhost and private IP addresses for security (SSRF protection). If you're using a local image generation model that returns localhost URLs, you can enable local URL access by adding this to your `wp-config.php`:
 
-    define('CUSTOM_AI_ALLOW_LOCAL_URLS', true);
+    define('DUETGAICON_ALLOW_LOCAL_URLS', true);
 
 = How do I use this in my code? =
 
@@ -175,6 +175,26 @@ By default, the plugin blocks requests to localhost and private IP addresses for
 * Support for text generation
 * Support for image generation
 
+== External Services ==
+
+This plugin connects to user-configured, third-party AI API services
+(any OpenAI-compatible API endpoint). It is needed to provide AI text
+generation and image generation features.
+
+Data is sent to the configured API endpoint when:
+* A user submits a text generation request via the Test AI page or
+  the WordPress AI features (Alt Text, Summarization, Review Notes, etc.)
+* A user submits an image generation request
+
+The data sent includes: the user's prompt text, model configuration,
+and for vision features, image data.
+
+Since this plugin connects to user-configured endpoints, users should
+review the terms of service and privacy policy of their chosen provider:
+* OpenAI: [Terms of Service](https://openai.com/policies/terms-of-use),
+  [Privacy Policy](https://openai.com/policies/privacy-policy)
+* Other providers: Please consult your provider's documentation
+
 == Upgrade Notice ==
 
 = 0.2.3 =
@@ -184,7 +204,7 @@ This version fixes an OutputNotEscaped error in the Test AI page.
 This version includes code quality improvements and bug fixes from a comprehensive code audit. No configuration changes required for existing users.
 
 = 0.2.1 =
-This version adds SSRF protection for image URLs and fixes several code quality issues. If you use a local image generation model, you may need to add `define('CUSTOM_AI_ALLOW_LOCAL_URLS', true);` to wp-config.php.
+This version adds SSRF protection for image URLs and fixes several code quality issues. If you use a local image generation model, you may need to add `define('DUETGAICON_ALLOW_LOCAL_URLS', true);` to wp-config.php.
 
 = 0.2.0 =
 This version adds full compatibility with WordPress AI plugin (0.6.0+). Upgrade to use AI features like Alt Text Generation, Content Summarization, Review Notes, and more.

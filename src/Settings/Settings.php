@@ -20,6 +20,12 @@ use WordPress\AiClient\Providers\Http\DTO\ApiKeyRequestAuthentication;
  */
 class Settings
 {
+    // Default API Configuration
+    public const DEFAULT_TEXT_BASE_URL = 'https://api.openai.com/v1';
+    public const DEFAULT_TEXT_MODEL = 'gpt-4';
+    public const DEFAULT_IMAGE_BASE_URL = 'https://api.openai.com/v1';
+    public const DEFAULT_IMAGE_MODEL = 'dall-e-3';
+
     // Cached values to reduce get_option() calls
     private static ?string $cachedTextModel = null;
     private static ?string $cachedTextBaseUrl = null;
@@ -74,14 +80,14 @@ class Settings
         register_setting('connectors', self::TEXT_BASE_URL_OPTION, [
             'type' => 'string',
             'sanitize_callback' => 'esc_url_raw',
-            'default' => '',
+            'default' => self::DEFAULT_TEXT_BASE_URL,
             'show_in_rest' => true,
         ]);
 
         register_setting('connectors', self::TEXT_MODEL_OPTION, [
             'type' => 'string',
             'sanitize_callback' => 'sanitize_text_field',
-            'default' => '',
+            'default' => self::DEFAULT_TEXT_MODEL,
             'show_in_rest' => true,
         ]);
 
@@ -96,14 +102,14 @@ class Settings
         register_setting('connectors', self::IMAGE_BASE_URL_OPTION, [
             'type' => 'string',
             'sanitize_callback' => 'esc_url_raw',
-            'default' => '',
+            'default' => self::DEFAULT_IMAGE_BASE_URL,
             'show_in_rest' => true,
         ]);
 
         register_setting('connectors', self::IMAGE_MODEL_OPTION, [
             'type' => 'string',
             'sanitize_callback' => 'sanitize_text_field',
-            'default' => '',
+            'default' => self::DEFAULT_IMAGE_MODEL,
             'show_in_rest' => true,
         ]);
     }
@@ -191,7 +197,7 @@ class Settings
     public static function getTextModel(): string
     {
         if (self::$cachedTextModel === null) {
-            self::$cachedTextModel = get_option(self::TEXT_MODEL_OPTION, '');
+            self::$cachedTextModel = get_option(self::TEXT_MODEL_OPTION, self::DEFAULT_TEXT_MODEL);
         }
         return self::$cachedTextModel;
     }
@@ -202,7 +208,7 @@ class Settings
     public static function getTextBaseUrl(): string
     {
         if (self::$cachedTextBaseUrl === null) {
-            self::$cachedTextBaseUrl = get_option(self::TEXT_BASE_URL_OPTION, '');
+            self::$cachedTextBaseUrl = get_option(self::TEXT_BASE_URL_OPTION, self::DEFAULT_TEXT_BASE_URL);
         }
         return self::$cachedTextBaseUrl;
     }
@@ -213,7 +219,7 @@ class Settings
     public static function getImageModel(): string
     {
         if (self::$cachedImageModel === null) {
-            self::$cachedImageModel = get_option(self::IMAGE_MODEL_OPTION, '');
+            self::$cachedImageModel = get_option(self::IMAGE_MODEL_OPTION, self::DEFAULT_IMAGE_MODEL);
         }
         return self::$cachedImageModel;
     }
@@ -224,7 +230,7 @@ class Settings
     public static function getImageBaseUrl(): string
     {
         if (self::$cachedImageBaseUrl === null) {
-            self::$cachedImageBaseUrl = get_option(self::IMAGE_BASE_URL_OPTION, '');
+            self::$cachedImageBaseUrl = get_option(self::IMAGE_BASE_URL_OPTION, self::DEFAULT_IMAGE_BASE_URL);
         }
         return self::$cachedImageBaseUrl;
     }

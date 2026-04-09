@@ -183,7 +183,7 @@ class CustomImageGenerationModel extends AbstractOpenAiCompatibleImageGeneration
      * Validate image URL to prevent SSRF attacks
      *
      * By default, blocks private IP ranges, localhost, and non-HTTP protocols.
-     * Override by defining CUSTOM_AI_ALLOW_LOCAL_URLS in wp-config.php.
+     * Override by defining DUETGAICON_ALLOW_LOCAL_URLS in wp-config.php.
      *
      * @param string $url The URL to validate
      * @throws \WordPress\AiClient\Providers\Http\Exception\ResponseException
@@ -191,7 +191,7 @@ class CustomImageGenerationModel extends AbstractOpenAiCompatibleImageGeneration
     private function validateImageUrl(string $url): void
     {
         // Allow override via constant (for local development/testing)
-        if (defined('CUSTOM_AI_ALLOW_LOCAL_URLS') && CUSTOM_AI_ALLOW_LOCAL_URLS) {
+        if (defined('DUETGAICON_ALLOW_LOCAL_URLS') && DUETGAICON_ALLOW_LOCAL_URLS) {
             return;
         }
 
@@ -227,7 +227,7 @@ class CustomImageGenerationModel extends AbstractOpenAiCompatibleImageGeneration
 
         // Block hostnames that resolve to private IPs (basic check)
         // This is a best-effort check since DNS resolution can be slow
-        if (defined('CUSTOM_AI_CHECK_DNS') && CUSTOM_AI_CHECK_DNS) {
+        if (defined('DUETGAICON_CHECK_DNS') && DUETGAICON_CHECK_DNS) {
             $dns_result = gethostbynamel($host);
             if ($dns_result !== false) {
                 foreach ($dns_result as $ip) {
