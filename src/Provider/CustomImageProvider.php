@@ -30,11 +30,11 @@ class CustomImageProvider extends AbstractApiProvider
     {
         return new ProviderMetadata(
             'custom_image',
-            __('Custom Image Generation', 'custom-ai-provider'),
+            __('Custom Image Generation', 'duetg-ai-connector'),
             ProviderTypeEnum::cloud(),
             null,
             RequestAuthenticationMethod::apiKey(),
-            __('Image generation with custom OpenAI-compatible API provider', 'custom-ai-provider')
+            __('Image generation with custom OpenAI-compatible API provider', 'duetg-ai-connector')
         );
     }
 
@@ -82,7 +82,7 @@ class CustomImageProvider extends AbstractApiProvider
         return new class implements \WordPress\AiClient\Providers\Contracts\ProviderAvailabilityInterface {
             public function isConfigured(): bool
             {
-                // Check if API key is configured - URL and model always have defaults
+                // Check if API key is configured
                 return !empty(Settings::get_image_api_key());
             }
         };

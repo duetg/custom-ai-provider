@@ -46,7 +46,7 @@ class TestPage
         $js_url = $plugin_url . 'assets/js/test-page.js';
 
         wp_enqueue_script(
-            'custom-ai-test-page',
+            'duetgaicon-test-page',
             $js_url,
             [],
             filemtime(dirname(__DIR__, 2) . '/assets/js/test-page.js'),
@@ -55,10 +55,10 @@ class TestPage
 
         // Pass localized data for placeholders
         wp_add_inline_script(
-            'custom-ai-test-page',
+            'duetgaicon-test-page',
             'window.customAiTestPage = ' . json_encode([
-                'textPlaceholder' => __('Enter your text prompt...', 'custom-ai-provider'),
-                'imagePlaceholder' => __('Describe the image you want to generate...', 'custom-ai-provider'),
+                'textPlaceholder' => __('Enter your text prompt...', 'duetg-ai-connector'),
+                'imagePlaceholder' => __('Describe the image you want to generate...', 'duetg-ai-connector'),
             ]) . ';',
             'before'
         );
@@ -87,16 +87,16 @@ class TestPage
             $prompt = isset($_POST['prompt']) ? sanitize_text_field(wp_unslash($_POST['prompt'])) : '';
 
             if (empty($prompt)) {
-                $error = __('Please enter a prompt.', 'custom-ai-provider');
+                $error = __('Please enter a prompt.', 'duetg-ai-connector');
             } else {
                 try {
                     $registry = AiClient::defaultRegistry();
 
                     if ($provider_type === 'text') {
                         if (!$registry->hasProvider('custom_text')) {
-                            $error = __('Text provider not registered.', 'custom-ai-provider');
+                            $error = __('Text provider not registered.', 'duetg-ai-connector');
                         } elseif (!$registry->isProviderConfigured('custom_text')) {
-                            $error = __('Text provider not configured. Please add API key via Settings > Connectors.', 'custom-ai-provider');
+                            $error = __('Text provider not configured. Please add API key via Settings > Connectors.', 'duetg-ai-connector');
                         } else {
                             $model = $registry->getProviderModel('custom_text', CustomTextProvider::getModelId());
                             $result = $model->generateTextResult([
@@ -107,9 +107,9 @@ class TestPage
                         }
                     } else {
                         if (!$registry->hasProvider('custom_image')) {
-                            $error = __('Image provider not registered.', 'custom-ai-provider');
+                            $error = __('Image provider not registered.', 'duetg-ai-connector');
                         } elseif (!$registry->isProviderConfigured('custom_image')) {
-                            $error = __('Image provider not configured. Please add API key via Settings > Connectors.', 'custom-ai-provider');
+                            $error = __('Image provider not configured. Please add API key via Settings > Connectors.', 'duetg-ai-connector');
                         } else {
                             $model = $registry->getProviderModel('custom_image', CustomImageProvider::getModelId());
                             $result = $model->generateImageResult([
@@ -120,8 +120,8 @@ class TestPage
                         }
                     }
                 } catch (\Exception $e) {
-                    custom_ai_debug('Test page error', ['message' => $e->getMessage()]);
-                    $error = __('An error occurred while processing the request. Check debug logs for details.', 'custom-ai-provider');
+                    duetgaicon_debug('Test page error', ['message' => $e->getMessage()]);
+                    $error = __('An error occurred while processing the request. Check debug logs for details.', 'duetg-ai-connector');
                     if (defined('CUSTOM_AI_DEBUG') && CUSTOM_AI_DEBUG) {
                         $error .= ' ' . $e->getMessage();
                     }
@@ -140,19 +140,19 @@ class TestPage
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
             <div class="card" style="max-width: 100%; margin-top: 20px;">
-                <h2><?php esc_html_e('Provider Status', 'custom-ai-provider'); ?></h2>
+                <h2><?php esc_html_e('Provider Status', 'duetg-ai-connector'); ?></h2>
                 <table class="widefat">
                     <thead>
                         <tr>
-                            <th><?php esc_html_e('Type', 'custom-ai-provider'); ?></th>
-                            <th><?php esc_html_e('Base URL', 'custom-ai-provider'); ?></th>
-                            <th><?php esc_html_e('Model', 'custom-ai-provider'); ?></th>
-                            <th><?php esc_html_e('API Key Status', 'custom-ai-provider'); ?></th>
+                            <th><?php esc_html_e('Type', 'duetg-ai-connector'); ?></th>
+                            <th><?php esc_html_e('Base URL', 'duetg-ai-connector'); ?></th>
+                            <th><?php esc_html_e('Model', 'duetg-ai-connector'); ?></th>
+                            <th><?php esc_html_e('API Key Status', 'duetg-ai-connector'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><strong><?php esc_html_e('Text Generation', 'custom-ai-provider'); ?></strong></td>
+                            <td><strong><?php esc_html_e('Text Generation', 'duetg-ai-connector'); ?></strong></td>
                             <td><?php echo esc_html($text_base_url); ?></td>
                             <td><?php echo esc_html($text_model); ?></td>
                             <td>
@@ -160,15 +160,15 @@ class TestPage
                                 $text_api_key = self::get_api_key_status('text');
 
                                 if ($text_api_key) {
-                                    echo '<span style="color: green;">&#10004; ' . esc_html__('Configured', 'custom-ai-provider') . '</span>';
+                                    echo '<span style="color: green;">&#10004; ' . esc_html__('Configured', 'duetg-ai-connector') . '</span>';
                                 } else {
-                                    echo '<span style="color: red;">&#10008; ' . esc_html__('Not Configured', 'custom-ai-provider') . '</span>';
+                                    echo '<span style="color: red;">&#10008; ' . esc_html__('Not Configured', 'duetg-ai-connector') . '</span>';
                                 }
                                 ?>
                             </td>
                         </tr>
                         <tr>
-                            <td><strong><?php esc_html_e('Image Generation', 'custom-ai-provider'); ?></strong></td>
+                            <td><strong><?php esc_html_e('Image Generation', 'duetg-ai-connector'); ?></strong></td>
                             <td><?php echo esc_html($image_base_url); ?></td>
                             <td><?php echo esc_html($image_model); ?></td>
                             <td>
@@ -176,9 +176,9 @@ class TestPage
                                 $image_api_key = self::get_api_key_status('image');
 
                                 if ($image_api_key) {
-                                    echo '<span style="color: green;">&#10004; ' . esc_html__('Configured', 'custom-ai-provider') . '</span>';
+                                    echo '<span style="color: green;">&#10004; ' . esc_html__('Configured', 'duetg-ai-connector') . '</span>';
                                 } else {
-                                    echo '<span style="color: red;">&#10008; ' . esc_html__('Not Configured', 'custom-ai-provider') . '</span>';
+                                    echo '<span style="color: red;">&#10008; ' . esc_html__('Not Configured', 'duetg-ai-connector') . '</span>';
                                 }
                                 ?>
                             </td>
@@ -188,23 +188,23 @@ class TestPage
             </div>
 
             <div class="card" style="max-width: 100%; margin-top: 20px;">
-                <h2><?php esc_html_e('Test AI', 'custom-ai-provider'); ?></h2>
+                <h2><?php esc_html_e('Test AI', 'duetg-ai-connector'); ?></h2>
                 <form method="post">
                     <?php wp_nonce_field('custom_ai_test_action'); ?>
 
                     <table class="form-table">
                         <tr>
-                            <th scope="row"><?php esc_html_e('Provider Type', 'custom-ai-provider'); ?></th>
+                            <th scope="row"><?php esc_html_e('Provider Type', 'duetg-ai-connector'); ?></th>
                             <td>
                                 <select name="provider_type" id="provider_type">
-                                    <option value="text" <?php selected($provider_type, 'text'); ?>><?php esc_html_e('Text Generation', 'custom-ai-provider'); ?></option>
-                                    <option value="image" <?php selected($provider_type, 'image'); ?>><?php esc_html_e('Image Generation', 'custom-ai-provider'); ?></option>
+                                    <option value="text" <?php selected($provider_type, 'text'); ?>><?php esc_html_e('Text Generation', 'duetg-ai-connector'); ?></option>
+                                    <option value="image" <?php selected($provider_type, 'image'); ?>><?php esc_html_e('Image Generation', 'duetg-ai-connector'); ?></option>
                                 </select>
                             </td>
                         </tr>
                         <tr>
                             <th scope="row">
-                                <label for="prompt"><?php esc_html_e('Prompt', 'custom-ai-provider'); ?></label>
+                                <label for="prompt"><?php esc_html_e('Prompt', 'duetg-ai-connector'); ?></label>
                             </th>
                             <td>
                                 <textarea
@@ -212,24 +212,24 @@ class TestPage
                                     id="prompt"
                                     rows="4"
                                     class="large-text"
-                                    placeholder="<?php echo $provider_type === 'text' ? esc_attr__('Enter your text prompt...', 'custom-ai-provider') : esc_attr__('Describe the image you want to generate...', 'custom-ai-provider'); ?>"
+                                    placeholder="<?php echo $provider_type === 'text' ? esc_attr__('Enter your text prompt...', 'duetg-ai-connector') : esc_attr__('Describe the image you want to generate...', 'duetg-ai-connector'); ?>"
                                 ><?php echo esc_textarea($prompt); ?></textarea>
                             </td>
                         </tr>
                     </table>
 
-                    <?php submit_button(esc_html__('Generate', 'custom-ai-provider'), 'primary', 'test_submit', false); ?>
+                    <?php submit_button(esc_html__('Generate', 'duetg-ai-connector'), 'primary', 'test_submit', false); ?>
                 </form>
 
                 <?php if ($error): ?>
                     <div class="notice notice-error" style="margin-top: 20px;">
-                        <p><strong><?php esc_html_e('Error', 'custom-ai-provider'); ?>:</strong> <?php echo esc_html($error); ?></p>
+                        <p><strong><?php esc_html_e('Error', 'duetg-ai-connector'); ?>:</strong> <?php echo esc_html($error); ?></p>
                     </div>
                 <?php endif; ?>
 
                 <?php if ($result): ?>
                     <div class="notice notice-success" style="margin-top: 20px;">
-                        <p><strong><?php esc_html_e('Success!', 'custom-ai-provider'); ?></strong></p>
+                        <p><strong><?php esc_html_e('Success!', 'duetg-ai-connector'); ?></strong></p>
                         <?php if ($provider_type === 'text'): ?>
                             <?php $text = $result->toText(); ?>
                             <pre style="background: #f0f0f0; padding: 10px; overflow-x: auto; max-height: 300px;"><?php echo esc_html($text); ?></pre>
@@ -256,7 +256,7 @@ class TestPage
                                     <?php endif;
                                 endforeach; ?>
                             <?php else: ?>
-                                <p><?php echo esc_html__('No image files returned. Result type: ', 'custom-ai-provider') . esc_html(get_class($result)); ?></p>
+                                <p><?php echo esc_html__('No image files returned. Result type: ', 'duetg-ai-connector') . esc_html(get_class($result)); ?></p>
                             <?php endif; ?>
                         <?php endif; ?>
                     </div>
@@ -264,8 +264,8 @@ class TestPage
             </div>
 
             <div class="card" style="max-width: 100%; margin-top: 20px;">
-                <h2><?php esc_html_e('How to Use', 'custom-ai-provider'); ?></h2>
-                <p><?php esc_html_e('To use this provider in your code:', 'custom-ai-provider'); ?></p>
+                <h2><?php esc_html_e('How to Use', 'duetg-ai-connector'); ?></h2>
+                <p><?php esc_html_e('To use this provider in your code:', 'duetg-ai-connector'); ?></p>
                 <pre style="background: #f0f0f0; padding: 10px; overflow-x: auto;">// Text Generation
 $registry = AiClient::defaultRegistry();
 $model = $registry->getProviderModel('custom_text', '<?php echo esc_html($text_model); ?>');

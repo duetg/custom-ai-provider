@@ -1,6 +1,6 @@
 <?php
 /**
- * Autoloader for Custom AI Provider plugin
+ * Autoloader for DuetG AI Connector plugin
  *
  * @package CustomAiProvider
  */
@@ -11,16 +11,16 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Debug logging helper - only logs when CUSTOM_AI_DEBUG is enabled
+ * Debug logging helper - only logs when DUETGAICON_DEBUG is enabled
  *
  * @param string $message The message to log
  * @param mixed $data Optional data to include (lazy JSON encoding, only when debug is enabled)
  * @param int $maxDataLength Maximum length for data serialization (0 = no limit)
  */
-if (!function_exists('custom_ai_debug')) {
-    function custom_ai_debug($message, $data = null, $maxDataLength = 0) {
-        // Only log when CUSTOM_AI_DEBUG is explicitly enabled
-        if (!defined('CUSTOM_AI_DEBUG') || !CUSTOM_AI_DEBUG) {
+if (!function_exists('duetgaicon_debug')) {
+    function duetgaicon_debug($message, $data = null, $maxDataLength = 0) {
+        // Only log when DUETGAICON_DEBUG is explicitly enabled
+        if (!defined('DUETGAICON_DEBUG') || !DUETGAICON_DEBUG) {
             return;
         }
 
@@ -37,7 +37,7 @@ if (!function_exists('custom_ai_debug')) {
             }
         }
 
-        $log_message = 'Custom AI: ' . $message;
+        $log_message = 'DuetG AI Connector: ' . $message;
         if ($data !== null) {
             // Lazy serialization - only encode when debug is enabled
             $encoded = json_encode($data);

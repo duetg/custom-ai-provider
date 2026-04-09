@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings for Custom AI Provider Connector
+ * Settings for DuetG AI Connector
  *
  * @package CustomAiProvider\Settings
  */
@@ -26,23 +26,17 @@ class Settings
     private static ?string $cachedImageModel = null;
     private static ?string $cachedImageBaseUrl = null;
 
-    // Default values
-    public const DEFAULT_TEXT_BASE_URL = 'https://api.openai.com/v1';
-    public const DEFAULT_TEXT_MODEL = 'gpt-4';
-    public const DEFAULT_IMAGE_BASE_URL = 'https://api.openai.com/v1';
-    public const DEFAULT_IMAGE_MODEL = 'dall-e-3';
-
     // Text Generation Settings
-    public const TEXT_ENABLED_OPTION = 'connectors_ai_custom_text_enabled';
-    public const TEXT_BASE_URL_OPTION = 'connectors_ai_custom_text_base_url';
-    public const TEXT_MODEL_OPTION = 'connectors_ai_custom_text_model';
-    public const TEXT_API_KEY_OPTION = 'connectors_ai_custom_text_api_key';
+    public const TEXT_ENABLED_OPTION = 'connectors_ai_duetgaicon_text_enabled';
+    public const TEXT_BASE_URL_OPTION = 'connectors_ai_duetgaicon_text_base_url';
+    public const TEXT_MODEL_OPTION = 'connectors_ai_duetgaicon_text_model';
+    public const TEXT_API_KEY_OPTION = 'connectors_ai_duetgaicon_text_api_key';
 
     // Image Generation Settings
-    public const IMAGE_ENABLED_OPTION = 'connectors_ai_custom_image_enabled';
-    public const IMAGE_BASE_URL_OPTION = 'connectors_ai_custom_image_base_url';
-    public const IMAGE_MODEL_OPTION = 'connectors_ai_custom_image_model';
-    public const IMAGE_API_KEY_OPTION = 'connectors_ai_custom_image_api_key';
+    public const IMAGE_ENABLED_OPTION = 'connectors_ai_duetgaicon_image_enabled';
+    public const IMAGE_BASE_URL_OPTION = 'connectors_ai_duetgaicon_image_base_url';
+    public const IMAGE_MODEL_OPTION = 'connectors_ai_duetgaicon_image_model';
+    public const IMAGE_API_KEY_OPTION = 'connectors_ai_duetgaicon_image_api_key';
 
     /**
      * Initialize settings
@@ -80,14 +74,14 @@ class Settings
         register_setting('connectors', self::TEXT_BASE_URL_OPTION, [
             'type' => 'string',
             'sanitize_callback' => 'esc_url_raw',
-            'default' => self::DEFAULT_TEXT_BASE_URL,
+            'default' => '',
             'show_in_rest' => true,
         ]);
 
         register_setting('connectors', self::TEXT_MODEL_OPTION, [
             'type' => 'string',
             'sanitize_callback' => 'sanitize_text_field',
-            'default' => self::DEFAULT_TEXT_MODEL,
+            'default' => '',
             'show_in_rest' => true,
         ]);
 
@@ -102,14 +96,14 @@ class Settings
         register_setting('connectors', self::IMAGE_BASE_URL_OPTION, [
             'type' => 'string',
             'sanitize_callback' => 'esc_url_raw',
-            'default' => self::DEFAULT_IMAGE_BASE_URL,
+            'default' => '',
             'show_in_rest' => true,
         ]);
 
         register_setting('connectors', self::IMAGE_MODEL_OPTION, [
             'type' => 'string',
             'sanitize_callback' => 'sanitize_text_field',
-            'default' => self::DEFAULT_IMAGE_MODEL,
+            'default' => '',
             'show_in_rest' => true,
         ]);
     }
@@ -156,12 +150,12 @@ class Settings
     public static function get_text_api_key(): string
     {
         // 1. Check constant
-        if (defined('CUSTOM_TEXT_API_KEY')) {
-            return constant('CUSTOM_TEXT_API_KEY');
+        if (defined('DUETGAICON_TEXT_API_KEY')) {
+            return constant('DUETGAICON_TEXT_API_KEY');
         }
 
         // 2. Check environment variable
-        $env = getenv('CUSTOM_TEXT_API_KEY');
+        $env = getenv('DUETGAICON_TEXT_API_KEY');
         if ($env !== false && $env !== '') {
             return $env;
         }
@@ -177,12 +171,12 @@ class Settings
     public static function get_image_api_key(): string
     {
         // 1. Check constant
-        if (defined('CUSTOM_IMAGE_API_KEY')) {
-            return constant('CUSTOM_IMAGE_API_KEY');
+        if (defined('DUETGAICON_IMAGE_API_KEY')) {
+            return constant('DUETGAICON_IMAGE_API_KEY');
         }
 
         // 2. Check environment variable
-        $env = getenv('CUSTOM_IMAGE_API_KEY');
+        $env = getenv('DUETGAICON_IMAGE_API_KEY');
         if ($env !== false && $env !== '') {
             return $env;
         }
@@ -192,45 +186,45 @@ class Settings
     }
 
     /**
-     * Get text model - returns configured model or default
+     * Get text model - returns configured model or empty string
      */
     public static function getTextModel(): string
     {
         if (self::$cachedTextModel === null) {
-            self::$cachedTextModel = get_option(self::TEXT_MODEL_OPTION, self::DEFAULT_TEXT_MODEL);
+            self::$cachedTextModel = get_option(self::TEXT_MODEL_OPTION, '');
         }
         return self::$cachedTextModel;
     }
 
     /**
-     * Get text base URL - returns configured URL or default
+     * Get text base URL - returns configured URL or empty string
      */
     public static function getTextBaseUrl(): string
     {
         if (self::$cachedTextBaseUrl === null) {
-            self::$cachedTextBaseUrl = get_option(self::TEXT_BASE_URL_OPTION, self::DEFAULT_TEXT_BASE_URL);
+            self::$cachedTextBaseUrl = get_option(self::TEXT_BASE_URL_OPTION, '');
         }
         return self::$cachedTextBaseUrl;
     }
 
     /**
-     * Get image model - returns configured model or default
+     * Get image model - returns configured model or empty string
      */
     public static function getImageModel(): string
     {
         if (self::$cachedImageModel === null) {
-            self::$cachedImageModel = get_option(self::IMAGE_MODEL_OPTION, self::DEFAULT_IMAGE_MODEL);
+            self::$cachedImageModel = get_option(self::IMAGE_MODEL_OPTION, '');
         }
         return self::$cachedImageModel;
     }
 
     /**
-     * Get image base URL - returns configured URL or default
+     * Get image base URL - returns configured URL or empty string
      */
     public static function getImageBaseUrl(): string
     {
         if (self::$cachedImageBaseUrl === null) {
-            self::$cachedImageBaseUrl = get_option(self::IMAGE_BASE_URL_OPTION, self::DEFAULT_IMAGE_BASE_URL);
+            self::$cachedImageBaseUrl = get_option(self::IMAGE_BASE_URL_OPTION, '');
         }
         return self::$cachedImageBaseUrl;
     }

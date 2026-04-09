@@ -59,7 +59,7 @@ Note: Only Alt Text Generation requires a VLM. All other features work with a st
 
 == Installation ==
 
-1. Upload the `custom-ai-provider` folder to the `/wp-content/plugins/` directory
+1. Upload the `duetg-ai-connector` folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Configure your API key at Settings > Connectors
 4. Go to Settings > Custom AI to configure your Base URL and model
