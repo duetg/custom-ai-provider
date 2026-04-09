@@ -1,11 +1,11 @@
 # Copyright (C) 2026 DuetG
-# This file is distributed under the same license as the Custom AI Provider plugin.
+# This file is distributed under the same license as the DuetG AI Connector plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Custom AI Provider 0.1.0\n"
+"Project-Id-Version: DuetG AI Connector 0.2.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-26 00:00+0000\n"
-"PO-Revision-Date: 2026-03-26 00:00+0000\n"
+"POT-Creation-Date: 2026-04-08 00:00+0000\n"
+"PO-Revision-Date: 2026-04-08 00:00+0000\n"
 "Last-Translator: DuetG <hello@duetg.com>\n"
 "Language-Team: DuetG <hello@duetg.com>\n"
 "Language: en_US\n"
@@ -18,20 +18,20 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: src\n"
 
-#: plugin.php
-msgid "Custom AI Provider"
+#: duetg-ai-connector.php
+msgid "DuetG AI Connector"
 msgstr ""
 
-#: plugin.php
+#: duetg-ai-connector.php
 msgid "Custom AI"
 msgstr ""
 
-#: plugin.php
+#: duetg-ai-connector.php
 msgid "Test AI"
 msgstr ""
 
-#: plugin.php
-msgid "Custom AI Provider requires WordPress 7.0 or higher."
+#: duetg-ai-connector.php
+msgid "DuetG AI Connector requires WordPress 7.0 or higher."
 msgstr ""
 
 #: src/Provider/CustomTextProvider.php
@@ -63,11 +63,11 @@ msgid "Please configure your API Key in the Settings > Connectors page. The API 
 msgstr ""
 
 #: src/Admin/Admin.php
-msgid "Text Generation is using default values (OpenAI). To use a different provider, enter your custom Base URL and Model Name below, then click Save."
+msgid "Text Generation is not configured. Please enter your Base URL and Model Name below."
 msgstr ""
 
 #: src/Admin/Admin.php
-msgid "Image Generation is using default values (OpenAI). To use a different provider, enter your custom Base URL and Model Name below, then click Save."
+msgid "Image Generation is not configured. Please enter your Base URL and Model Name below."
 msgstr ""
 
 #: src/Admin/Admin.php
@@ -79,11 +79,11 @@ msgid "Image Generation"
 msgstr ""
 
 #: src/Admin/Admin.php
-msgid "The base URL for the text generation API. Default: https://api.openai.com/v1"
+msgid "The base URL for the text generation API (e.g., https://api.openai.com/v1)."
 msgstr ""
 
 #: src/Admin/Admin.php
-msgid "The base URL for the image generation API. Default: https://api.openai.com/v1"
+msgid "The base URL for the image generation API (e.g., https://api.openai.com/v1)."
 msgstr ""
 
 #: src/Admin/Admin.php
@@ -91,11 +91,11 @@ msgid "Model Name"
 msgstr ""
 
 #: src/Admin/Admin.php
-msgid "The model identifier. Default: gpt-4"
+msgid "The model identifier for text generation (e.g., gpt-4, gpt-3.5-turbo)."
 msgstr ""
 
 #: src/Admin/Admin.php
-msgid "The model identifier. Default: dall-e-3"
+msgid "The model identifier for image generation (e.g., dall-e-3, dall-e-2)."
 msgstr ""
 
 #: src/Admin/Admin.php
