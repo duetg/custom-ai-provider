@@ -305,6 +305,19 @@ class ReviewNotesNormalizer
         $normalized = [];
 
         foreach ($suggestions as $item) {
+            // Handle string item (腾讯混元 format: ["term1", "term2", ...])
+            if (is_string($item)) {
+                $term = trim($item);
+                if (!empty($term)) {
+                    $normalized[] = [
+                        'term' => $term,
+                        'confidence' => 0.5, // default confidence
+                        'is_new' => true,
+                    ];
+                }
+                continue;
+            }
+
             if (!is_array($item)) {
                 continue;
             }
