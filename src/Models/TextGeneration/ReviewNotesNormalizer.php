@@ -85,7 +85,13 @@ class ReviewNotesNormalizer
             return ['suggestions' => []];
         }
 
-        // Case 4: Direct array of suggestions (no wrapper object)
+        // Case 4: Direct array of suggestions with "term" field (GLM-4.7 style)
+        // Check if it's an array where first element has "term" field
+        if (is_array($data) && !empty($data) && isset($data[0]) && is_array($data[0]) && isset($data[0]['term'])) {
+            return $this->normalizeTermBasedSuggestions($data);
+        }
+
+        // Case 5: Direct array of suggestions (no wrapper object)
         if (is_array($data) && !empty($data)) {
             return $this->normalizeDirectArray($data);
         }
