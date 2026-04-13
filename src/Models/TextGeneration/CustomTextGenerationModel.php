@@ -119,7 +119,7 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
         // Get base URL from settings
         $base_url = $this->getBaseUrl();
 
-        // Debug logging - log final request details (before removing response_format)
+        // Debug logging - log final request details
         Helper::debug('Request', [
             'path' => $path,
             'model' => $model_id,
@@ -128,12 +128,10 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
             'data_keys' => is_array($data) ? array_keys($data) : null,
         ]);
 
-        if (is_array($data) && isset($data['response_format'])) {
-            // Remove response_format for models that don't support it properly
-            // This includes Kimi, Qwen, and others that don't properly handle JSON schema
-            // These models will output plain text which the caller can parse
-            unset($data['response_format']);
-        }
+        // Note: response_format handling was removed because WordPress AI features
+        // like Content Classification require structured JSON output.
+        // If you encounter issues with specific providers, you may need to add
+        // model-specific handling here.
 
         return new Request($method, $base_url . '/' . ltrim($path, '/'), $headers, $data);
     }
