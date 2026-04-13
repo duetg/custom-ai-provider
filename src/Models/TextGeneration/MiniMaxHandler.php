@@ -104,7 +104,7 @@ class MiniMaxHandler implements ModelHandlerInterface
     }
 
     /**
-     * Transform message data - handles reasoning_details and thinking tags
+     * Transform message data - handles reasoning_details, thinking tags, and structured text formats
      *
      * @param array $message
      * @return array
@@ -136,6 +136,13 @@ class MiniMaxHandler implements ModelHandlerInterface
             if (!empty($result['thinking']) && !isset($message['reasoning_content'])) {
                 $message['reasoning_content'] = $result['thinking'];
             }
+
+            // Try to parse structured text formats (like taxonomy suggestions)
+            // This handles MiniMax's <suggested-terms> format
+            $parsed = $this->tryParseStructuredText($message['content']);
+            if ($parsed !== null) {
+                $message['content'] = $parsed;
+            }
         }
 
         // Handle 'reasoning' field (some MiniMax models)
@@ -144,5 +151,58 @@ class MiniMaxHandler implements ModelHandlerInterface
         }
 
         return $message;
+    }
+
+    /**
+     * Try to parse structured text formats like taxonomy suggestions
+     *
+     * MiniMax sometimes returns text like:
+     * <taxonomy>category</taxonomy>
+     * <suggested-terms>
+     * <term>Education</term>
+     * <confidence>0.95</confidence>
+     * <term>Obituary</term>
+     * <confidence>0.85</confidence>
+     * ...
+     * </suggested-terms>
+     *
+     * @param string $content
+     * @return string|null JSON string if parsed, null otherwise
+     */
+    private function tryParseStructuredText(string $content): ?string
+    {
+        // Check if content has suggested-terms format
+        if (strpos($content, '<suggested-terms>') === false) {
+            return null;
+        }
+
+        $suggestions = [];
+
+        // Extract all term/confidence pairs
+        // Pattern: <term>xxx</term> followed eventually by <confidence>yyy</confidence>
+        if (preg_match_all('/<term>([^<]+)<\/term>\s*<confidence>([\d.]+)<\/confidence>/', $content, $termMatches, PREG_SET_ORDER)) {
+            foreach ($termMatches as $match) {
+                $suggestions[] = [
+                    'term' => trim($match[1]),
+                    'confidence' => (float) $match[2],
+                ];
+            }
+        }
+
+        // Also check for term without confidence (assign default)
+        if (empty($suggestions) && preg_match_all('/<term>([^<]+)<\/term>/', $content, $termMatches)) {
+            foreach ($termMatches[1] as $term) {
+                $suggestions[] = [
+                    'term' => trim($term),
+                    'confidence' => 0.5, // default
+                ];
+            }
+        }
+
+        if (!empty($suggestions)) {
+            return json_encode(['suggestions' => $suggestions]);
+        }
+
+        return null;
     }
 }
