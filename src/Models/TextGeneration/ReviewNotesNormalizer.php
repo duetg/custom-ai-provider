@@ -305,7 +305,7 @@ class ReviewNotesNormalizer
         $normalized = [];
 
         foreach ($suggestions as $item) {
-            // Handle string item (腾讯混元 format: ["term1", "term2", ...])
+            // Handle string item (Tencent Hunyuan format: ["term1", "term2", ...])
             if (is_string($item)) {
                 $term = trim($item);
                 if (!empty($term)) {
