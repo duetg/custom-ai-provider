@@ -79,24 +79,6 @@ class MiniMaxHandler implements ModelHandlerInterface
         // even with thinking disabled (e.g., MiniMax-M2.7)
         $params['n'] = 1;
 
-        // Transform response_format for MiniMax API requirements
-        // MiniMax requires json_schema to have a "name" field
-        if (isset($params['response_format']) && is_array($params['response_format'])) {
-            if (isset($params['response_format']['json_schema']) && is_array($params['response_format']['json_schema'])) {
-                // Wrap the schema in MiniMax's expected format
-                $originalSchema = $params['response_format']['json_schema'];
-                $params['response_format'] = [
-                    'type' => 'json_object',
-                ];
-            } elseif ($params['response_format']['type'] === 'json_schema') {
-                // MiniMax doesn't properly support json_schema with name field
-                // Fall back to json_object which returns plain JSON
-                $params['response_format'] = [
-                    'type' => 'json_object',
-                ];
-            }
-        }
-
         return $params;
     }
 
