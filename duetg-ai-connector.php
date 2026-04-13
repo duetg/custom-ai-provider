@@ -18,11 +18,6 @@ namespace WordPress\CustomAiProvider;
 use WordPress\CustomAiProvider\Settings\Settings;
 use WordPress\CustomAiProvider\Admin\Admin;
 
-// TEMP DEBUG - REMOVE AFTER TESTING
-if (!defined('DUETGAICON_DEBUG')) {
-    define('DUETGAICON_DEBUG', true);
-}
-
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -124,7 +119,7 @@ function duetgaicon_register_connectors(\WP_Connector_Registry $registry): void
         'authentication' => array(
             'method'          => 'api_key',
             'credentials_url' => 'https://github.com/duetg/duetg-ai-connector#setup',
-            'setting_name'    => 'connectors_ai_duetgaicon_text_api_key',
+            'setting_name'    => Settings::TEXT_API_KEY_OPTION,
         ),
     ));
 
@@ -139,7 +134,7 @@ function duetgaicon_register_connectors(\WP_Connector_Registry $registry): void
         'authentication' => array(
             'method'          => 'api_key',
             'credentials_url' => 'https://github.com/duetg/duetg-ai-connector#setup',
-            'setting_name'    => 'connectors_ai_duetgaicon_image_api_key',
+            'setting_name'    => Settings::IMAGE_API_KEY_OPTION,
         ),
     ));
 }

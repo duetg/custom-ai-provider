@@ -365,15 +365,6 @@ class JsonResponseExtractor
             return ['suggestions' => []];
         }
 
-        // Try to handle fragmented JSON format before splitting by lines
-        $reconstructed = $this->reconstructFragmentedJson($text);
-        if ($reconstructed !== null) {
-            $decoded = json_decode($reconstructed, true);
-            if (is_array($decoded) && json_last_error() === JSON_ERROR_NONE) {
-                return $normalizer->normalize($decoded);
-            }
-        }
-
         // Split by newlines
         $lines = preg_split('/\r\n|\r|\n/', $text);
         $suggestions = [];
