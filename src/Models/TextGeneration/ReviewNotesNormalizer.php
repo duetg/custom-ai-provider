@@ -75,6 +75,11 @@ class ReviewNotesNormalizer
             return $this->normalizeTermBasedSuggestions($terms);
         }
 
+        // Case 2c: Has "suggested_terms" key (some models like GLM)
+        if (isset($data['suggested_terms']) && is_array($data['suggested_terms'])) {
+            return $this->normalizeTermBasedSuggestions($data['suggested_terms']);
+        }
+
         // Case 3: Empty array
         if (empty($data)) {
             return ['suggestions' => []];
