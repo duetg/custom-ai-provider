@@ -56,7 +56,23 @@ class ReviewNotesNormalizer
 
         // Case 2: Already has "suggestions" key
         if (isset($data['suggestions']) && is_array($data['suggestions'])) {
+            // Check if suggestions use "term" field (MiniMax format) instead of "text"
+            foreach ($data['suggestions'] as $item) {
+                if (isset($item['term']) || isset($item['category'])) {
+                    return $this->normalizeTermBasedSuggestions($data['suggestions']);
+                }
+            }
             return $this->normalizeSuggestionsArray($data['suggestions']);
+        }
+
+        // Case 2b: Has "terms" key instead of "suggestions" (some models like Kimi)
+        if (isset($data['terms']) && is_array($data['terms'])) {
+            $terms = $data['terms'];
+            // Handle nested array case: terms: [[{term:...}, {term:...}]]
+            if (isset($terms[0]) && is_array($terms[0]) && isset($terms[0][0])) {
+                $terms = $terms[0];
+            }
+            return $this->normalizeTermBasedSuggestions($terms);
         }
 
         // Case 3: Empty array
@@ -257,6 +273,64 @@ class ReviewNotesNormalizer
 
         if (!empty($suggestions)) {
             return ['suggestions' => $suggestions];
+        }
+
+        return ['suggestions' => []];
+    }
+
+    /**
+     * Normalize term-based suggestions (MiniMax taxonomy format)
+     *
+     * MiniMax returns suggestions like:
+     * {"suggestions": [{"term": "Education", "confidence": 0.95}, {"term": "Obituary", "confidence": 0.9}]}
+     *
+     * This format IS the WordPress AI format, so just pass through with is_new field added.
+     *
+     * @param array $suggestions
+     * @return array
+     */
+    private function normalizeTermBasedSuggestions(array $suggestions): array
+    {
+        $normalized = [];
+
+        foreach ($suggestions as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            // Handle "term" field (MiniMax taxonomy format)
+            if (isset($item['term'])) {
+                $term = trim($item['term']);
+                if (empty($term)) {
+                    continue;
+                }
+
+                $confidence = isset($item['confidence']) ? floatval($item['confidence']) : 0.5;
+
+                $normalizedItem = [
+                    'term' => $term,
+                    'confidence' => $confidence,
+                    'is_new' => true, // MiniMax can't know if term exists, assume new
+                ];
+
+                // Preserve parent if present
+                if (isset($item['parent'])) {
+                    $normalizedItem['parent'] = trim($item['parent']);
+                }
+
+                $normalized[] = $normalizedItem;
+                continue;
+            }
+
+            // Fallback: if no "term", try standard normalization
+            $objNormalized = $this->normalizeObjectItem($item);
+            if ($objNormalized !== null) {
+                $normalized[] = $objNormalized;
+            }
+        }
+
+        if (!empty($normalized)) {
+            return ['suggestions' => $normalized];
         }
 
         return ['suggestions' => []];

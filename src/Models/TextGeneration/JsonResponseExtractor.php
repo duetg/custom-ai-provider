@@ -34,24 +34,111 @@ class JsonResponseExtractor
             return $normalizer->normalize($decoded);
         }
 
-        // Try to find JSON in the text using regex
-        // Add length check to prevent ReDoS via catastrophic backtracking
-        if (strlen($text) > 100000) {
-            return null;
-        }
+        // Try to find JSON in the text using balanced brace counting
+        // This handles nested JSON correctly unlike non-greedy regex
+        $jsonStart = null;
+        $braceCount = 0;
+        $inString = false;
+        $escaped = false;
 
-        if (preg_match('/\{[\s\S]*?\}/', $text, $matches)) {
-            $decoded = json_decode($matches[0], true);
-            if (is_array($decoded) && json_last_error() === JSON_ERROR_NONE) {
-                return $normalizer->normalize($decoded);
+        for ($i = 0; $i < strlen($text); $i++) {
+            $char = $text[$i];
+
+            // Handle escape sequences
+            if ($escaped) {
+                $escaped = false;
+                continue;
+            }
+            if ($char === '\\') {
+                $escaped = true;
+                continue;
+            }
+
+            // Handle string boundaries
+            if ($char === '"' && !$escaped) {
+                $inString = !$inString;
+                continue;
+            }
+
+            // Skip if inside string
+            if ($inString) {
+                continue;
+            }
+
+            // Find opening brace
+            if ($char === '{' && $jsonStart === null) {
+                $jsonStart = $i;
+                $braceCount = 1;
+                continue;
+            }
+
+            // Track brace depth
+            if ($jsonStart !== null) {
+                if ($char === '{') {
+                    $braceCount++;
+                } elseif ($char === '}') {
+                    $braceCount--;
+                    if ($braceCount === 0) {
+                        // Found complete JSON object
+                        $jsonStr = substr($text, $jsonStart, $i - $jsonStart + 1);
+                        $decoded = json_decode($jsonStr, true);
+                        if (is_array($decoded) && json_last_error() === JSON_ERROR_NONE) {
+                            return $normalizer->normalize($decoded);
+                        }
+                        // Not valid JSON, continue searching
+                        $jsonStart = null;
+                    }
+                }
             }
         }
 
-        // Try to find JSON array [...]
-        if (preg_match('/\[[\s\S]*?\]/', $text, $matches)) {
-            $decoded = json_decode($matches[0], true);
-            if (is_array($decoded) && json_last_error() === JSON_ERROR_NONE) {
-                return $normalizer->normalize(['suggestions' => $decoded]);
+        // Try to find JSON array [...] using balanced bracket counting
+        $arrStart = null;
+        $bracketCount = 0;
+        $inString = false;
+        $escaped = false;
+
+        for ($i = 0; $i < strlen($text); $i++) {
+            $char = $text[$i];
+
+            if ($escaped) {
+                $escaped = false;
+                continue;
+            }
+            if ($char === '\\') {
+                $escaped = true;
+                continue;
+            }
+
+            if ($char === '"' && !$escaped) {
+                $inString = !$inString;
+                continue;
+            }
+
+            if ($inString) {
+                continue;
+            }
+
+            if ($char === '[' && $arrStart === null) {
+                $arrStart = $i;
+                $bracketCount = 1;
+                continue;
+            }
+
+            if ($arrStart !== null) {
+                if ($char === '[') {
+                    $bracketCount++;
+                } elseif ($char === ']') {
+                    $bracketCount--;
+                    if ($bracketCount === 0) {
+                        $jsonStr = substr($text, $arrStart, $i - $arrStart + 1);
+                        $decoded = json_decode($jsonStr, true);
+                        if (is_array($decoded) && json_last_error() === JSON_ERROR_NONE) {
+                            return $normalizer->normalize(['suggestions' => $decoded]);
+                        }
+                        $arrStart = null;
+                    }
+                }
             }
         }
 

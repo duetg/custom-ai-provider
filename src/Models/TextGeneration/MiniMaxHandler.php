@@ -10,6 +10,8 @@
 
 namespace WordPress\CustomAiProvider\Models\TextGeneration;
 
+use WordPress\CustomAiProvider\Helper;
+
 /**
  * MiniMax Model Handler
  */
@@ -79,6 +81,16 @@ class MiniMaxHandler implements ModelHandlerInterface
         // even with thinking disabled (e.g., MiniMax-M2.7)
         $params['n'] = 1;
 
+        // Transform response_format for MiniMax API requirements
+        // MiniMax doesn't support json_schema format, only json_object
+        if (isset($params['response_format']) && is_array($params['response_format'])) {
+            if (isset($params['response_format']['json_schema']) || ($params['response_format']['type'] ?? '') === 'json_schema') {
+                $params['response_format'] = [
+                    'type' => 'json_object',
+                ];
+            }
+        }
+
         return $params;
     }
 
@@ -90,6 +102,11 @@ class MiniMaxHandler implements ModelHandlerInterface
      */
     public function transformResponse(array $response): array
     {
+        Helper::debug('MiniMax transformResponse called', [
+            'has_choices' => isset($response['choices']),
+            'choices_count' => isset($response['choices']) ? count($response['choices']) : 0,
+        ]);
+
         if (!isset($response['choices']) || !is_array($response['choices'])) {
             return $response;
         }
@@ -129,6 +146,7 @@ class MiniMaxHandler implements ModelHandlerInterface
 
         // If reasoning_split didn't work (no reasoning_details), clean content using thinking tags
         if (isset($message['content'])) {
+            $originalContent = $message['content'];
             $result = ThinkingTagHelper::clean($message['content']);
 
             $message['content'] = $result['content'];
@@ -138,11 +156,21 @@ class MiniMaxHandler implements ModelHandlerInterface
             }
 
             // Try to parse structured text formats (like taxonomy suggestions)
-            // This handles MiniMax's <suggested-terms> format
+            // This handles MiniMax's XML format
             $parsed = $this->tryParseStructuredText($message['content']);
             if ($parsed !== null) {
                 $message['content'] = $parsed;
             }
+
+            // Debug: log the transformation
+            Helper::debug('MiniMax transformMessage', [
+                'had_reasoning_details' => isset($message['reasoning_details']),
+                'original_content_preview' => substr($originalContent, 0, 100),
+                'thinking_found' => !empty($result['thinking']),
+                'thinking_preview' => substr($result['thinking'], 0, 50),
+                'content_after_clean' => substr($message['content'], 0, 100),
+                'parsed_from_xml' => $parsed !== null,
+            ]);
         }
 
         // Handle 'reasoning' field (some MiniMax models)
@@ -156,31 +184,32 @@ class MiniMaxHandler implements ModelHandlerInterface
     /**
      * Try to parse structured text formats like taxonomy suggestions
      *
-     * MiniMax sometimes returns text like:
-     * <taxonomy>category</taxonomy>
-     * <suggested-terms>
-     * <term>Education</term>
-     * <confidence>0.95</confidence>
-     * <term>Obituary</term>
-     * <confidence>0.85</confidence>
-     * ...
-     * </suggested-terms>
+     * MiniMax returns text in XML format like:
+     * <taxonomy>
+     * <term confidence="0.95">Education</term>
+     * <term confidence="0.90">Obituary</term>
+     * <term confidence="0.85">Social Media</term>
+     * </taxonomy>
      *
      * @param string $content
      * @return string|null JSON string if parsed, null otherwise
      */
     private function tryParseStructuredText(string $content): ?string
     {
-        // Check if content has suggested-terms format
-        if (strpos($content, '<suggested-terms>') === false) {
-            return null;
-        }
-
         $suggestions = [];
 
-        // Extract all term/confidence pairs
-        // Pattern: <term>xxx</term> followed eventually by <confidence>yyy</confidence>
-        if (preg_match_all('/<term>([^<]+)<\/term>\s*<confidence>([\d.]+)<\/confidence>/', $content, $termMatches, PREG_SET_ORDER)) {
+        // Pattern 1: <term confidence="y.y">xxx</term> - confidence as attribute, term as text
+        if (preg_match_all('/<term\s+confidence="([\d.]+)"[^>]*>([^<]+)<\/term>/', $content, $termMatches, PREG_SET_ORDER)) {
+            foreach ($termMatches as $match) {
+                $suggestions[] = [
+                    'term' => trim($match[2]),
+                    'confidence' => (float) $match[1],
+                ];
+            }
+        }
+
+        // Pattern 2: <term name="xxx" confidence="y.y"/> - self-closing with attributes
+        if (empty($suggestions) && preg_match_all('/<term\s+name="([^"]+)"\s+confidence="([\d.]+)"\s*\/>/', $content, $termMatches, PREG_SET_ORDER)) {
             foreach ($termMatches as $match) {
                 $suggestions[] = [
                     'term' => trim($match[1]),
@@ -189,7 +218,17 @@ class MiniMaxHandler implements ModelHandlerInterface
             }
         }
 
-        // Also check for term without confidence (assign default)
+        // Pattern 3: <term>xxx</term><confidence>y.y</confidence> - separate elements
+        if (empty($suggestions) && preg_match_all('/<term>([^<]+)<\/term>\s*<confidence>([\d.]+)<\/confidence>/', $content, $termMatches, PREG_SET_ORDER)) {
+            foreach ($termMatches as $match) {
+                $suggestions[] = [
+                    'term' => trim($match[1]),
+                    'confidence' => (float) $match[2],
+                ];
+            }
+        }
+
+        // Pattern 4: Simple <term>xxx</term> without confidence
         if (empty($suggestions) && preg_match_all('/<term>([^<]+)<\/term>/', $content, $termMatches)) {
             foreach ($termMatches[1] as $term) {
                 $suggestions[] = [

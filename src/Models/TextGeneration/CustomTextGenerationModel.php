@@ -104,6 +104,11 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
 
         // Apply model-specific handler if available (e.g., MiniMax)
         $handler = $this->getModelHandler();
+        Helper::debug('Handler check', [
+            'model_id' => $model_id,
+            'handler_found' => $handler !== null,
+            'handler_class' => $handler !== null ? get_class($handler) : null,
+        ]);
         if ($handler !== null && is_array($data)) {
             $data = $handler->transformRequest($data);
         } else {
@@ -111,6 +116,20 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
             // This is required for models like Qwen, DeepSeek, etc. that have thinking enabled by default
             if (is_array($data) && (!isset($data['n']) || $data['n'] > 1)) {
                 $data['n'] = 1;
+            }
+
+            // Transform response_format json_schema to json_object for APIs that don't support it
+            // Many OpenAI-compatible APIs (Kimi, DeepSeek on SiliconFlow, etc.) don't support json_schema format
+            if (isset($data['response_format']) && is_array($data['response_format'])) {
+                if (isset($data['response_format']['json_schema'])) {
+                    $data['response_format'] = ['type' => 'json_object'];
+                } elseif (isset($data['response_format']['type']) && $data['response_format']['type'] === 'json_schema') {
+                    $data['response_format'] = ['type' => 'json_object'];
+                }
+
+                // Many APIs (DashScope/qwen/glm, etc.) require the word "json" in messages
+                // when using response_format json_object, so ensure it's present
+                $data = $this->ensureJsonKeywordInMessages($data);
             }
         }
 
@@ -124,7 +143,7 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
             'path' => $path,
             'model' => $model_id,
             'url' => $base_url . '/' . ltrim($path, '/'),
-            'had_response_format' => is_array($data) && isset($data['response_format']),
+            'response_format' => isset($data['response_format']) ? $data['response_format'] : null,
             'data_keys' => is_array($data) ? array_keys($data) : null,
         ]);
 
@@ -151,6 +170,7 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
         Helper::debug('Response choice[' . $index . ']', [
             'content' => isset($choiceData['message']['content']) ? substr($choiceData['message']['content'], 0, 500) : null,
             'finish_reason' => $choiceData['finish_reason'] ?? null,
+            'choiceData_keys' => array_keys($choiceData),
         ]);
 
         // Apply model-specific handler if available
@@ -226,6 +246,64 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
         }
 
         return parent::parseResponseChoiceToCandidate($choiceData, $index);
+    }
+
+    /**
+     * Ensure the word "json" appears in messages for GLM models
+     *
+     * GLM requires the word "json" in messages when using response_format json_object.
+     * This modifies the user message to include "json" if not already present.
+     *
+     * @param array $data
+     * @return array
+     */
+    private function ensureJsonKeywordInMessages(array $data): array
+    {
+        if (!isset($data['messages']) || !is_array($data['messages'])) {
+            return $data;
+        }
+
+        $jsonKeyword = 'json';
+        $found = false;
+
+        foreach ($data['messages'] as &$msg) {
+            // Handle content that might be string or array (for multi-modal)
+            $content = $msg['content'] ?? '';
+            if (is_array($content)) {
+                // For array content (multi-modal), check each part
+                foreach ($content as $part) {
+                    if (isset($part['text']) && is_string($part['text'])) {
+                        if (stripos($part['text'], $jsonKeyword) !== false) {
+                            $found = true;
+                            break 2;
+                        }
+                    }
+                }
+            } elseif (is_string($content)) {
+                if (stripos($content, $jsonKeyword) !== false) {
+                    $found = true;
+                    break;
+                }
+            }
+        }
+        unset($msg); // Unset reference
+
+        // If no message contains "json", append a note to the last message
+        if (!$found) {
+            $lastIndex = count($data['messages']) - 1;
+            if ($lastIndex >= 0) {
+                $lastContent = $data['messages'][$lastIndex]['content'] ?? '';
+                if (is_string($lastContent)) {
+                    $data['messages'][$lastIndex]['content'] = $lastContent . "\n\nPlease respond in JSON format.";
+                } elseif (is_array($lastContent)) {
+                    // For array content, add a text part
+                    $lastContent[] = ['type' => 'text', 'text' => "\n\nPlease respond in JSON format."];
+                    $data['messages'][$lastIndex]['content'] = $lastContent;
+                }
+            }
+        }
+
+        return $data;
     }
 
 }
