@@ -105,33 +105,38 @@ add_filter('wpai_preferred_text_models', __NAMESPACE__ . '\\duetgaicon_preferred
  */
 function duetgaicon_register_connectors(\WP_Connector_Registry $registry): void
 {
-    // Register Custom Text connector - use 'custom_text' to match AI Client provider ID
-    if (!$registry->is_registered('custom_text')) {
-        $registry->register('custom_text', array(
-            'name'        => __('DuetG Text (Custom)', 'duetg-ai-connector'),
-            'description' => __('Connect to any OpenAI-compatible text generation API.', 'duetg-ai-connector'),
-            'type'        => 'ai_provider',
-            'authentication' => array(
-                'method'          => 'api_key',
-                'credentials_url' => 'https://github.com/duetg/duetg-ai-connector#setup',
-                'setting_name'    => 'connectors_ai_duetgaicon_text_api_key',
-            ),
-        ));
-    }
+    // Unregister first (if exists) then re-register with proper setting_name
+    // This is needed because auto-discovery runs before this hook and doesn't set setting_name
 
-    // Register Custom Image connector - use 'custom_image' to match AI Client provider ID
-    if (!$registry->is_registered('custom_image')) {
-        $registry->register('custom_image', array(
-            'name'        => __('DuetG Image (Custom)', 'duetg-ai-connector'),
-            'description' => __('Connect to any OpenAI-compatible image generation API.', 'duetg-ai-connector'),
-            'type'        => 'ai_provider',
-            'authentication' => array(
-                'method'          => 'api_key',
-                'credentials_url' => 'https://github.com/duetg/duetg-ai-connector#setup',
-                'setting_name'    => 'connectors_ai_duetgaicon_image_api_key',
-            ),
-        ));
+    // Custom Text connector
+    if ($registry->is_registered('custom_text')) {
+        $registry->unregister('custom_text');
     }
+    $registry->register('custom_text', array(
+        'name'        => __('DuetG Text (Custom)', 'duetg-ai-connector'),
+        'description' => __('Connect to any OpenAI-compatible text generation API.', 'duetg-ai-connector'),
+        'type'        => 'ai_provider',
+        'authentication' => array(
+            'method'          => 'api_key',
+            'credentials_url' => 'https://github.com/duetg/duetg-ai-connector#setup',
+            'setting_name'    => 'connectors_ai_duetgaicon_text_api_key',
+        ),
+    ));
+
+    // Custom Image connector
+    if ($registry->is_registered('custom_image')) {
+        $registry->unregister('custom_image');
+    }
+    $registry->register('custom_image', array(
+        'name'        => __('DuetG Image (Custom)', 'duetg-ai-connector'),
+        'description' => __('Connect to any OpenAI-compatible image generation API.', 'duetg-ai-connector'),
+        'type'        => 'ai_provider',
+        'authentication' => array(
+            'method'          => 'api_key',
+            'credentials_url' => 'https://github.com/duetg/duetg-ai-connector#setup',
+            'setting_name'    => 'connectors_ai_duetgaicon_image_api_key',
+        ),
+    ));
 }
 add_action('wp_connectors_init', __NAMESPACE__ . '\\duetgaicon_register_connectors');
 
