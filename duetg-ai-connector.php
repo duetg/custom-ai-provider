@@ -18,6 +18,11 @@ namespace WordPress\CustomAiProvider;
 use WordPress\CustomAiProvider\Settings\Settings;
 use WordPress\CustomAiProvider\Admin\Admin;
 
+// TEMP DEBUG - REMOVE AFTER TESTING
+if (!defined('DUETGAICON_DEBUG')) {
+    define('DUETGAICON_DEBUG', true);
+}
+
 if (!defined('ABSPATH')) {
     exit;
 }
