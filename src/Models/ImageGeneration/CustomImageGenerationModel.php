@@ -17,6 +17,7 @@ use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
 use WordPress\AiClient\Results\DTO\Candidate;
 use WordPress\AiClient\Results\Enums\FinishReasonEnum;
 use WordPress\CustomAiProvider\Settings\Settings;
+use WordPress\CustomAiProvider\Helper;
 
 /**
  * Custom Image Generation Model for OpenAI-compatible APIs
@@ -165,12 +166,12 @@ class CustomImageGenerationModel extends AbstractOpenAiCompatibleImageGeneration
         // If we couldn't fetch, return as URL file (might work if URL is accessible)
         // Log the failure for debugging
         if (is_wp_error($response)) {
-            duetgaicon_debug('Image download failed', [
+            Helper::debug('Image download failed', [
                 'url' => substr($url, 0, 200),
                 'error' => $response->get_error_message()
             ]);
         } else {
-            duetgaicon_debug('Image download failed', [
+            Helper::debug('Image download failed', [
                 'url' => substr($url, 0, 200),
                 'error' => 'HTTP ' . wp_remote_retrieve_response_code($response)
             ]);

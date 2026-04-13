@@ -16,6 +16,7 @@ use WordPress\AiClient\AiClient;
 use WordPress\CustomAiProvider\Provider\CustomTextProvider;
 use WordPress\CustomAiProvider\Provider\CustomImageProvider;
 use WordPress\CustomAiProvider\Settings\Settings;
+use WordPress\CustomAiProvider\Helper;
 
 /**
  * Test page class
@@ -120,7 +121,7 @@ class TestPage
                         }
                     }
                 } catch (\Exception $e) {
-                    duetgaicon_debug('Test page error', ['message' => $e->getMessage()]);
+                    Helper::debug('Test page error', ['message' => $e->getMessage()]);
                     $error = __('An error occurred while processing the request. Check debug logs for details.', 'duetg-ai-connector');
                     if (defined('DUETGAICON_DEBUG') && DUETGAICON_DEBUG) {
                         $error .= ' ' . $e->getMessage();

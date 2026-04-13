@@ -13,6 +13,7 @@ use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
 use WordPress\CustomAiProvider\Settings\Settings;
 use WordPress\CustomAiProvider\Models\TextGeneration\ThinkingTagHelper;
 use WordPress\CustomAiProvider\Models\TextGeneration\ReviewNotesNormalizer;
+use WordPress\CustomAiProvider\Helper;
 
 /**
  * Custom Text Generation Model for OpenAI-compatible APIs
@@ -119,7 +120,7 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
         $base_url = $this->getBaseUrl();
 
         // Debug logging - log final request details (before removing response_format)
-        duetgaicon_debug('Request', [
+        Helper::debug('Request', [
             'path' => $path,
             'model' => $model_id,
             'url' => $base_url . '/' . ltrim($path, '/'),
@@ -149,7 +150,7 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
     protected function parseResponseChoiceToCandidate(array $choiceData, int $index): \WordPress\AiClient\Results\DTO\Candidate
     {
         // Debug: log raw response data
-        duetgaicon_debug('Response choice[' . $index . ']', [
+        Helper::debug('Response choice[' . $index . ']', [
             'content' => isset($choiceData['message']['content']) ? substr($choiceData['message']['content'], 0, 500) : null,
             'finish_reason' => $choiceData['finish_reason'] ?? null,
         ]);
@@ -201,7 +202,7 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
         if (isset($choiceData['content']) && is_string($choiceData['content'])) {
             $content = $choiceData['content'];
 
-            duetgaicon_debug('Checking JSON extraction', [
+            Helper::debug('Checking JSON extraction', [
                 'content_preview' => substr($content, 0, 200),
                 'matches_json_pattern' => (bool) preg_match('/^\s*[\[{]/', $content),
             ]);
@@ -210,7 +211,7 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
             // This handles Review Notes and other structured responses
             // Normal conversation responses are plain text and won't match this pattern
             if (preg_match('/^\s*[\[{]/', $content)) {
-                duetgaicon_debug('Detected JSON-like response, trying to extract and normalize');
+                Helper::debug('Detected JSON-like response, trying to extract and normalize');
                 $json_extracted = $this->getReviewNotesNormalizer()->extractJsonFromText($content);
                 if ($json_extracted !== null) {
                     $json_content = json_encode($json_extracted);
@@ -219,10 +220,10 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
                     if (isset($choiceData['message']) && is_array($choiceData['message'])) {
                         $choiceData['message']['content'] = $json_content;
                     }
-                    duetgaicon_debug('Extracted JSON from text', $json_content);
+                    Helper::debug('Extracted JSON from text', $json_content);
                 }
             } else {
-                duetgaicon_debug('Content does not look like JSON, skipping extraction');
+                Helper::debug('Content does not look like JSON, skipping extraction');
             }
         }
 
