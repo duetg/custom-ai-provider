@@ -98,6 +98,36 @@ function duetgaicon_preferred_text_models_filter(array $models): array
 add_filter('wpai_preferred_text_models', __NAMESPACE__ . '\\duetgaicon_preferred_text_models_filter', PHP_INT_MAX);
 
 /**
+ * Filter to report our connectors as configured when API key is set
+ *
+ * This allows WordPress AI 0.7.0+ to recognize our connector as configured,
+ * bypassing the default API key validation which may fail for non-standard providers.
+ *
+ * @param bool $has_credentials Default credential check result
+ * @param array $connectors All registered connectors
+ * @return bool
+ */
+function duetgaicon_has_ai_credentials(bool $has_credentials, array $connectors): bool
+{
+    if ($has_credentials) {
+        return true;
+    }
+
+    // Check if any of our connectors have API keys set
+    foreach ($connectors as $connector) {
+        if (in_array($connector['id'], ['custom_text', 'custom_image'], true)) {
+            $api_key = $connector['auth']['api_key'] ?? '';
+            if (!empty($api_key)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+add_filter('wpai_has_ai_credentials', __NAMESPACE__ . '\\duetgaicon_has_ai_credentials', 10, 2);
+
+/**
  * Register the connector to WordPress AI system
  */
 function register_connector(): void
