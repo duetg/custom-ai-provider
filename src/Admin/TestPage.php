@@ -191,6 +191,7 @@ class TestPage
                 </table>
             </div>
 
+            <?php if (defined('DUETGAICON_ALLOW_LOCAL_URLS') && DUETGAICON_ALLOW_LOCAL_URLS): ?>
             <div class="card" style="max-width: 100%; margin-top: 20px;">
                 <h2><?php esc_html_e('Network Connectivity Test', 'duetg-ai-connector'); ?></h2>
                 <p><?php esc_html_e('Test if your WordPress environment can reach a specific URL. Useful for debugging local AI connections.', 'duetg-ai-connector'); ?></p>
@@ -207,7 +208,7 @@ class TestPage
                             </td>
                         </tr>
                     </table>
-                    <?php submit_button(esc_html__('Test Connection', 'duetg-ai-connector'), 'secondary', 'network_test_submit', false); ?>
+                    <?php submit_button(esc_html__('Test Connection', 'duetg-ai-connector'), 'primary', 'network_test_submit', false); ?>
                 </form>
 
                 <?php
@@ -282,6 +283,7 @@ class TestPage
                 }
                 ?>
             </div>
+            <?php endif; ?>
 
             <div class="card" style="max-width: 100%; margin-top: 20px;">
                 <h2><?php esc_html_e('Test AI', 'duetg-ai-connector'); ?></h2>

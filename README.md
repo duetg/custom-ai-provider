@@ -145,6 +145,8 @@ define('DUETGAICON_ALLOW_LOCAL_URLS', true);
 
 This setting applies to both text and image models when using local AI providers.
 
+**Tip**: When `DUETGAICON_ALLOW_LOCAL_URLS` is enabled, a **Network Connectivity Test** tool appears on the Test AI page (Tools > Test AI). You can use it to verify that your WordPress server can reach your local AI provider before running actual AI feature tests. This is especially useful for debugging connection issues with local Ollama or LM Studio installations.
+
 ### How do I use this in my code?
 
 ```php
@@ -187,6 +189,10 @@ $files = $result->toImageFiles();
 * Added FAQ section explaining local reasoning model timeout issues
 * Removed WordPress AI version requirements from documentation
 * Cleaned up debug logging code in CustomTextGenerationModel
+* Fixed PHPCS: sanitize test_url before use in form field
+* Network Connectivity Test now hidden when DUETGAICON_ALLOW_LOCAL_URLS is disabled
+* Fixed Network Connectivity Test button styling (now uses primary style)
+* Added Network Connectivity Test documentation to local AI provider FAQ
 
 ### 0.2.3
 * Fixed OutputNotEscaped error for image URL in TestPage.php
