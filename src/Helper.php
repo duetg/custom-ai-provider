@@ -51,4 +51,22 @@ class Helper
         // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
         error_log($log_message);
     }
+
+    /**
+     * Check if a URL points to a local/private host (localhost, 127.0.0.1, ::1, or private IP range)
+     *
+     * @param string $url The URL to check
+     * @return bool True if the URL is local/private
+     */
+    public static function isLocalUrl($url)
+    {
+        $parsed = wp_parse_url($url);
+        if (empty($parsed['host'])) {
+            return false;
+        }
+        return $parsed['host'] === 'localhost'
+            || $parsed['host'] === '127.0.0.1'
+            || $parsed['host'] === '::1'
+            || filter_var($parsed['host'], FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
+    }
 }

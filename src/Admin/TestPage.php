@@ -98,6 +98,8 @@ class TestPage
                             $error = __('Text provider not registered.', 'duetg-ai-connector');
                         } elseif (!$registry->isProviderConfigured('custom_text')) {
                             $error = __('Text provider not configured. Please add API key via Settings > Connectors.', 'duetg-ai-connector');
+                        } elseif (Helper::isLocalUrl(Settings::getTextBaseUrl()) && (!defined('DUETGAICON_ALLOW_LOCAL_URLS') || !DUETGAICON_ALLOW_LOCAL_URLS)) {
+                            $error = __('Your Base URL points to a local/private IP address. To use a local AI provider, add <code>define(\'DUETGAICON_ALLOW_LOCAL_URLS\', true);</code> to your wp-config.php.', 'duetg-ai-connector');
                         } else {
                             $model = $registry->getProviderModel('custom_text', CustomTextProvider::getModelId());
                             $result = $model->generateTextResult([
@@ -111,6 +113,8 @@ class TestPage
                             $error = __('Image provider not registered.', 'duetg-ai-connector');
                         } elseif (!$registry->isProviderConfigured('custom_image')) {
                             $error = __('Image provider not configured. Please add API key via Settings > Connectors.', 'duetg-ai-connector');
+                        } elseif (Helper::isLocalUrl(Settings::getImageBaseUrl()) && (!defined('DUETGAICON_ALLOW_LOCAL_URLS') || !DUETGAICON_ALLOW_LOCAL_URLS)) {
+                            $error = __('Your Base URL points to a local/private IP address. To use a local AI provider, add <code>define(\'DUETGAICON_ALLOW_LOCAL_URLS\', true);</code> to your wp-config.php.', 'duetg-ai-connector');
                         } else {
                             $model = $registry->getProviderModel('custom_image', CustomImageProvider::getModelId());
                             $result = $model->generateImageResult([
@@ -223,12 +227,7 @@ class TestPage
                         // Note: This diagnostic tool intentionally bypasses SSRF protection to test local URLs.
                         // It is restricted to administrators only (manage_options capability) and protected by nonce.
                         // SSL verification is disabled for local URLs since local servers often use self-signed certificates.
-                        $parsed_url = wp_parse_url($test_url);
-                        $is_local_url = !empty($parsed_url['host']) && (
-                            $parsed_url['host'] === 'localhost' ||
-                            $parsed_url['host'] === '127.0.0.1' ||
-                            $parsed_url['host'] === '::1' ||
-                            filter_var($parsed_url['host'], FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false
+                        $is_local_url = Helper::isLocalUrl($test_url);
                         );
 
                         $request_args = array(
