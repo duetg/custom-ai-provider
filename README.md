@@ -175,6 +175,15 @@ $files = $result->toImageFiles();
 
 ## Changelog
 
+### 0.3.1
+* Added isLocalUrl() helper method for detecting localhost/private IP URLs
+* Added explicit error message when local AI URL is configured but DUETGAICON_ALLOW_LOCAL_URLS is disabled
+* Fixed PHP syntax error (stray ); in TestPage.php)
+* Fixed PHPCS: use wp_kses_post for error output to allow HTML formatting
+* Fixed PHPCS: use sprintf with translators comment for i18n-friendly error messages
+* Network Connectivity Test button now uses primary styling
+* Refactored duplicate local URL detection code into Helper::isLocalUrl()
+
 ### 0.3.0
 * Renamed plugin to DuetG AI Connector (from Custom AI Provider)
 * Added Content Classification feature (AI-powered suggestions for post tags and categories)

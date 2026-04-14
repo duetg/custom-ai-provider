@@ -6,7 +6,7 @@ Tested up to: 7.0
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Stable tag: 0.3.0
+Stable tag: 0.3.1
 
 Connect WordPress AI Client to any OpenAI-compatible AI API provider.
 
@@ -174,6 +174,15 @@ This setting applies to both text and image models when using local AI providers
 3. Test AI screen - Verify your AI configuration and test text/image generation.
 
 == Changelog ==
+
+= 0.3.1 =
+* Added isLocalUrl() helper method for detecting localhost/private IP URLs
+* Added explicit error message when local AI URL is configured but DUETGAICON_ALLOW_LOCAL_URLS is disabled
+* Fixed PHP syntax error (stray ); in TestPage.php)
+* Fixed PHPCS: use wp_kses_post for error output to allow HTML formatting
+* Fixed PHPCS: use sprintf with translators comment for i18n-friendly error messages
+* Network Connectivity Test button now uses primary styling
+* Refactored duplicate local URL detection code into Helper::isLocalUrl()
 
 = 0.3.0 =
 * Renamed plugin to DuetG AI Connector (from Custom AI Provider)
