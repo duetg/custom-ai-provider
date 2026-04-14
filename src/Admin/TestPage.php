@@ -320,7 +320,7 @@ class TestPage
 
                 <?php if ($error): ?>
                     <div class="notice notice-error" style="margin-top: 20px;">
-                        <p><strong><?php esc_html_e('Error', 'duetg-ai-connector'); ?>:</strong> <?php echo esc_html($error); ?></p>
+                        <p><strong><?php esc_html_e('Error', 'duetg-ai-connector'); ?>:</strong> <?php echo wp_kses_post($error); ?></p>
                     </div>
                 <?php endif; ?>
 
