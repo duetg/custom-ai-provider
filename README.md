@@ -24,13 +24,15 @@ DuetG AI Connector allows WordPress AI Client to connect to any AI service that 
 
 ## WordPress AI Integration
 
-This plugin is compatible with the official [WordPress AI plugin](https://wordpress.org/plugins/ai/) (version 0.6.0+). When installed together, you can use your custom API provider with WordPress's built-in AI features:
+This plugin is compatible with the official [WordPress AI plugin](https://wordpress.org/plugins/ai/) (version 0.6.0+). When installed together, you can use your custom API provider with WordPress's built-in AI features (0.7.0 features require WordPress AI 0.7.0+):
 
 - **Alt Text Generation** - Generates descriptive alt text for images using AI vision models (requires VLM model)
+- **Content Classification** (WordPress AI 0.7.0+) - AI-powered suggestions for post tags and categories based on content analysis
 - **Content Summarization** - Summarizes long-form content into digestible overviews
 - **Excerpt Generation** - Generates excerpt suggestions from content
 - **Image Generation** - Generate featured images and inline images using AI
 - **Image Prompt Generation** - Generates a prompt from post content that can be used to generate an image
+- **Meta Description Generation** (WordPress AI 0.7.0+) - Generates meta description suggestions and integrates with various SEO plugins
 - **Review Notes** - Reviews post content block-by-block and adds Notes with suggestions for Accessibility, Readability, Grammar, and SEO
 - **Title Generation** - Generates title suggestions from content
 
@@ -56,6 +58,7 @@ This plugin is compatible with the official [WordPress AI plugin](https://wordpr
 * PHP 7.4 or higher
 * WordPress 7.0 or higher (uses built-in Connectors API)
 * (Optional) WordPress AI plugin 0.6.0+ for enhanced integration
+* Note: Content Classification and Meta Description Generation require WordPress AI 0.7.0+
 
 ## Installation
 
@@ -66,6 +69,21 @@ This plugin is compatible with the official [WordPress AI plugin](https://wordpr
 5. (Optional) Go to **Tools > Test AI** to verify your configuration
 
 ## Frequently Asked Questions
+
+### How do I enable debug logging?
+
+To enable debug logging, add the following to your `wp-config.php`:
+
+```php
+define('DUETGAICON_DEBUG', true);
+```
+
+When enabled, debug information will be written to your server's debug log (usually `wp-content/debug.log`). This includes:
+* Request/response details for AI API calls
+* Provider registration status
+* Model handler information
+
+**Note**: Disable debug logging in production environments to avoid performance impact and log file growth.
 
 ### Does this plugin work without WordPress 7.0?
 
@@ -132,6 +150,18 @@ $files = $result->toImageFiles();
 ```
 
 ## Changelog
+
+### 0.3.0
+* **Major: WordPress AI 0.7.0 Compatibility** - Full compatibility with WordPress AI 0.7.0, including Content Classification and Meta Description Generation features
+* **WordPress Connector Registry Integration** - Proper integration with WordPress 7.0+ Connectors API for API key management
+* **Multi-Provider Response Format Normalization** - Supports various AI provider response formats:
+  * MiniMax XML format parsing
+  * Kimi nested terms array format
+  * GLM suggested_terms format
+  * Tencent Hunyuan string array format
+* **DashScope Universal Fix** - Automatic JSON keyword injection for qwen/glm models
+* **Balanced Brace Counting** - Improved JSON extraction using balanced brace counting instead of non-greedy regex
+* **Enhanced Debug Logging** - Detailed debug information with URL sanitization
 
 ### 0.2.3
 * Fixed OutputNotEscaped error for image URL in TestPage.php

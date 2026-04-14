@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: DuetG AI Connector
- * Description: Connect WordPress AI Client to any OpenAI-compatible AI API provider
- * Version: 0.2.3
+ * Description: Connect WordPress AI Client to any OpenAI-compatible AI API provider.
+ * Version: 0.3.0
  * Author: DuetG
  * Author URI: https://github.com/duetg/duetg-ai-connector
  * License: GPL-2.0-or-later
