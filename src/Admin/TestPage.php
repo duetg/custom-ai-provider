@@ -136,8 +136,9 @@ class TestPage
         $image_base_url = Settings::getImageBaseUrl();
         $image_model = CustomImageProvider::getModelId();
 
-        // Pre-process network test URL for form field (sanitized early to satisfy PHPCS)
-        $test_url_value = isset($_POST['test_url']) ? esc_url(wp_unslash($_POST['test_url'])) : 'http://127.0.0.1:11434/v1/models';
+        // Pre-process network test URL for form field
+        // Input: use sanitize_text_field for PHPCS; output escaping happens at use site via esc_url()
+        $test_url_raw = isset($_POST['test_url']) ? sanitize_text_field(wp_unslash($_POST['test_url'])) : '';
 
         ?>
         <div class="wrap">
@@ -203,7 +204,7 @@ class TestPage
                                 <label for="test_url"><?php esc_html_e('URL to Test', 'duetg-ai-connector'); ?></label>
                             </th>
                             <td>
-                                <input type="text" name="test_url" id="test_url" class="large-text" value="<?php echo $test_url_value; ?>" placeholder="http://127.0.0.1:11434/v1/models" />
+                                <input type="text" name="test_url" id="test_url" class="large-text" value="<?php echo $test_url_raw ? esc_url($test_url_raw) : 'http://127.0.0.1:11434/v1/models'; ?>" placeholder="http://127.0.0.1:11434/v1/models" />
                                 <p class="description"><?php esc_html_e('Enter the full URL including path to test connectivity.', 'duetg-ai-connector'); ?></p>
                             </td>
                         </tr>
