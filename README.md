@@ -182,6 +182,11 @@ $files = $result->toImageFiles();
 * Added automatic JSON keyword injection for DashScope (qwen/glm) models
 * Improved JSON extraction using balanced brace counting instead of non-greedy regex
 * Added detailed debug logging with URL sanitization
+* Added Network Connectivity Test feature to Test AI page for debugging local Ollama connections
+* Expanded DUETGAICON_ALLOW_LOCAL_URLS to apply to entire plugin (text and image models)
+* Added FAQ section explaining local reasoning model timeout issues
+* Removed WordPress AI version requirements from documentation
+* Cleaned up debug logging code in CustomTextGenerationModel
 
 ### 0.2.3
 * Fixed OutputNotEscaped error for image URL in TestPage.php
