@@ -99,7 +99,10 @@ class TestPage
                         } elseif (!$registry->isProviderConfigured('custom_text')) {
                             $error = __('Text provider not configured. Please add API key via Settings > Connectors.', 'duetg-ai-connector');
                         } elseif (Helper::isLocalUrl(Settings::getTextBaseUrl()) && (!defined('DUETGAICON_ALLOW_LOCAL_URLS') || !DUETGAICON_ALLOW_LOCAL_URLS)) {
-                            $error = __('Your Base URL points to a local/private IP address. To use a local AI provider, add <code>define(\'DUETGAICON_ALLOW_LOCAL_URLS\', true);</code> to your wp-config.php.', 'duetg-ai-connector');
+                            $error = sprintf(
+                                __('Your Base URL points to a local/private IP address. To use a local AI provider, add %s to your wp-config.php.', 'duetg-ai-connector'),
+                                '<code>define(\'DUETGAICON_ALLOW_LOCAL_URLS\', true);</code>'
+                            );
                         } else {
                             $model = $registry->getProviderModel('custom_text', CustomTextProvider::getModelId());
                             $result = $model->generateTextResult([
@@ -114,7 +117,10 @@ class TestPage
                         } elseif (!$registry->isProviderConfigured('custom_image')) {
                             $error = __('Image provider not configured. Please add API key via Settings > Connectors.', 'duetg-ai-connector');
                         } elseif (Helper::isLocalUrl(Settings::getImageBaseUrl()) && (!defined('DUETGAICON_ALLOW_LOCAL_URLS') || !DUETGAICON_ALLOW_LOCAL_URLS)) {
-                            $error = __('Your Base URL points to a local/private IP address. To use a local AI provider, add <code>define(\'DUETGAICON_ALLOW_LOCAL_URLS\', true);</code> to your wp-config.php.', 'duetg-ai-connector');
+                            $error = sprintf(
+                                __('Your Base URL points to a local/private IP address. To use a local AI provider, add %s to your wp-config.php.', 'duetg-ai-connector'),
+                                '<code>define(\'DUETGAICON_ALLOW_LOCAL_URLS\', true);</code>'
+                            );
                         } else {
                             $model = $registry->getProviderModel('custom_image', CustomImageProvider::getModelId());
                             $result = $model->generateImageResult([
