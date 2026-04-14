@@ -113,7 +113,7 @@ function duetgaicon_register_connectors(\WP_Connector_Registry $registry): void
         $registry->unregister('custom_text');
     }
     $registry->register('custom_text', array(
-        'name'        => __('DuetG Text (Custom)', 'duetg-ai-connector'),
+        'name'        => __('DuetG AI Text', 'duetg-ai-connector'),
         'description' => __('Connect to any OpenAI-compatible text generation API.', 'duetg-ai-connector'),
         'type'        => 'ai_provider',
         'authentication' => array(
@@ -128,7 +128,7 @@ function duetgaicon_register_connectors(\WP_Connector_Registry $registry): void
         $registry->unregister('custom_image');
     }
     $registry->register('custom_image', array(
-        'name'        => __('DuetG Image (Custom)', 'duetg-ai-connector'),
+        'name'        => __('DuetG AI Image', 'duetg-ai-connector'),
         'description' => __('Connect to any OpenAI-compatible image generation API.', 'duetg-ai-connector'),
         'type'        => 'ai_provider',
         'authentication' => array(
