@@ -189,6 +189,81 @@ class TestPage
             </div>
 
             <div class="card" style="max-width: 100%; margin-top: 20px;">
+                <h2><?php esc_html_e('Network Connectivity Test', 'duetg-ai-connector'); ?></h2>
+                <p><?php esc_html_e('Test if your WordPress environment can reach a specific URL. Useful for debugging local AI connections.', 'duetg-ai-connector'); ?></p>
+                <form method="post" style="margin-top: 15px;">
+                    <?php wp_nonce_field('duetgaicon_network_test_action'); ?>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row">
+                                <label for="test_url"><?php esc_html_e('URL to Test', 'duetg-ai-connector'); ?></label>
+                            </th>
+                            <td>
+                                <input type="text" name="test_url" id="test_url" class="large-text" value="<?php echo isset($_POST['test_url']) ? esc_url($_POST['test_url']) : 'http://127.0.0.1:11434/v1/models'; ?>" placeholder="http://127.0.0.1:11434/v1/models" />
+                                <p class="description"><?php esc_html_e('Enter the full URL including path to test connectivity.', 'duetg-ai-connector'); ?></p>
+                            </td>
+                        </tr>
+                    </table>
+                    <?php submit_button(esc_html__('Test Connection', 'duetg-ai-connector'), 'secondary', 'network_test_submit', false); ?>
+                </form>
+
+                <?php
+                // Handle network test submission
+                if (isset($_POST['network_test_submit']) && check_admin_referer('duetgaicon_network_test_action')) {
+                    $test_url = isset($_POST['test_url']) ? esc_url_raw($_POST['test_url']) : '';
+
+                    if (empty($test_url)) {
+                        echo '<div class="notice notice-error" style="margin-top: 15px;"><p>' . esc_html__('Please enter a URL to test.', 'duetg-ai-connector') . '</p></div>';
+                    } else {
+                        $response = wp_remote_get($test_url, array(
+                            'timeout' => 10,
+                            'sslverify' => false,
+                            'headers' => array(
+                                'Accept' => 'application/json',
+                            ),
+                        ));
+
+                        if (is_wp_error($response)) {
+                            echo '<div class="notice notice-error" style="margin-top: 15px;">';
+                            echo '<p><strong>' . esc_html__('Connection Failed', 'duetg-ai-connector') . ':</strong> ' . esc_html($response->get_error_message()) . '</p>';
+                            echo '<p><strong>' . esc_html__('Possible Cause', 'duetg-ai-connector') . ':</strong> ';
+                            if (strpos($response->get_error_message(), 'A valid URL') !== false || strpos($response->get_error_message(), 'blocked') !== false) {
+                                esc_html_e('WordPress SSRF protection is blocking this URL. Localhost/private IPs are blocked by default.', 'duetg-ai-connector');
+                            } else {
+                                esc_html_e('The server may be unreachable or the URL may be invalid.', 'duetg-ai-connector');
+                            }
+                            echo '</p></div>';
+                        } else {
+                            $code = wp_remote_retrieve_response_code($response);
+                            $body = wp_remote_retrieve_body($response);
+
+                            echo '<div class="notice notice-success" style="margin-top: 15px;">';
+                            echo '<p><strong>' . esc_html__('Connection Successful!', 'duetg-ai-connector') . '</strong></p>';
+                            echo '<p>' . esc_html__('HTTP Status Code', 'duetg-ai-connector') . ': ' . esc_html($code) . '</p>';
+
+                            if ($code == 200) {
+                                // Try to parse as JSON (Ollama models endpoint)
+                                $data = json_decode($body, true);
+                                if (isset($data['models']) && is_array($data['models'])) {
+                                    echo '<p><strong>' . esc_html__('Available Models:', 'duetg-ai-connector') . '</strong></p>';
+                                    echo '<ul style="margin: 10px 0;">';
+                                    foreach ($data['models'] as $model) {
+                                        echo '<li>' . esc_html($model['name'] ?? json_encode($model)) . '</li>';
+                                    }
+                                    echo '</ul>';
+                                } else {
+                                    echo '<p>' . esc_html__('Response Body Preview:', 'duetg-ai-connector') . '</p>';
+                                    echo '<pre style="background: #f0f0f0; padding: 10px; max-height: 200px; overflow-y: auto;">' . esc_html(substr($body, 0, 500)) . '</pre>';
+                                }
+                            }
+                            echo '</div>';
+                        }
+                    }
+                }
+                ?>
+            </div>
+
+            <div class="card" style="max-width: 100%; margin-top: 20px;">
                 <h2><?php esc_html_e('Test AI', 'duetg-ai-connector'); ?></h2>
                 <form method="post">
                     <?php wp_nonce_field('duetgaicon_test_action'); ?>

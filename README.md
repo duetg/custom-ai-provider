@@ -117,13 +117,30 @@ If you need more consistent results, consider using a model that reliably return
 
 Some providers require an API key. For local installations (like Ollama) that don't require authentication, you can enter any dummy string (e.g., "not-required") as the API key.
 
-### How do I use a local image model that returns localhost URLs?
+### Why do reasoning/thinking models (like Gemma 4, DeepSeek) sometimes timeout?
 
-By default, the plugin blocks requests to localhost and private IP addresses for security (SSRF protection). If you're using a local image generation model that returns localhost URLs, you can enable local URL access by adding this to your `wp-config.php`:
+Reasoning models (like Gemma 4, DeepSeek R1, QwQ, etc.) generate long "thinking" chains before producing their final answer. This process can take 30-60 seconds or more, which can trigger cURL's low speed limit timeout (30 seconds by default).
+
+**Recommended solutions:**
+
+1. **Use non-reasoning models** for WordPress AI features. For Ollama, models like `qwen2.5:7b`, `llama3.2:3b`, or `phi3` work well without the timeout issue.
+
+2. **Configure Ollama to keep models loaded:**
+   ```bash
+   export OLLAMA_KEEP_ALIVE=-1  # Keep model in memory
+   ```
+
+3. **If using reasoning models**, be aware that WordPress AI features may be slower or timeout. The thinking behavior is controlled by the model, not by the plugin.
+
+### How do I use a local AI provider (like Ollama or LM Studio)?
+
+By default, the plugin blocks requests to localhost and private IP addresses for security (SSRF protection). If you're using a local AI provider, you can enable local URL access by adding this to your `wp-config.php`:
 
 ```php
 define('DUETGAICON_ALLOW_LOCAL_URLS', true);
 ```
+
+This setting applies to both text and image models when using local AI providers.
 
 ### How do I use this in my code?
 

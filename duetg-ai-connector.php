@@ -57,7 +57,7 @@ function duetgaicon_preferred_vision_models_filter(array $models): array
 add_filter('wpai_preferred_vision_models', __NAMESPACE__ . '\\duetgaicon_preferred_vision_models_filter', PHP_INT_MAX);
 
 /**
- * Increase timeout for AI API requests only
+ * Increase timeout for AI API requests and bypass SSRF protection when enabled
  *
  * @param array $args
  * @param string $url
@@ -73,6 +73,12 @@ function duetgaicon_http_request_args_filter(array $args, string $url): array
     foreach ($ai_base_urls as $base) {
         if (!empty($base) && strpos($url, rtrim($base, '/')) === 0) {
             $args['timeout'] = 300; // 5 minutes timeout for AI requests
+
+            // Bypass SSRF protection for local URLs when enabled
+            // By default (constant not defined or false), SSRF protection blocks localhost/private IPs
+            if (defined('DUETGAICON_ALLOW_LOCAL_URLS') && DUETGAICON_ALLOW_LOCAL_URLS) {
+                $args['reject_unsafe_urls'] = false;
+            }
             break;
         }
     }

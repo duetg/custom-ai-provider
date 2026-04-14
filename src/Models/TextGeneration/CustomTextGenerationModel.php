@@ -139,18 +139,13 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
         $base_url = $this->getBaseUrl();
 
         // Debug logging - log final request details
-        Helper::debug('Request', [
-            'path' => $path,
-            'model' => $model_id,
-            'url' => $base_url . '/' . ltrim($path, '/'),
-            'response_format' => isset($data['response_format']) ? $data['response_format'] : null,
-            'data_keys' => is_array($data) ? array_keys($data) : null,
-        ]);
-
-        // Note: response_format handling was removed because WordPress AI features
-        // like Content Classification require structured JSON output.
-        // If you encounter issues with specific providers, you may need to add
-        // model-specific handling here.
+        if (defined('DUETGAICON_DEBUG') && DUETGAICON_DEBUG) {
+            Helper::debug('Request', [
+                'path' => $path,
+                'model' => $model_id,
+                'url' => $base_url . '/' . ltrim($path, '/'),
+            ]);
+        }
 
         return new Request($method, $base_url . '/' . ltrim($path, '/'), $headers, $data);
     }
@@ -167,11 +162,12 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
     protected function parseResponseChoiceToCandidate(array $choiceData, int $index): \WordPress\AiClient\Results\DTO\Candidate
     {
         // Debug: log raw response data
-        Helper::debug('Response choice[' . $index . ']', [
-            'content' => isset($choiceData['message']['content']) ? substr($choiceData['message']['content'], 0, 500) : null,
-            'finish_reason' => $choiceData['finish_reason'] ?? null,
-            'choiceData_keys' => array_keys($choiceData),
-        ]);
+        if (defined('DUETGAICON_DEBUG') && DUETGAICON_DEBUG) {
+            Helper::debug('Response choice[' . $index . ']', [
+                'content' => isset($choiceData['message']['content']) ? substr($choiceData['message']['content'], 0, 500) : null,
+                'finish_reason' => $choiceData['finish_reason'] ?? null,
+            ]);
+        }
 
         // Apply model-specific handler if available
         $handler = $this->getModelHandler();
@@ -216,32 +212,22 @@ class CustomTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationMo
 
         // Check if content is not valid JSON but looks like it should be JSON
         // Try to extract JSON from the text response - but ONLY for Review Notes requests
-        // Check if the response contains keywords that indicate this is a Review Notes request
         if (isset($choiceData['content']) && is_string($choiceData['content'])) {
             $content = $choiceData['content'];
 
-            Helper::debug('Checking JSON extraction', [
-                'content_preview' => substr($content, 0, 200),
-                'matches_json_pattern' => (bool) preg_match('/^\s*[\[{]/', $content),
-            ]);
-
             // If the response looks like JSON (starts with [ or {), try to parse and normalize it
-            // This handles Review Notes and other structured responses
-            // Normal conversation responses are plain text and won't match this pattern
             if (preg_match('/^\s*[\[{]/', $content)) {
-                Helper::debug('Detected JSON-like response, trying to extract and normalize');
+                if (defined('DUETGAICON_DEBUG') && DUETGAICON_DEBUG) {
+                    Helper::debug('Detected JSON-like response, extracting and normalizing');
+                }
                 $json_extracted = $this->getReviewNotesNormalizer()->extractJsonFromText($content);
                 if ($json_extracted !== null) {
                     $json_content = json_encode($json_extracted);
-                    // Update both top-level and message content
                     $choiceData['content'] = $json_content;
                     if (isset($choiceData['message']) && is_array($choiceData['message'])) {
                         $choiceData['message']['content'] = $json_content;
                     }
-                    Helper::debug('Extracted JSON from text', $json_content);
                 }
-            } else {
-                Helper::debug('Content does not look like JSON, skipping extraction');
             }
         }
 
