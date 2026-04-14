@@ -24,26 +24,26 @@ DuetG AI Connector allows WordPress AI Client to connect to any AI service that 
 
 ## WordPress AI Integration
 
-This plugin is compatible with the official [WordPress AI plugin](https://wordpress.org/plugins/ai/) (version 0.6.0+). When installed together, you can use your custom API provider with WordPress's built-in AI features (0.7.0 features require WordPress AI 0.7.0+):
+When installed together with the official [WordPress AI plugin](https://wordpress.org/plugins/ai/), you can use your custom API provider with WordPress's built-in AI features:
 
 - **Alt Text Generation** - Generates descriptive alt text for images using AI vision models (requires VLM model)
-- **Content Classification** (WordPress AI 0.7.0+) - AI-powered suggestions for post tags and categories based on content analysis
+- **Content Classification** - AI-powered suggestions for post tags and categories based on content analysis
 - **Content Summarization** - Summarizes long-form content into digestible overviews
 - **Excerpt Generation** - Generates excerpt suggestions from content
 - **Image Generation** - Generate featured images and inline images using AI
 - **Image Prompt Generation** - Generates a prompt from post content that can be used to generate an image
-- **Meta Description Generation** (WordPress AI 0.7.0+) - Generates meta description suggestions and integrates with various SEO plugins
+- **Meta Description Generation** - Generates meta description suggestions and integrates with various SEO plugins
 - **Review Notes** - Reviews post content block-by-block and adds Notes with suggestions for Accessibility, Readability, Grammar, and SEO
 - **Title Generation** - Generates title suggestions from content
 
 ### Model Capabilities
 
 **All Models** (text generation endpoint):
-- Content Classification (requires WordPress AI 0.7.0+)
+- Content Classification
 - Content Summarization
 - Excerpt Generation
 - Image Prompt Generation
-- Meta Description Generation (requires WordPress AI 0.7.0+)
+- Meta Description Generation
 - Review Notes
 - Title Generation
 
@@ -59,8 +59,7 @@ This plugin is compatible with the official [WordPress AI plugin](https://wordpr
 
 * PHP 7.4 or higher
 * WordPress 7.0 or higher (uses built-in Connectors API)
-* (Optional) WordPress AI plugin 0.6.0+ for enhanced integration
-* Note: Content Classification and Meta Description Generation require WordPress AI 0.7.0+
+* (Optional) WordPress AI plugin for enhanced integration
 
 ## Installation
 
@@ -117,28 +116,32 @@ If you need more consistent results, consider using a model that reliably return
 
 Some providers require an API key. For local installations (like Ollama) that don't require authentication, you can enter any dummy string (e.g., "not-required") as the API key.
 
-### Why do reasoning/thinking models (like Gemma 4, DeepSeek) sometimes timeout?
+### Why do local reasoning/thinking models sometimes timeout?
 
-Reasoning models (like Gemma 4, DeepSeek R1, QwQ, etc.) generate long "thinking" chains before producing their final answer. This process can take 30-60 seconds or more, which can trigger cURL's low speed limit timeout (30 seconds by default).
+Local reasoning models (like Gemma 4, QwQ, etc.) running on Ollama generate long "thinking" chains before producing their final answer. This process can take 30-60 seconds or more, which can trigger cURL's low speed limit timeout (30 seconds by default).
 
-**Recommended solutions:**
+**Cloud models generally work well** - most cloud API providers (DeepSeek, MiniMax, Moonshot, etc.) respond quickly without timeout issues. If a cloud model frequently times out, it may have unusually long thinking chains - try switching to a different model.
 
-1. **Use non-reasoning models** for WordPress AI features. For Ollama, models like `qwen2.5:7b`, `llama3.2:3b`, or `phi3` work well without the timeout issue.
+**Recommended solutions for local models:**
+
+1. **Use non-reasoning models** for local AI features. For Ollama, models like `qwen2.5:7b`, `llama3.2:3b`, or `phi3` work well without the timeout issue.
 
 2. **Configure Ollama to keep models loaded:**
    ```bash
    export OLLAMA_KEEP_ALIVE=-1  # Keep model in memory
    ```
 
-3. **If using reasoning models**, be aware that WordPress AI features may be slower or timeout. The thinking behavior is controlled by the model, not by the plugin.
+If using reasoning models, be aware that WordPress AI features may be slower or timeout. The thinking behavior is controlled by the model, not by the plugin.
 
 ### How do I use a local AI provider (like Ollama or LM Studio)?
 
-By default, the plugin blocks requests to localhost and private IP addresses for security (SSRF protection). If you're using a local AI provider, you can enable local URL access by adding this to your `wp-config.php`:
+By default, WordPress blocks requests to localhost and private IP addresses for security (SSRF protection). If you're using a local AI provider, you can disable this protection by adding to your `wp-config.php`:
 
 ```php
 define('DUETGAICON_ALLOW_LOCAL_URLS', true);
 ```
+
+**Warning**: Disabling SSRF protection allows requests to private/local IPs. Only enable this if you trust your local AI provider and your server is not directly accessible from the internet.
 
 This setting applies to both text and image models when using local AI providers.
 
@@ -172,7 +175,6 @@ $files = $result->toImageFiles();
 
 ### 0.3.0
 * Renamed plugin to DuetG AI Connector (from Custom AI Provider)
-* Added full compatibility with WordPress AI 0.7.0
 * Added Content Classification feature (AI-powered suggestions for post tags and categories)
 * Added Meta Description Generation feature
 * Added WordPress Connector Registry integration for WordPress 7.0+ compatibility
