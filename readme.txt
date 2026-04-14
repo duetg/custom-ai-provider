@@ -208,7 +208,7 @@ This setting applies to both text and image models when using local AI providers
 * Fixed unsescaped output in test page
 * Added direct file access protection to Settings.php
 * Added SSRF protection for image URLs (blocks localhost/private IPs by default)
-* Added CUSTOM_AI_ALLOW_LOCAL_URLS constant to enable local image URLs when needed
+* Added DUETGAICON_ALLOW_LOCAL_URLS constant to enable local image URLs when needed
 * Updated to WordPress AI plugin (removed "Experiments" branding)
 
 = 0.2.0 =

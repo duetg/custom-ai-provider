@@ -199,7 +199,7 @@ class TestPage
                                 <label for="test_url"><?php esc_html_e('URL to Test', 'duetg-ai-connector'); ?></label>
                             </th>
                             <td>
-                                <input type="text" name="test_url" id="test_url" class="large-text" value="<?php echo isset($_POST['test_url']) ? esc_url($_POST['test_url']) : 'http://127.0.0.1:11434/v1/models'; ?>" placeholder="http://127.0.0.1:11434/v1/models" />
+                                <input type="text" name="test_url" id="test_url" class="large-text" value="<?php echo isset($_POST['test_url']) ? esc_url(wp_unslash($_POST['test_url'])) : 'http://127.0.0.1:11434/v1/models'; ?>" placeholder="http://127.0.0.1:11434/v1/models" />
                                 <p class="description"><?php esc_html_e('Enter the full URL including path to test connectivity.', 'duetg-ai-connector'); ?></p>
                             </td>
                         </tr>
@@ -210,18 +210,35 @@ class TestPage
                 <?php
                 // Handle network test submission
                 if (isset($_POST['network_test_submit']) && check_admin_referer('duetgaicon_network_test_action')) {
-                    $test_url = isset($_POST['test_url']) ? esc_url_raw($_POST['test_url']) : '';
+                    $test_url = isset($_POST['test_url']) ? esc_url_raw(wp_unslash($_POST['test_url'])) : '';
 
                     if (empty($test_url)) {
                         echo '<div class="notice notice-error" style="margin-top: 15px;"><p>' . esc_html__('Please enter a URL to test.', 'duetg-ai-connector') . '</p></div>';
                     } else {
-                        $response = wp_remote_get($test_url, array(
+                        // Note: This diagnostic tool intentionally bypasses SSRF protection to test local URLs.
+                        // It is restricted to administrators only (manage_options capability) and protected by nonce.
+                        // SSL verification is disabled for local URLs since local servers often use self-signed certificates.
+                        $parsed_url = wp_parse_url($test_url);
+                        $is_local_url = !empty($parsed_url['host']) && (
+                            $parsed_url['host'] === 'localhost' ||
+                            $parsed_url['host'] === '127.0.0.1' ||
+                            $parsed_url['host'] === '::1' ||
+                            filter_var($parsed_url['host'], FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false
+                        );
+
+                        $request_args = array(
                             'timeout' => 10,
-                            'sslverify' => false,
                             'headers' => array(
                                 'Accept' => 'application/json',
                             ),
-                        ));
+                        );
+
+                        // Only disable SSL verify for local URLs (self-signed certs common)
+                        if ($is_local_url) {
+                            $request_args['sslverify'] = false;
+                        }
+
+                        $response = wp_remote_get($test_url, $request_args);
 
                         if (is_wp_error($response)) {
                             echo '<div class="notice notice-error" style="margin-top: 15px;">';
