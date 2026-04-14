@@ -228,7 +228,6 @@ class TestPage
                         // It is restricted to administrators only (manage_options capability) and protected by nonce.
                         // SSL verification is disabled for local URLs since local servers often use self-signed certificates.
                         $is_local_url = Helper::isLocalUrl($test_url);
-                        );
 
                         $request_args = array(
                             'timeout' => 10,
