@@ -39,9 +39,11 @@ This plugin is compatible with the official [WordPress AI plugin](https://wordpr
 = Model Capabilities =
 
 **All Models** (text generation endpoint):
+* Content Classification (requires WordPress AI 0.7.0+)
 * Content Summarization
 * Excerpt Generation
 * Image Prompt Generation
+* Meta Description Generation (requires WordPress AI 0.7.0+)
 * Review Notes
 * Title Generation
 
@@ -152,16 +154,15 @@ By default, the plugin blocks requests to localhost and private IP addresses for
 == Changelog ==
 
 = 0.3.0 =
-* **Major: WordPress AI 0.7.0 Compatibility** - Full compatibility with WordPress AI 0.7.0, including Content Classification and Meta Description Generation features
-* **WordPress Connector Registry Integration** - Proper integration with WordPress 7.0+ Connectors API for API key management
-* **Multi-Provider Response Format Normalization** - Supports various AI provider response formats:
-  * MiniMax XML format parsing
-  * Kimi nested terms array format
-  * GLM suggested_terms format
-  * Tencent Hunyuan string array format
-* **DashScope Universal Fix** - Automatic JSON keyword injection for qwen/glm models
-* **Balanced Brace Counting** - Improved JSON extraction using balanced brace counting instead of non-greedy regex
-* **Enhanced Debug Logging** - Detailed debug information with URL sanitization
+* Renamed plugin to DuetG AI Connector (from Custom AI Provider)
+* Added full compatibility with WordPress AI 0.7.0
+* Added Content Classification feature (AI-powered suggestions for post tags and categories)
+* Added Meta Description Generation feature
+* Added WordPress Connector Registry integration for WordPress 7.0+ compatibility
+* Added multi-provider response format normalization for MiniMax, Kimi, GLM, and Tencent Hunyuan
+* Added automatic JSON keyword injection for DashScope (qwen/glm) models
+* Improved JSON extraction using balanced brace counting instead of non-greedy regex
+* Added detailed debug logging with URL sanitization
 
 = 0.2.3 =
 * Fixed OutputNotEscaped error for image URL in TestPage.php
