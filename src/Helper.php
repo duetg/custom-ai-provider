@@ -64,9 +64,22 @@ class Helper
         if (empty($parsed['host'])) {
             return false;
         }
-        return $parsed['host'] === 'localhost'
+
+        // Check for localhost variants
+        if ($parsed['host'] === 'localhost'
             || $parsed['host'] === '127.0.0.1'
             || $parsed['host'] === '::1'
-            || filter_var($parsed['host'], FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
+        ) {
+            return true;
+        }
+
+        // If it's an IP address, check if it's a private/reserved IP
+        // filter_var returns false for non-IP strings (like domain names)
+        if (filter_var($parsed['host'], FILTER_VALIDATE_IP) !== false) {
+            return filter_var($parsed['host'], FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
+        }
+
+        // Domain names are never local URLs
+        return false;
     }
 }
