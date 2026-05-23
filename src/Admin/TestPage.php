@@ -70,8 +70,8 @@ class TestPage
                             } elseif (!$registry->isProviderConfigured('duetgaicon_text')) {
                                 $error = __('Text provider not configured. Please add API key via Settings > Connectors.', 'duetg-ai-connector');
                             } elseif (Helper::isLocalUrl(Settings::getTextBaseUrl()) && (!defined('DUETGAICON_ALLOW_LOCAL_URLS') || !DUETGAICON_ALLOW_LOCAL_URLS)) {
-                                // translators: %s is a PHP constant definition
                                 $error = sprintf(
+                                    // translators: %s is a PHP constant definition, e.g. define('DUETGAICON_ALLOW_LOCAL_URLS', true);
                                     __('Your Base URL points to a local/private IP address. To use a local AI provider, add %s to your wp-config.php.', 'duetg-ai-connector'),
                                     '<code>define(\'DUETGAICON_ALLOW_LOCAL_URLS\', true);</code>'
                                 );
@@ -89,8 +89,8 @@ class TestPage
                             } elseif (!$registry->isProviderConfigured('duetgaicon_image')) {
                                 $error = __('Image provider not configured. Please add API key via Settings > Connectors.', 'duetg-ai-connector');
                             } elseif (Helper::isLocalUrl(Settings::getImageBaseUrl()) && (!defined('DUETGAICON_ALLOW_LOCAL_URLS') || !DUETGAICON_ALLOW_LOCAL_URLS)) {
-                                // translators: %s is a PHP constant definition
                                 $error = sprintf(
+                                    // translators: %s is a PHP constant definition, e.g. define('DUETGAICON_ALLOW_LOCAL_URLS', true);
                                     __('Your Base URL points to a local/private IP address. To use a local AI provider, add %s to your wp-config.php.', 'duetg-ai-connector'),
                                     '<code>define(\'DUETGAICON_ALLOW_LOCAL_URLS\', true);</code>'
                                 );
