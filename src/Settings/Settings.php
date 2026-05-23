@@ -42,7 +42,7 @@ class Settings
     public const IMAGE_ENABLED_OPTION = 'connectors_ai_duetgaicon_image_enabled';
     public const IMAGE_BASE_URL_OPTION = 'connectors_ai_duetgaicon_image_base_url';
     public const IMAGE_MODEL_OPTION = 'connectors_ai_duetgaicon_image_model';
-    public const IMAGE_API_KEY_OPTION = 'connectors_ai_duetgaicon_image_api_key';
+    public const IMAGE_API_KEY_OPTION = 'connectors_ai_custom_image_api_key';
 
     /**
      * Initialize settings

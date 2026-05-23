@@ -90,8 +90,8 @@ class CustomTextProvider extends AbstractApiProvider
         return new class implements \WordPress\AiClient\Providers\Contracts\ProviderAvailabilityInterface {
             public function isConfigured(): bool
             {
-                // Check if API key is configured
-                return !empty(Settings::get_text_api_key());
+                // Always return true - users are responsible for their own API key validity
+                return true;
             }
         };
     }
