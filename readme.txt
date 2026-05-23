@@ -22,25 +22,6 @@ DuetG AI Connector allows WordPress AI Client to connect to any AI service that 
 * SiliconFlow
 * And any other OpenAI-compatible API provider
 
-= Model Capabilities =
-
-**All Models** (text generation endpoint):
-* Content Classification
-* Content Summarization
-* Excerpt Generation
-* Image Prompt Generation
-* Meta Description Generation
-* Review Notes
-* Title Generation
-
-**Vision-Language Models (VLM)** additionally support:
-* Alt Text Generation (analyzes image content)
-
-**Image Generation Endpoint**:
-* Image Generation (featured images and inline images)
-
-Note: Only Alt Text Generation requires a VLM. All other features work with a standard text-only model.
-
 == Requirements ==
 
 * PHP 7.4 or higher
