@@ -103,48 +103,6 @@ function duetgaicon_preferred_text_models_filter(array $models): array
 }
 add_filter('wpai_preferred_text_models', __NAMESPACE__ . '\\duetgaicon_preferred_text_models_filter', PHP_INT_MAX);
 
-/**
- * Register our connectors with WordPress Connector Registry
- * This is needed because WordPress 7.0+ auto-discovery doesn't set setting_name properly
- *
- * @param WP_Connector_Registry $registry Connector registry instance
- */
-function duetgaicon_register_connectors(\WP_Connector_Registry $registry): void
-{
-    // Unregister first (if exists) then re-register with proper setting_name
-    // This is needed because auto-discovery runs before this hook and doesn't set setting_name
-
-    // Custom Text connector
-    if ($registry->is_registered('custom_text')) {
-        $registry->unregister('custom_text');
-    }
-    $registry->register('custom_text', array(
-        'name'        => __('DuetG AI Text', 'duetg-ai-connector'),
-        'description' => __('Connect to any OpenAI-compatible text generation API.', 'duetg-ai-connector'),
-        'type'        => 'ai_provider',
-        'authentication' => array(
-            'method'          => 'api_key',
-            'credentials_url' => 'https://github.com/duetg/duetg-ai-connector#setup',
-            'setting_name'    => Settings::TEXT_API_KEY_OPTION,
-        ),
-    ));
-
-    // Custom Image connector
-    if ($registry->is_registered('custom_image')) {
-        $registry->unregister('custom_image');
-    }
-    $registry->register('custom_image', array(
-        'name'        => __('DuetG AI Image', 'duetg-ai-connector'),
-        'description' => __('Connect to any OpenAI-compatible image generation API.', 'duetg-ai-connector'),
-        'type'        => 'ai_provider',
-        'authentication' => array(
-            'method'          => 'api_key',
-            'credentials_url' => 'https://github.com/duetg/duetg-ai-connector#setup',
-            'setting_name'    => Settings::IMAGE_API_KEY_OPTION,
-        ),
-    ));
-}
-add_action('wp_connectors_init', __NAMESPACE__ . '\\duetgaicon_register_connectors');
 
 /**
  * Register the connector to WordPress AI system

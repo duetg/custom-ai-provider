@@ -7,6 +7,7 @@
 
 namespace WordPress\CustomAiProvider\Provider;
 
+use WordPress\AiClient\AiClient;
 use WordPress\AiClient\Providers\ApiBasedImplementation\AbstractApiProvider;
 use WordPress\AiClient\Providers\DTO\ProviderMetadata;
 use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
@@ -28,14 +29,21 @@ class CustomImageProvider extends AbstractApiProvider
      */
     protected static function createProviderMetadata(): ProviderMetadata
     {
-        return new ProviderMetadata(
+        $providerMetadataArgs = [
             'custom_image',
             __('Custom Image Generation', 'duetg-ai-connector'),
             ProviderTypeEnum::cloud(),
             null,
             RequestAuthenticationMethod::apiKey(),
-            __('Image generation with custom OpenAI-compatible API provider', 'duetg-ai-connector')
-        );
+            __('Image generation with custom OpenAI-compatible API provider', 'duetg-ai-connector'),
+        ];
+
+        // Provider logoPath support was added in 1.3.0.
+        if (version_compare(AiClient::VERSION, '1.3.0', '>=')) {
+            $providerMetadataArgs[] = dirname(__DIR__, 2) . '/assets/images/duetg-ai-connector.svg';
+        }
+
+        return new ProviderMetadata(...$providerMetadataArgs);
     }
 
     /**
