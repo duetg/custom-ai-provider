@@ -143,10 +143,14 @@ This setting applies to both text and image models when using local AI providers
 == Changelog ==
 
 = 0.3.2 =
-* Renamed all provider IDs from custom_text/custom_image to duetgaicon_text/duetgaicon_image
-* Fixed isConfigured() to properly validate API key presence (prevents false "Connected" status)
+* Fixed logo not appearing by removing manual connector registration (use registerProvider())
 * Fixed image generation display (bypassed esc_url() for inline base64 data URIs)
+* Fixed isConfigured() to properly validate API key presence
+* Renamed all provider IDs from custom_text/custom_image to duetgaicon_text/duetgaicon_image
+* Added debug logging for provider registration status
 * Updated code examples in documentation to reflect new provider ID prefix
+* Removed WordPress AI Integration section from readme
+* Removed Model Capabilities section from readme
 
 = 0.3.1 =
 * Added isLocalUrl() helper method for detecting localhost/private IP URLs
