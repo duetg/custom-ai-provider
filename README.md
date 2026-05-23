@@ -20,21 +20,7 @@ DuetG AI Connector allows WordPress AI Client to connect to any AI service that 
 * Image generation support
 * Works with any OpenAI-compatible API
 * Simple configuration through WordPress admin
-* Compatible with WordPress AI plugin
-
-## WordPress AI Integration
-
-When installed together with the official [WordPress AI plugin](https://wordpress.org/plugins/ai/), you can use your custom API provider with WordPress's built-in AI features:
-
-- **Alt Text Generation** - Generates descriptive alt text for images using AI vision models (requires VLM model)
-- **Content Classification** - AI-powered suggestions for post tags and categories based on content analysis
-- **Content Summarization** - Summarizes long-form content into digestible overviews
-- **Excerpt Generation** - Generates excerpt suggestions from content
-- **Image Generation** - Generate featured images and inline images using AI
-- **Image Prompt Generation** - Generates a prompt from post content that can be used to generate an image
-- **Meta Description Generation** - Generates meta description suggestions and integrates with various SEO plugins
-- **Review Notes** - Reviews post content block-by-block and adds Notes with suggestions for Accessibility, Readability, Grammar, and SEO
-- **Title Generation** - Generates title suggestions from content
+* **Compatible with [WordPress AI plugin](https://wordpress.org/plugins/ai/)**
 
 ### Model Capabilities
 
@@ -155,7 +141,7 @@ use WordPress\AiClient\AiClient;
 $registry = AiClient::defaultRegistry();
 
 // Text Generation
-$model = $registry->getProviderModel('custom_text', 'gpt-4');
+$model = $registry->getProviderModel('duetgaicon_text', 'gpt-4');
 $result = $model->generateTextResult([
     new \WordPress\AiClient\Messages\DTO\UserMessage([
         new \WordPress\AiClient\Messages\DTO\MessagePart('Your prompt here')
@@ -164,7 +150,7 @@ $result = $model->generateTextResult([
 echo $result->toText();
 
 // Image Generation
-$model = $registry->getProviderModel('custom_image', 'dall-e-3');
+$model = $registry->getProviderModel('duetgaicon_image', 'dall-e-3');
 $result = $model->generateImageResult([
     new \WordPress\AiClient\Messages\DTO\UserMessage([
         new \WordPress\AiClient\Messages\DTO\MessagePart('Your prompt here')
@@ -174,6 +160,12 @@ $files = $result->toImageFiles();
 ```
 
 ## Changelog
+
+### 0.3.2
+* Renamed all provider IDs from custom_text/custom_image to duetgaicon_text/duetgaicon_image
+* Fixed isConfigured() to properly validate API key presence (prevents false "Connected" status)
+* Fixed image generation display (bypassed esc_url() for inline base64 data URIs)
+* Updated code examples in documentation to reflect new provider ID prefix
 
 ### 0.3.1
 * Added isLocalUrl() helper method for detecting localhost/private IP URLs
