@@ -34,7 +34,7 @@ function duetgaicon_preferred_image_models_filter(array $models): array
 {
     $image_model = Settings::getImageModel();
     if (!empty($image_model)) {
-        $models[] = ['custom_image', $image_model];
+        $models[] = ['duetgaicon_image', $image_model];
     }
     return $models;
 }
@@ -50,7 +50,7 @@ function duetgaicon_preferred_vision_models_filter(array $models): array
 {
     $text_model = Settings::getTextModel();
     if (!empty($text_model)) {
-        $models[] = ['custom_text', $text_model];
+        $models[] = ['duetgaicon_text', $text_model];
     }
     return $models;
 }
@@ -97,7 +97,7 @@ function duetgaicon_preferred_text_models_filter(array $models): array
 {
     $text_model = Settings::getTextModel();
     if (!empty($text_model)) {
-        $models[] = ['custom_text', $text_model];
+        $models[] = ['duetgaicon_text', $text_model];
     }
     return $models;
 }
@@ -122,32 +122,32 @@ function register_connector(): void
 
     $registry = \WordPress\AiClient\AiClient::defaultRegistry();
 
-    if (!$registry->hasProvider('custom_text')) {
+    if (!$registry->hasProvider('duetgaicon_text')) {
         try {
             $registry->registerProvider(\WordPress\CustomAiProvider\Provider\CustomTextProvider::class);
             if (defined('DUETGAICON_DEBUG') && DUETGAICON_DEBUG) {
                 // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-                error_log('DuetG AI Connector: custom_text provider registered successfully');
+                error_log('DuetG AI Connector: duetgaicon_text provider registered successfully');
             }
         } catch (\Throwable $e) {
             if (defined('DUETGAICON_DEBUG') && DUETGAICON_DEBUG) {
                 // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-                error_log('DuetG AI Connector: Failed to register custom_text provider: ' . $e->getMessage());
+                error_log('DuetG AI Connector: Failed to register duetgaicon_text provider: ' . $e->getMessage());
             }
         }
     }
 
-    if (!$registry->hasProvider('custom_image')) {
+    if (!$registry->hasProvider('duetgaicon_image')) {
         try {
             $registry->registerProvider(\WordPress\CustomAiProvider\Provider\CustomImageProvider::class);
             if (defined('DUETGAICON_DEBUG') && DUETGAICON_DEBUG) {
                 // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-                error_log('DuetG AI Connector: custom_image provider registered successfully');
+                error_log('DuetG AI Connector: duetgaicon_image provider registered successfully');
             }
         } catch (\Throwable $e) {
             if (defined('DUETGAICON_DEBUG') && DUETGAICON_DEBUG) {
                 // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-                error_log('DuetG AI Connector: Failed to register custom_image provider: ' . $e->getMessage());
+                error_log('DuetG AI Connector: Failed to register duetgaicon_image provider: ' . $e->getMessage());
             }
         }
     }
@@ -155,9 +155,9 @@ function register_connector(): void
     // Debug: log provider status
     if (defined('DUETGAICON_DEBUG') && DUETGAICON_DEBUG) {
         // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-        error_log('DuetG AI Connector: has custom_text=' . ($registry->hasProvider('custom_text') ? 'true' : 'false'));
+        error_log('DuetG AI Connector: has duetgaicon_text=' . ($registry->hasProvider('duetgaicon_text') ? 'true' : 'false'));
         // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-        error_log('DuetG AI Connector: has custom_image=' . ($registry->hasProvider('custom_image') ? 'true' : 'false'));
+        error_log('DuetG AI Connector: has duetgaicon_image=' . ($registry->hasProvider('duetgaicon_image') ? 'true' : 'false'));
     }
 
     Settings::pass_api_keys_to_ai_client();
