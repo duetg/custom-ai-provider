@@ -30,8 +30,8 @@ class CustomTextProvider extends AbstractApiProvider
     protected static function createProviderMetadata(): ProviderMetadata
     {
         $providerMetadataArgs = [
-            'custom_text',
-            __('Custom Text Generation', 'duetg-ai-connector'),
+            'duetgaicon_text',
+            __('DuetG AI Text', 'duetg-ai-connector'),
             ProviderTypeEnum::cloud(),
             null,
             RequestAuthenticationMethod::apiKey(),
@@ -90,8 +90,7 @@ class CustomTextProvider extends AbstractApiProvider
         return new class implements \WordPress\AiClient\Providers\Contracts\ProviderAvailabilityInterface {
             public function isConfigured(): bool
             {
-                // Always return true - users are responsible for their own API key validity
-                return true;
+                return !empty(Settings::get_text_api_key());
             }
         };
     }

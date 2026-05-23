@@ -42,7 +42,7 @@ class Settings
     public const IMAGE_ENABLED_OPTION = 'connectors_ai_duetgaicon_image_enabled';
     public const IMAGE_BASE_URL_OPTION = 'connectors_ai_duetgaicon_image_base_url';
     public const IMAGE_MODEL_OPTION = 'connectors_ai_duetgaicon_image_model';
-    public const IMAGE_API_KEY_OPTION = 'connectors_ai_custom_image_api_key';
+    public const IMAGE_API_KEY_OPTION = 'connectors_ai_duetgaicon_image_api_key';
 
     /**
      * Initialize settings
@@ -129,18 +129,18 @@ class Settings
 
             // Text generation API key
             $text_api_key = self::get_text_api_key();
-            if (!empty($text_api_key) && $registry->hasProvider('custom_text')) {
+            if (!empty($text_api_key) && $registry->hasProvider('duetgaicon_text')) {
                 $registry->setProviderRequestAuthentication(
-                    'custom_text',
+                    'duetgaicon_text',
                     new ApiKeyRequestAuthentication($text_api_key)
                 );
             }
 
             // Image generation API key
             $image_api_key = self::get_image_api_key();
-            if (!empty($image_api_key) && $registry->hasProvider('custom_image')) {
+            if (!empty($image_api_key) && $registry->hasProvider('duetgaicon_image')) {
                 $registry->setProviderRequestAuthentication(
-                    'custom_image',
+                    'duetgaicon_image',
                     new ApiKeyRequestAuthentication($image_api_key)
                 );
             }

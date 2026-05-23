@@ -30,8 +30,8 @@ class CustomImageProvider extends AbstractApiProvider
     protected static function createProviderMetadata(): ProviderMetadata
     {
         $providerMetadataArgs = [
-            'custom_image',
-            __('Custom Image Generation', 'duetg-ai-connector'),
+            'duetgaicon_image',
+            __('DuetG AI Image', 'duetg-ai-connector'),
             ProviderTypeEnum::cloud(),
             null,
             RequestAuthenticationMethod::apiKey(),
@@ -90,8 +90,7 @@ class CustomImageProvider extends AbstractApiProvider
         return new class implements \WordPress\AiClient\Providers\Contracts\ProviderAvailabilityInterface {
             public function isConfigured(): bool
             {
-                // Always return true - users are responsible for their own API key validity
-                return true;
+                return !empty(Settings::get_image_api_key());
             }
         };
     }

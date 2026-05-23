@@ -65,9 +65,9 @@ class TestPage
                         $registry = \WordPress\AiClient\AiClient::defaultRegistry();
 
                         if ($provider_type === 'text') {
-                            if (!$registry->hasProvider('custom_text')) {
+                            if (!$registry->hasProvider('duetgaicon_text')) {
                                 $error = __('Text provider not registered.', 'duetg-ai-connector');
-                            } elseif (!$registry->isProviderConfigured('custom_text')) {
+                            } elseif (!$registry->isProviderConfigured('duetgaicon_text')) {
                                 $error = __('Text provider not configured. Please add API key via Settings > Connectors.', 'duetg-ai-connector');
                             } elseif (Helper::isLocalUrl(Settings::getTextBaseUrl()) && (!defined('DUETGAICON_ALLOW_LOCAL_URLS') || !DUETGAICON_ALLOW_LOCAL_URLS)) {
                                 $error = sprintf(
@@ -75,7 +75,7 @@ class TestPage
                                     '<code>define(\'DUETGAICON_ALLOW_LOCAL_URLS\', true);</code>'
                                 );
                             } else {
-                                $model = $registry->getProviderModel('custom_text', CustomTextProvider::getModelId());
+                                $model = $registry->getProviderModel('duetgaicon_text', CustomTextProvider::getModelId());
                                 $result = $model->generateTextResult([
                                     new \WordPress\AiClient\Messages\DTO\UserMessage([
                                         new \WordPress\AiClient\Messages\DTO\MessagePart($prompt)
@@ -83,9 +83,9 @@ class TestPage
                                 ]);
                             }
                         } else {
-                            if (!$registry->hasProvider('custom_image')) {
+                            if (!$registry->hasProvider('duetgaicon_image')) {
                                 $error = __('Image provider not registered.', 'duetg-ai-connector');
-                            } elseif (!$registry->isProviderConfigured('custom_image')) {
+                            } elseif (!$registry->isProviderConfigured('duetgaicon_image')) {
                                 $error = __('Image provider not configured. Please add API key via Settings > Connectors.', 'duetg-ai-connector');
                             } elseif (Helper::isLocalUrl(Settings::getImageBaseUrl()) && (!defined('DUETGAICON_ALLOW_LOCAL_URLS') || !DUETGAICON_ALLOW_LOCAL_URLS)) {
                                 $error = sprintf(
@@ -93,7 +93,7 @@ class TestPage
                                     '<code>define(\'DUETGAICON_ALLOW_LOCAL_URLS\', true);</code>'
                                 );
                             } else {
-                                $model = $registry->getProviderModel('custom_image', CustomImageProvider::getModelId());
+                                $model = $registry->getProviderModel('duetgaicon_image', CustomImageProvider::getModelId());
                                 $result = $model->generateImageResult([
                                     new \WordPress\AiClient\Messages\DTO\UserMessage([
                                         new \WordPress\AiClient\Messages\DTO\MessagePart($prompt)
@@ -319,7 +319,7 @@ class TestPage
                 <p><?php esc_html_e('To use this provider in your code:', 'duetg-ai-connector'); ?></p>
                 <pre style="background: #f0f0f0; padding: 10px; overflow-x: auto;">// Text Generation
 $registry = AiClient::defaultRegistry();
-$model = $registry->getProviderModel('custom_text', '<?php echo esc_html($text_model); ?>');
+$model = $registry->getProviderModel('duetgaicon_text', '<?php echo esc_html($text_model); ?>');
 $result = $model->generateTextResult([
     new \WordPress\AiClient\Messages\DTO\UserMessage([
         new \WordPress\AiClient\Messages\DTO\MessagePart('Your prompt here')
@@ -328,7 +328,7 @@ $result = $model->generateTextResult([
 echo $result->toText();
 
 // Image Generation
-$model = $registry->getProviderModel('custom_image', '<?php echo esc_html($image_model); ?>');
+$model = $registry->getProviderModel('duetgaicon_image', '<?php echo esc_html($image_model); ?>');
 $result = $model->generateImageResult([
     new \WordPress\AiClient\Messages\DTO\UserMessage([
         new \WordPress\AiClient\Messages\DTO\MessagePart('Your prompt here')
