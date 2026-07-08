@@ -122,8 +122,27 @@ class CustomImageGenerationModel extends AbstractOpenAiCompatibleImageGeneration
             // If b64_json was requested but URL was returned, try to convert
             $imageFile = $this->createFileFromUrl($choiceData['url'], $expectedMimeType);
         } elseif (isset($choiceData['b64_json']) && is_string($choiceData['b64_json'])) {
-            // Provider returned base64 - use it directly
-            $imageFile = new File($choiceData['b64_json'], $expectedMimeType);
+            // Provider returned base64 - use it directly.
+            //
+            // Wrap as a Data URI to bypass an upstream warning in
+            // \WordPress\AiClient\Files\DTO\File::detectAndProcessFile().
+            // The File constructor checks the input in this order:
+            //   1. URL          (isUrl)
+            //   2. Data URI     (preg_match)
+            //   3. file_exists() ← emits "file name is longer than the
+            //                       maximum allowed path length on this
+            //                       platform (4096)" on PHP 8.x when the
+            //                       raw base64 string is > 4096 bytes
+            //   4. Base64 regex
+            // Most generated images easily exceed 4 KB of base64, so any
+            // image API returning b64_json (e.g. SiliconFlow Kolors)
+            // triggers the warning. Data URI matches step 2 and skips
+            // file_exists entirely. Behavior inside File is identical
+            // (base64Data + mimeType are set the same way).
+            //
+            // Can be removed once the upstream AI Client ships a fix.
+            $dataUri = 'data:' . $expectedMimeType . ';base64,' . $choiceData['b64_json'];
+            $imageFile = new File($dataUri, $expectedMimeType);
         } else {
             // No url or b64_json - throw error like parent
             throw new \WordPress\AiClient\Providers\Http\Exception\ResponseException(
