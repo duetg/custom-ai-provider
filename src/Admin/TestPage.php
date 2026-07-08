@@ -48,6 +48,7 @@ class TestPage
         );
 
         $provider_type = 'text';
+        $prompt = '';
         $result = null;
         $error = null;
 
