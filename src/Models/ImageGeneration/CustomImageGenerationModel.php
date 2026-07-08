@@ -122,27 +122,7 @@ class CustomImageGenerationModel extends AbstractOpenAiCompatibleImageGeneration
             // If b64_json was requested but URL was returned, try to convert
             $imageFile = $this->createFileFromUrl($choiceData['url'], $expectedMimeType);
         } elseif (isset($choiceData['b64_json']) && is_string($choiceData['b64_json'])) {
-            // Provider returned base64 - use it directly.
-            //
-            // Wrap as a Data URI to bypass an upstream warning in
-            // \WordPress\AiClient\Files\DTO\File::detectAndProcessFile().
-            // The File constructor checks the input in this order:
-            //   1. URL          (isUrl)
-            //   2. Data URI     (preg_match)
-            //   3. file_exists() ← emits "file name is longer than the
-            //                       maximum allowed path length on this
-            //                       platform (4096)" on PHP 8.x when the
-            //                       raw base64 string is > 4096 bytes
-            //   4. Base64 regex
-            // Most generated images easily exceed 4 KB of base64, so any
-            // image API returning b64_json (e.g. SiliconFlow Kolors)
-            // triggers the warning. Data URI matches step 2 and skips
-            // file_exists entirely. Behavior inside File is identical
-            // (base64Data + mimeType are set the same way).
-            //
-            // Can be removed once the upstream AI Client ships a fix.
-            $dataUri = 'data:' . $expectedMimeType . ';base64,' . $choiceData['b64_json'];
-            $imageFile = new File($dataUri, $expectedMimeType);
+            $imageFile = $this->createFileFromBase64($choiceData['b64_json'], $expectedMimeType);
         } else {
             // No url or b64_json - throw error like parent
             throw new \WordPress\AiClient\Providers\Http\Exception\ResponseException(
@@ -177,8 +157,7 @@ class CustomImageGenerationModel extends AbstractOpenAiCompatibleImageGeneration
         if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
             $body = wp_remote_retrieve_body($response);
             if (!empty($body)) {
-                $base64 = base64_encode($body);
-                return new File($base64, $expectedMimeType);
+                return $this->createFileFromBase64(base64_encode($body), $expectedMimeType);
             }
         }
 
@@ -197,6 +176,45 @@ class CustomImageGenerationModel extends AbstractOpenAiCompatibleImageGeneration
         }
 
         return new File($url, $expectedMimeType);
+    }
+
+    /**
+     * Create a File from raw base64 data.
+     *
+     * Wraps the base64 as a Data URI to bypass an upstream bug in
+     * \WordPress\AiClient\Files\DTO\File::detectAndProcessFile(), which
+     * probes input in this order:
+     *   1. URL          (isUrl)
+     *   2. Data URI     (preg_match)
+     *   3. file_exists() <- emits "file name is longer than the maximum
+     *                       allowed path length on this platform (4096)"
+     *                       on PHP 8.x when the raw base64 string is
+     *                       > 4096 bytes
+     *   4. Base64 regex
+     *
+     * A raw base64 string larger than 4 KB trips the file_exists() check
+     * (which never finds a real path) and emits a Warning even though the
+     * final base64 regex matches. Wrapping as a Data URI matches step 2
+     * and skips file_exists entirely. The resulting File is functionally
+     * equivalent (same fileType=inline, same base64Data, same mimeType)
+     * for any standard base64 input (the only kind base64_encode() or
+     * API responses produce).
+     *
+     * Tracked upstream as php-ai-client issue #258. When the upstream
+     * File constructor gates file_exists() on strlen() <= PHP_MAXPATHLEN,
+     * this helper can be replaced with direct `new File($base64, $mime)`
+     * calls and removed.
+     *
+     * @param string $base64   Standard base64 (no data URI prefix, no
+     *                         newlines). Typically the output of
+     *                         base64_encode() or a b64_json API response.
+     * @param string $mimeType MIME type to record on the File.
+     * @return File
+     */
+    private function createFileFromBase64(string $base64, string $mimeType): File
+    {
+        $dataUri = 'data:' . $mimeType . ';base64,' . $base64;
+        return new File($dataUri, $mimeType);
     }
 
     /**
