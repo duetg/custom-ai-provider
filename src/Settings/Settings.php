@@ -2,7 +2,7 @@
 /**
  * Settings for DuetG AI Connector
  *
- * @package CustomAiProvider\Settings
+ * @package DuetGAIConnector\Settings
  */
 
 namespace WordPress\DuetGAIConnector\Settings;

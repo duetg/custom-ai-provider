@@ -2,7 +2,7 @@
 /**
  * Interface for model-specific handlers
  *
- * @package CustomAiProvider\Models\TextGeneration
+ * @package DuetGAIConnector\Models\TextGeneration
  */
 
 namespace WordPress\DuetGAIConnector\Models\TextGeneration;

@@ -2,7 +2,7 @@
 /**
  * Custom Text Generation Provider
  *
- * @package CustomAiProvider\Provider
+ * @package DuetGAIConnector\Provider
  */
 
 namespace WordPress\DuetGAIConnector\Provider;

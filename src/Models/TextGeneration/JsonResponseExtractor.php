@@ -5,7 +5,7 @@
  * Handles extraction and parsing of JSON responses from AI models.
  * Used by ReviewNotesNormalizer to handle various JSON formats returned by models.
  *
- * @package CustomAiProvider\Models\TextGeneration
+ * @package DuetGAIConnector\Models\TextGeneration
  */
 
 namespace WordPress\DuetGAIConnector\Models\TextGeneration;

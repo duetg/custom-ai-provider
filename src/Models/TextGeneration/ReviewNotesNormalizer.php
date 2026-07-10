@@ -5,7 +5,7 @@
  * Handles normalization of AI responses to Review Notes format.
  * Review Notes expects: {"suggestions": [{"review_type": "...", "text": "...", "priority": 1}]}
  *
- * @package CustomAiProvider\Models\TextGeneration
+ * @package DuetGAIConnector\Models\TextGeneration
  */
 
 namespace WordPress\DuetGAIConnector\Models\TextGeneration;

@@ -2,7 +2,7 @@
 /**
  * Custom Image Model Metadata Directory
  *
- * @package CustomAiProvider\Metadata
+ * @package DuetGAIConnector\Metadata
  */
 
 namespace WordPress\DuetGAIConnector\Metadata;

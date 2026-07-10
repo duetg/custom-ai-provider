@@ -4,7 +4,7 @@
  *
  * Manages registered handlers for different models
  *
- * @package CustomAiProvider\Models\TextGeneration
+ * @package DuetGAIConnector\Models\TextGeneration
  */
 
 namespace WordPress\DuetGAIConnector\Models\TextGeneration;

@@ -2,7 +2,7 @@
 /**
  * Autoloader for DuetG AI Connector plugin
  *
- * @package CustomAiProvider
+ * @package DuetGAIConnector
  */
 
 // Exit if accessed directly.

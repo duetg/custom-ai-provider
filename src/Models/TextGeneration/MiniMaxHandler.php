@@ -5,7 +5,7 @@
  * Handles MiniMax-M2, MiniMax-MoE, and other MiniMax models
  * that use non-standard response formats.
  *
- * @package CustomAiProvider\Models\TextGeneration
+ * @package DuetGAIConnector\Models\TextGeneration
  */
 
 namespace WordPress\DuetGAIConnector\Models\TextGeneration;

@@ -2,7 +2,7 @@
 /**
  * Custom Image Generation Model
  *
- * @package CustomAiProvider\Models\ImageGeneration
+ * @package DuetGAIConnector\Models\ImageGeneration
  */
 
 namespace WordPress\DuetGAIConnector\Models\ImageGeneration;

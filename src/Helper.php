@@ -2,7 +2,7 @@
 /**
  * Helper utilities for DuetG AI Connector
  *
- * @package CustomAiProvider
+ * @package DuetGAIConnector
  */
 
 namespace WordPress\DuetGAIConnector;

@@ -2,7 +2,7 @@
 /**
  * Admin settings page for DuetG AI Connector
  *
- * @package CustomAiProvider\Admin
+ * @package DuetGAIConnector\Admin
  */
 
 namespace WordPress\DuetGAIConnector\Admin;

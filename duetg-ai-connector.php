@@ -10,7 +10,7 @@
  * Requires PHP: 7.4
  * Text Domain: duetg-ai-connector
  *
- * @package CustomAiProvider
+ * @package DuetGAIConnector
  */
 
 namespace WordPress\DuetGAIConnector;
