@@ -6,7 +6,7 @@ Tested up to: 7.0
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Stable tag: 0.3.2
+Stable tag: 0.3.3
 
 Connect WordPress AI Client to any OpenAI-compatible AI API provider.
 
@@ -141,6 +141,13 @@ This setting applies to both text and image models when using local AI providers
 3. Test AI screen - Verify your AI configuration and test text/image generation.
 
 == Changelog ==
+
+= 0.3.3 =
+* Fixed PHP 8.x "Undefined variable $prompt" warning on Test AI page initial load
+* Fixed PHP 8.x "file_exists() path too long" warning emitted when image API returns b64_json larger than 4 KB
+* Extended the b64_json workaround to the URL→base64 download path (triggered when providers ignore response_format and return a URL)
+* Renamed internal PHP namespace from WordPress\CustomAiProvider to WordPress\DuetGAIConnector
+* Updated @package docblock annotations to match the new namespace
 
 = 0.3.2 =
 * Fixed logo not appearing by removing manual connector registration (use registerProvider())
