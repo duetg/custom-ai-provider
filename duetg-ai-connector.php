@@ -13,10 +13,10 @@
  * @package CustomAiProvider
  */
 
-namespace WordPress\CustomAiProvider;
+namespace WordPress\DuetGAIConnector;
 
-use WordPress\CustomAiProvider\Settings\Settings;
-use WordPress\CustomAiProvider\Admin\Admin;
+use WordPress\DuetGAIConnector\Settings\Settings;
+use WordPress\DuetGAIConnector\Admin\Admin;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -118,13 +118,13 @@ function register_connector(): void
     }
 
     // Initialize model handlers (autoloaded via PSR-4)
-    \WordPress\CustomAiProvider\Models\TextGeneration\ModelHandlerRegistry::init();
+    \WordPress\DuetGAIConnector\Models\TextGeneration\ModelHandlerRegistry::init();
 
     $registry = \WordPress\AiClient\AiClient::defaultRegistry();
 
     if (!$registry->hasProvider('duetgaicon_text')) {
         try {
-            $registry->registerProvider(\WordPress\CustomAiProvider\Provider\CustomTextProvider::class);
+            $registry->registerProvider(\WordPress\DuetGAIConnector\Provider\CustomTextProvider::class);
             if (defined('DUETGAICON_DEBUG') && DUETGAICON_DEBUG) {
                 // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 error_log('DuetG AI Connector: duetgaicon_text provider registered successfully');
@@ -139,7 +139,7 @@ function register_connector(): void
 
     if (!$registry->hasProvider('duetgaicon_image')) {
         try {
-            $registry->registerProvider(\WordPress\CustomAiProvider\Provider\CustomImageProvider::class);
+            $registry->registerProvider(\WordPress\DuetGAIConnector\Provider\CustomImageProvider::class);
             if (defined('DUETGAICON_DEBUG') && DUETGAICON_DEBUG) {
                 // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 error_log('DuetG AI Connector: duetgaicon_image provider registered successfully');
@@ -220,7 +220,7 @@ function render_test_page(): void
         return;
     }
 
-    \WordPress\CustomAiProvider\Admin\TestPage::render();
+    \WordPress\DuetGAIConnector\Admin\TestPage::render();
 }
 
 /**

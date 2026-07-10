@@ -5,7 +5,7 @@
  * @package CustomAiProvider\Provider
  */
 
-namespace WordPress\CustomAiProvider\Provider;
+namespace WordPress\DuetGAIConnector\Provider;
 
 use WordPress\AiClient\AiClient;
 use WordPress\AiClient\Providers\ApiBasedImplementation\AbstractApiProvider;
@@ -13,9 +13,9 @@ use WordPress\AiClient\Providers\DTO\ProviderMetadata;
 use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
 use WordPress\AiClient\Providers\Enums\ProviderTypeEnum;
 use WordPress\AiClient\Providers\Http\Enums\RequestAuthenticationMethod;
-use WordPress\CustomAiProvider\Settings\Settings;
-use WordPress\CustomAiProvider\Models\ImageGeneration\CustomImageGenerationModel;
-use WordPress\CustomAiProvider\Metadata\CustomImageModelMetadataDirectory;
+use WordPress\DuetGAIConnector\Settings\Settings;
+use WordPress\DuetGAIConnector\Models\ImageGeneration\CustomImageGenerationModel;
+use WordPress\DuetGAIConnector\Metadata\CustomImageModelMetadataDirectory;
 
 /**
  * Custom Image Generation Provider for OpenAI-compatible APIs

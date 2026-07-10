@@ -5,7 +5,7 @@
  * @package CustomAiProvider
  */
 
-namespace WordPress\CustomAiProvider;
+namespace WordPress\DuetGAIConnector;
 
 /**
  * Debug logging helper - only logs when DUETGAICON_DEBUG is enabled

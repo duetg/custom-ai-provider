@@ -5,15 +5,15 @@
  * @package CustomAiProvider\Models\TextGeneration
  */
 
-namespace WordPress\CustomAiProvider\Models\TextGeneration;
+namespace WordPress\DuetGAIConnector\Models\TextGeneration;
 
 use WordPress\AiClient\Providers\OpenAiCompatibleImplementation\AbstractOpenAiCompatibleTextGenerationModel;
 use WordPress\AiClient\Providers\Http\DTO\Request;
 use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
-use WordPress\CustomAiProvider\Settings\Settings;
-use WordPress\CustomAiProvider\Models\TextGeneration\ThinkingTagHelper;
-use WordPress\CustomAiProvider\Models\TextGeneration\ReviewNotesNormalizer;
-use WordPress\CustomAiProvider\Helper;
+use WordPress\DuetGAIConnector\Settings\Settings;
+use WordPress\DuetGAIConnector\Models\TextGeneration\ThinkingTagHelper;
+use WordPress\DuetGAIConnector\Models\TextGeneration\ReviewNotesNormalizer;
+use WordPress\DuetGAIConnector\Helper;
 
 /**
  * Custom Text Generation Model for OpenAI-compatible APIs

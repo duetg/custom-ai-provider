@@ -5,7 +5,7 @@
  * @package CustomAiProvider\Metadata
  */
 
-namespace WordPress\CustomAiProvider\Metadata;
+namespace WordPress\DuetGAIConnector\Metadata;
 
 use WordPress\AiClient\Files\Enums\MediaOrientationEnum;
 use WordPress\AiClient\Messages\Enums\ModalityEnum;
@@ -14,7 +14,7 @@ use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
 use WordPress\AiClient\Providers\Models\DTO\SupportedOption;
 use WordPress\AiClient\Providers\Models\Enums\CapabilityEnum;
 use WordPress\AiClient\Providers\Models\Enums\OptionEnum;
-use WordPress\CustomAiProvider\Settings\Settings;
+use WordPress\DuetGAIConnector\Settings\Settings;
 
 /**
  * Custom Model Metadata Directory for Image Generation

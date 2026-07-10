@@ -8,7 +8,7 @@
  * @package CustomAiProvider\Models\TextGeneration
  */
 
-namespace WordPress\CustomAiProvider\Models\TextGeneration;
+namespace WordPress\DuetGAIConnector\Models\TextGeneration;
 
 /**
  * Normalizes AI responses to Review Notes format

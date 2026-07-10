@@ -5,7 +5,7 @@
  * @package CustomAiProvider\Settings
  */
 
-namespace WordPress\CustomAiProvider\Settings;
+namespace WordPress\DuetGAIConnector\Settings;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {

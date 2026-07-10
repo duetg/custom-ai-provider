@@ -5,12 +5,12 @@
  * @package CustomAiProvider\Admin
  */
 
-namespace WordPress\CustomAiProvider\Admin;
+namespace WordPress\DuetGAIConnector\Admin;
 
-use WordPress\CustomAiProvider\Settings\Settings;
-use WordPress\CustomAiProvider\Provider\CustomTextProvider;
-use WordPress\CustomAiProvider\Provider\CustomImageProvider;
-use WordPress\CustomAiProvider\Helper;
+use WordPress\DuetGAIConnector\Settings\Settings;
+use WordPress\DuetGAIConnector\Provider\CustomTextProvider;
+use WordPress\DuetGAIConnector\Provider\CustomImageProvider;
+use WordPress\DuetGAIConnector\Helper;
 
 if (!defined('ABSPATH')) {
     exit;

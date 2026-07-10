@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
 }
 
 spl_autoload_register(function ($class) {
-    $prefix = 'WordPress\\CustomAiProvider\\';
+    $prefix = 'WordPress\\DuetGAIConnector\\';
     $base_dir = __DIR__ . '/';
 
     $len = strlen($prefix);

@@ -8,7 +8,7 @@
  * @package CustomAiProvider\Models\TextGeneration
  */
 
-namespace WordPress\CustomAiProvider\Models\TextGeneration;
+namespace WordPress\DuetGAIConnector\Models\TextGeneration;
 
 /**
  * Extracts and parses JSON from AI text responses

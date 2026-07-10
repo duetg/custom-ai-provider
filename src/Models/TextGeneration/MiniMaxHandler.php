@@ -8,9 +8,9 @@
  * @package CustomAiProvider\Models\TextGeneration
  */
 
-namespace WordPress\CustomAiProvider\Models\TextGeneration;
+namespace WordPress\DuetGAIConnector\Models\TextGeneration;
 
-use WordPress\CustomAiProvider\Helper;
+use WordPress\DuetGAIConnector\Helper;
 
 /**
  * MiniMax Model Handler

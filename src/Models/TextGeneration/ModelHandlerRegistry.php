@@ -7,7 +7,7 @@
  * @package CustomAiProvider\Models\TextGeneration
  */
 
-namespace WordPress\CustomAiProvider\Models\TextGeneration;
+namespace WordPress\DuetGAIConnector\Models\TextGeneration;
 
 /**
  * Model Handler Registry

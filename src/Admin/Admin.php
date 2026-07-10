@@ -5,14 +5,14 @@
  * @package CustomAiProvider\Admin
  */
 
-namespace WordPress\CustomAiProvider\Admin;
+namespace WordPress\DuetGAIConnector\Admin;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
     exit;
 }
 
-use WordPress\CustomAiProvider\Settings\Settings;
+use WordPress\DuetGAIConnector\Settings\Settings;
 
 /**
  * Admin class for rendering the settings page

@@ -5,7 +5,7 @@
  * @package CustomAiProvider\Models\ImageGeneration
  */
 
-namespace WordPress\CustomAiProvider\Models\ImageGeneration;
+namespace WordPress\DuetGAIConnector\Models\ImageGeneration;
 
 use WordPress\AiClient\Files\DTO\File;
 use WordPress\AiClient\Messages\DTO\Message;
@@ -16,8 +16,8 @@ use WordPress\AiClient\Providers\Http\DTO\Request;
 use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
 use WordPress\AiClient\Results\DTO\Candidate;
 use WordPress\AiClient\Results\Enums\FinishReasonEnum;
-use WordPress\CustomAiProvider\Settings\Settings;
-use WordPress\CustomAiProvider\Helper;
+use WordPress\DuetGAIConnector\Settings\Settings;
+use WordPress\DuetGAIConnector\Helper;
 
 /**
  * Custom Image Generation Model for OpenAI-compatible APIs
